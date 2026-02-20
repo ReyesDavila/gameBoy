@@ -5,11 +5,11 @@
 #include <stdint.h>
 
 typedef struct {
-    int16_t x, y;
+    int16_t x, y, x2, y2;
     int8_t vx, vy;
     int8_t dx, dy;
     int8_t vx_max, vy_max;
-    int8_t acc_x, acc_y;
+    int8_t ax, ay;
     uint8_t tile_id;   // El ID del tile en la VRAM
     uint8_t active;
 } Entity;

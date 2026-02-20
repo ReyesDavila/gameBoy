@@ -17,12 +17,14 @@ Entity* entity_create(int16_t x, int16_t y, uint8_t tile_id) {
         if (!entity_pool[i].active) {
             entity_pool[i].x = x;
             entity_pool[i].y = y;
+            entity_pool[i].x2 = x;
+            entity_pool[i].y2 = y;
             entity_pool[i].vx = 0;
             entity_pool[i].vy = 0;
-            entity_pool[i].acc_x = 0;
-            entity_pool[i].acc_y = 0;
-            entity_pool[i].vx_max = 40;
-            entity_pool[i].vy_max = 40;
+            entity_pool[i].ax = 5;
+            entity_pool[i].ay = 5;
+            entity_pool[i].vx_max = 50;
+            entity_pool[i].vy_max = 50;
             entity_pool[i].dx = 1;
             entity_pool[i].dy = 1;
             entity_pool[i].tile_id = tile_id;
@@ -41,7 +43,7 @@ void entity_render_all(void) {
     for (i = 0; i < MAX_ENTITIES; i++) {
         if (entity_pool[i].active) {
             // Dibujamos la entidad en su posición x, y
-            move_sprite(i, (uint8_t)entity_pool[i].x, (uint8_t)entity_pool[i].y);
+            move_sprite(i, (uint8_t)entity_pool[i].x+8, (uint8_t)entity_pool[i].y+16);
         } else {
             // Si no está activa, la mandamos fuera de la pantalla
             move_sprite(i, 0, 0);
