@@ -1,7 +1,4 @@
 #include "../core/globals.h"
-#include "./game_objects.h"
-
-
 
 void game_logic(void) {
 
@@ -12,12 +9,17 @@ void game_logic(void) {
     if(!control){pelota->vx-=sign(pelota->vx);}
     if(!control & abs(pelota->vx)<5){pelota->vx=0;}
     if(abs(pelota->vx)>pelota->vx_max){pelota->vx = sign(pelota->vx)*pelota->vx_max;}
-    pelota->x+=pelota->vx;
+
+    pelota->acc_x += abs(pelota->vx);
+    while (pelota->acc_x >= 20) {
+        pelota->x += sign(pelota->vx);
+        pelota->acc_x -=20;
+    }
 
     #ifdef MODO_DEBUG
         debug_begin();
         debug_watch("control", control);
-        debug_watch("x",pelota->dx);
+        debug_watch("x",pelota->vx);
         debug_watch("y",pelota->y);
     #endif
 }

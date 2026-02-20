@@ -1,6 +1,5 @@
 #include "../core/globals.h"
 #include "../assets/tiles_fondo.h"
-#include "./game_objects.h" // <--- Incluimos el censo
 
 //Definir objetos aquí.
 Entity* pelota;

@@ -1,7 +1,7 @@
 ./src/core/main.c:
 ./src/game/game_init.c:
 ./src/game/assets/tiles_fondo.c:
+./src/game/entity_manager.c:
 ./src/game/game_logic.c:
 ./src/engine/joypad_system.c:
 ./src/engine/debug_system.c:
-./src/engine/entity_manager.c:

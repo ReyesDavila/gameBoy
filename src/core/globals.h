@@ -5,8 +5,8 @@
 
 // --- ENGINE (Herramientas de bajo nivel) ---
 #include "../engine/debug_system.h"
-#include "../engine/entity_manager.h"
 #include "../engine/joypad_system.h"
+#include "../game/entity_manager.h"
 
 // Matemáticas rápidas para Game Boy (sin librerías pesadas)
 #define abs(n) ((n) < 0 ? -(n) : (n))

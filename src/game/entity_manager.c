@@ -19,8 +19,10 @@ Entity* entity_create(int16_t x, int16_t y, uint8_t tile_id) {
             entity_pool[i].y = y;
             entity_pool[i].vx = 0;
             entity_pool[i].vy = 0;
-            entity_pool[i].vx_max = 10;
-            entity_pool[i].vy_max = 10;
+            entity_pool[i].acc_x = 0;
+            entity_pool[i].acc_y = 0;
+            entity_pool[i].vx_max = 40;
+            entity_pool[i].vy_max = 40;
             entity_pool[i].dx = 1;
             entity_pool[i].dy = 1;
             entity_pool[i].tile_id = tile_id;
