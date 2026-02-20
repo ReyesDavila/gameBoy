@@ -383,13 +383,13 @@ Files Linked                              [ module(s) ]
 
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/crt0.o
                                           [ Runtime ]
-/tmp/lcc104840.o                          [ main ]
-/tmp/lcc104841.o                          [ game_init ]
-/tmp/lcc104842.o                          [ tiles_fondo ]
-/tmp/lcc104843.o                          [ game_logic ]
-/tmp/lcc104844.o                          [ joypad_system ]
-/tmp/lcc104845.o                          [ debug_system ]
-/tmp/lcc104846.o                          [ entity_manager ]
+/tmp/lcc210960.o                          [ main ]
+/tmp/lcc210961.o                          [ game_init ]
+/tmp/lcc210962.o                          [ tiles_fondo ]
+/tmp/lcc210963.o                          [ game_logic ]
+/tmp/lcc210964.o                          [ joypad_system ]
+/tmp/lcc210965.o                          [ debug_system ]
+/tmp/lcc210966.o                          [ entity_manager ]
 
 
 Libraries Linked                          [ object file ]

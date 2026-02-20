@@ -308,4 +308,4 @@ DEF .refresh_OAM 0xFF80
 DEF __current_bank 0xFF90
 DEF __vbl_done 0xFF91
 DEF __shadow_OAM_base 0xFF92
-LOAD rom/ver05.ihx
+LOAD rom/game.ihx
