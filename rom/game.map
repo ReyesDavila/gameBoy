@@ -29,9 +29,9 @@ Area                       Addr        Size        Decimal Bytes (Attributes)
      0000000C  l__GSINIT |    00000013  l__HRAM   |    00000030  l__HEADER
      00000036  l__INITIA |    00000036  l__INITIA |    00000060  l__HEADER
      000000AB  l__HEADER |    000000E8  l__DATA   |    00000200  s__CODE  
-     0000089C  l__HOME   |    00000E72  l__CODE   |    00001072  s__HOME  
-     0000190E  s__BASE   |    0000190E  s__CODE_0 |    0000190E  s__INITIA
-     0000190E  s__LIT    |    00001944  s__GSINIT |    00001950  s__GSFINA
+     0000089C  l__HOME   |    00000EC2  l__CODE   |    000010C2  s__HOME  
+     0000195E  s__BASE   |    0000195E  s__CODE_0 |    0000195E  s__INITIA
+     0000195E  s__LIT    |    00001994  s__GSINIT |    000019A0  s__GSFINA
      00002000  _rROMB0   |    00003000  _rROMB1   |    00004000  _rMBC7_SR
      00004000  _rRAMB    |    00008000  __VRAM    |    00008000  __VRAM800
      00008800  __VRAM880 |    00009000  __VRAM900 |    00009800  __SCRN0  
@@ -76,25 +76,27 @@ Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_CODE                  00000200    00000E72 =        3698. bytes (REL,CON)
+_CODE                  00000200    00000EC2 =        3778. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00000200  _main     |    00000229  _game_ini |    0000028F  _entity_i
-     000002B7  _entity_c |    000003EB  _entity_r |    00000437  _game_log
-     000008B5  _joypad_u |    000008C2  _joy_chec |    000008CE  _joy_pres
-     000008E5  _joy_rele |    000008FC  _debug_in |    00000940  _debug_ms
-     0000097E  _debug_wa |    00000B38  _debug_be |    00000B3D  __mulsuch
-     00000B40  __mulusch |    00000B49  __mulscha |    00000B51  __mulint 
-     00000B70  __mulucha |    00000B82  _set_vram |    00000B8B  _set_win_
-     00000B94  _set_bkg_ |    00000BC3  _printf   |    00000BD8  __divsuch
-     00000BDE  __modsuch |    00000BE7  __divusch |    00000BF0  __modusch
-     00000BFC  __divscha |    00000C01  __modscha |    00000C08  __divsint
-     00000C11  __modsint |    00000C1D  __divucha |    00000C22  __moducha
-     00000C29  __divuint |    00000C32  __moduint |    00000C3E  .div8    
-     00000C3E  .mod8     |    00000C46  .div16    |    00000C46  .mod16   
-     00000C7C  .divu8    |    00000C7C  .modu8    |    00000C7F  .divu16  
-     00000C7F  .modu16   |    00000CF6  ___printf |    00001053  _sprintf 
+     00000200  _main     |    0000022C  _game_ini |    00000296  _sound_in
+     000002A3  _sound_pl |    000002D3  _sound_st |    000002DB  _sound_st
+     000002DF  _entity_i |    00000307  _entity_c |    0000043B  _entity_r
+     00000487  _game_log |    00000905  _joypad_u |    00000912  _joy_chec
+     0000091E  _joy_pres |    00000935  _joy_rele |    0000094C  _debug_in
+     00000990  _debug_ms |    000009CE  _debug_wa |    00000B88  _debug_be
+     00000B8D  __mulsuch |    00000B90  __mulusch |    00000B99  __mulscha
+     00000BA1  __mulint  |    00000BC0  __mulucha |    00000BD2  _set_vram
+     00000BDB  _set_win_ |    00000BE4  _set_bkg_ |    00000C13  _printf  
+     00000C28  __divsuch |    00000C2E  __modsuch |    00000C37  __divusch
+     00000C40  __modusch |    00000C4C  __divscha |    00000C51  __modscha
+     00000C58  __divsint |    00000C61  __modsint |    00000C6D  __divucha
+     00000C72  __moducha |    00000C79  __divuint |    00000C82  __moduint
+     00000C8E  .div8     |    00000C8E  .mod8     |    00000C96  .div16   
+     00000C96  .mod16    |    00000CCC  .divu8    |    00000CCC  .modu8   
+     00000CCF  .divu16   |    00000CCF  .modu16   |    00000D46  ___printf
+     000010A3  _sprintf 
 ASxxxx Linker V03.00/V05.40 + sdld,  page 4.
 Hexadecimal  [32-Bits]
 
@@ -272,35 +274,35 @@ Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_HOME                  00001072    0000089C =        2204. bytes (REL,CON)
+_HOME                  000010C2    0000089C =        2204. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00001072  .memset_s |    0000107B  .memcpy_s |    00001098  .display_
-     00001098  _display_ |    000010B0  _set_tile |    000010B5  _set_bkg_
-     000010B5  _set_win_ |    000010BD  _set_spri |    000010ED  .padup   
-     000010ED  _waitpadu |    000010FD  .jpad     |    000010FD  _joypad  
-     00001125  _waitpad  |    00001126  .wait_pad |    0000112D  _set_bkg_
-     00001141  _font_loa |    00001148  font_load |    00001190  font_copy
-     000011C6  font_set  |    000011D3  .put_char |    000011EB  .out_char
-     000011F1  .del_char |    00001247  _putchar  |    00001250  _setchar 
-     00001259  _font_loa |    00001267  _font_set |    00001276  _font_ini
-     00001295  .cls      |    00001295  _cls      |    000012B7  _gotoxy  
-     000012C2  _posx     |    000012D3  _posy     |    000012FB  .cr_curs 
-     00001310  .adv_curs |    0000136C  .tmode    |    00001389  .tmode_ou
-     00001392  _color    |    00001392  _set_1bpp |    000013A1  .drawing_
-     000013BE  _font_ibm |    0000179F  .add_LCD  |    0000179F  _add_LCD 
-     000017A5  .remove_L |    000017A5  _remove_L |    000017AB  .set_xy_w
-     000017B4  .set_xy_b |    000017C3  .set_xy_t |    00001807  _uitoa   
-     00001816  _itoa     |    00001825  .itoa     |    00001839  .utoa    
-     000018AD  _set_bkg_ |    000018AD  _set_win_ |    000018B5  _set_spri
-     0000190D  ___sdcc_c
+     000010C2  .memset_s |    000010CB  .memcpy_s |    000010E8  .display_
+     000010E8  _display_ |    00001100  _set_tile |    00001105  _set_bkg_
+     00001105  _set_win_ |    0000110D  _set_spri |    0000113D  .padup   
+     0000113D  _waitpadu |    0000114D  .jpad     |    0000114D  _joypad  
+     00001175  _waitpad  |    00001176  .wait_pad |    0000117D  _set_bkg_
+     00001191  _font_loa |    00001198  font_load |    000011E0  font_copy
+     00001216  font_set  |    00001223  .put_char |    0000123B  .out_char
+     00001241  .del_char |    00001297  _putchar  |    000012A0  _setchar 
+     000012A9  _font_loa |    000012B7  _font_set |    000012C6  _font_ini
+     000012E5  .cls      |    000012E5  _cls      |    00001307  _gotoxy  
+     00001312  _posx     |    00001323  _posy     |    0000134B  .cr_curs 
+     00001360  .adv_curs |    000013BC  .tmode    |    000013D9  .tmode_ou
+     000013E2  _color    |    000013E2  _set_1bpp |    000013F1  .drawing_
+     0000140E  _font_ibm |    000017EF  .add_LCD  |    000017EF  _add_LCD 
+     000017F5  .remove_L |    000017F5  _remove_L |    000017FB  .set_xy_w
+     00001804  .set_xy_b |    00001813  .set_xy_t |    00001857  _uitoa   
+     00001866  _itoa     |    00001875  .itoa     |    00001889  .utoa    
+     000018FD  _set_bkg_ |    000018FD  _set_win_ |    00001905  _set_spri
+     0000195D  ___sdcc_c
 ASxxxx Linker V03.00/V05.40 + sdld,  page 23.
 Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_INITIALIZER           0000190E    00000036 =          54. bytes (REL,CON)
+_INITIALIZER           0000195E    00000036 =          54. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
@@ -309,17 +311,17 @@ Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_GSINIT                00001944    0000000C =          12. bytes (REL,CON)
+_GSINIT                00001994    0000000C =          12. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
-     00001944  gsinit   
+     00001994  gsinit   
 ASxxxx Linker V03.00/V05.40 + sdld,  page 25.
 Hexadecimal  [32-Bits]
 
 Area                       Addr        Size        Decimal Bytes (Attributes)
 --------------------       ----        ----        ------- ----- ------------
-_GSFINAL               00001950    00000001 =           1. bytes (REL,CON)
+_GSFINAL               000019A0    00000001 =           1. bytes (REL,CON)
 
         Value  Global            Value  Global            Value  Global    
         -----  ------            -----  ------            -----  ------    
@@ -383,13 +385,14 @@ Files Linked                              [ module(s) ]
 
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/crt0.o
                                           [ Runtime ]
-/tmp/lcc477110.o                          [ main ]
-/tmp/lcc477111.o                          [ game_init ]
-/tmp/lcc477112.o                          [ tiles_fondo ]
-/tmp/lcc477113.o                          [ entity_manager ]
-/tmp/lcc477114.o                          [ game_logic ]
-/tmp/lcc477115.o                          [ joypad_system ]
-/tmp/lcc477116.o                          [ debug_system ]
+/tmp/lcc177760.o                          [ main ]
+/tmp/lcc177761.o                          [ game_init ]
+/tmp/lcc177762.o                          [ tiles_fondo ]
+/tmp/lcc177763.o                          [ audio ]
+/tmp/lcc177764.o                          [ entity_manager ]
+/tmp/lcc177765.o                          [ game_logic ]
+/tmp/lcc177766.o                          [ joypad_system ]
+/tmp/lcc177767.o                          [ debug_system ]
 
 
 Libraries Linked                          [ object file ]
@@ -401,9 +404,9 @@ Libraries Linked                          [ object file ]
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/gb.lib
                                           [ set_tile.o ]
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/gb.lib
-                                          [ pad.o ]
-/home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/gb.lib
                                           [ sfr.o ]
+/home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/gb.lib
+                                          [ pad.o ]
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/sm83/sm83.lib
                                           [ printf.o ]
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/sm83/sm83.lib

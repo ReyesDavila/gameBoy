@@ -7,6 +7,7 @@
 #include "../engine/debug_system.h"
 #include "../engine/joypad_system.h"
 #include "../game/entity_manager.h"
+#include "../game/audio.h"
 
 // Matemáticas rápidas para Game Boy (sin librerías pesadas)
 #define abs(n) ((n) < 0 ? -(n) : (n))

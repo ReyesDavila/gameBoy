@@ -6,6 +6,8 @@ void main(void) {
     SHOW_SPRITES;
     SHOW_BKG;
 
+    sound_init();
+
     // 2. Inicialización de los Sistemas (Engine)
     debug_init();    // Enciende la "luz" para el texto
     entity_init();   // Limpia el almacén de objetos
