@@ -6,8 +6,6 @@ void main(void) {
     SHOW_SPRITES;
     SHOW_BKG;
 
-    sound_init();
-
     // 2. Inicialización de los Sistemas (Engine)
     debug_init();    // Enciende la "luz" para el texto
     entity_init();   // Limpia el almacén de objetos
@@ -25,6 +23,8 @@ void main(void) {
 
         // El motor de entidades: dibuja todo lo que esté activo
         entity_render_all();
+
+        audio_update(); // Maneja los contadores y reinicia loops
 
         // Sincronización con la pantalla de la Game Boy
         wait_vbl_done();

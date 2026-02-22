@@ -8,7 +8,8 @@ void game_init(void) {
     // El motor crea la entidad, el juego le da el propósito de "pelota"
     pelota = entity_create(80, 72, 2);
 
-    sound_play(SND_BOUNCE);
+    sound_init();
+    sound_play(2);
     
     #ifdef MODO_DEBUG
         debug_init();
