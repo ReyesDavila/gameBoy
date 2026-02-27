@@ -1,0 +1,4955 @@
+RESUMEN TÉCNICO DEL DIRECTORIO: ./ver25
+Ámbito: Solo archivos contenidos en esta ubicación.
+----------------------------------------------------------
+
+ESTRUCTURA RELATIVA:
+.
+   make.sh
+   rom
+   resumenDirectorio.txt
+   src
+      game
+         objects
+            pelota
+            game_objects.h
+            game_objects.c
+            _object
+         scripts
+         game_step.c
+         game_init.c
+         rooms
+            rooms_all.h
+            room01
+            room02
+         game_draw.c
+         sounds
+            sample_song.c
+            _sound_data.c
+            _sound_data.h
+         sprites
+            tilesFondo.c
+            fuenteNumerica
+            tilesFondo.gbr
+            tilesFondo.h
+      engine
+         objects
+            entity_mgr.h
+            entity_mgr.c
+         main.c
+         math
+            math_util.h
+            math_util.c
+         game_bridge.h
+         video
+            video_sys.c
+            video_sys.h
+         sounds
+            hUGE.inc
+            hUGEDriver.h
+            hUGE_note_table.inc
+            hUGEDriver.o
+            sound_sys.h
+            sound_sys.c
+         joystick
+            joystick_sys.h
+            joystick_sys.c
+         debug
+            debug_sys.h
+            debug_sys.c
+   build
+   project_report.txt
+   project_report.sh
+   resumenDirectorio.sh
+----------------------------------------------------------
+ARCHIVO: ./make.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	# [AI INSTRUCTION / PROTECTED CODE]
+     4	# This script uses a ROBUST RECURSIVE SEARCH strategy. 
+     5	# DO NOT refactor the 'while' loop or the GBDK path discovery.
+     6	# DO NOT simplify paths; they are designed to be project-agnostic.
+     7	# DO NOT remove the error logging or the emulator blocking execution.
+     8	# VERBATIM preservation is required for the build-clean-loop cycle.
+     9	
+    10	# [AVISO TÉCNICO - CÓDIGO PROTEGIDO]
+    11	# Este script utiliza una estrategia de búsqueda recursiva agnóstica.
+    12	# NO modificar el bucle 'while true' ni simplificar las rutas de búsqueda.
+    13	# La exclusión de la carpeta './ext/' es intencional para archivos no procesables.
+    14	# Mantener la estructura de 'find' para asegurar la compatibilidad universal.
+    15	
+    16	# --- 1. LOCALIZACIÓN DE GBDK ---
+    17	# Este bloque busca el compilador 'lcc' subiendo por las carpetas.
+    18	GBDK_BIN_PATH=""
+    19	temp_path="."
+    20	while [ "$temp_path" != "/" ]; do
+    21	    if [ -f "$temp_path/bin/lcc" ]; then
+    22	        GBDK_BIN_PATH=$(realpath "$temp_path/bin")
+    23	        break
+    24	    fi
+    25	    temp_path=$(realpath "$temp_path/..")
+    26	done
+    27	
+    28	LCC="$GBDK_BIN_PATH/lcc"
+    29	
+    30	# --- 2. NOMBRE DEL PROYECTO (MODIFICADO) ---
+    31	# Ahora ignoramos el nombre de la carpeta y fijamos el nombre de la ROM.
+    32	PROJECT_NAME=$(basename "$PWD")
+    33	ROM_FILE="rom/game.gb"
+    34	
+    35	# --- 3. DETECCIÓN DE EMULADOR ---
+    36	EMULADOR=$(which mgba-qt || which mgba-sdl || which sameboy || which visualboyadvance-m || which bgb || which emulicious)
+    37	
+    38	while true; do
+    39	    clear
+    40	    echo "=========================================================="
+    41	    echo " PANEL UNIVERSAL: $PROJECT_NAME"
+    42	    echo "=========================================================="
+    43	    echo " [INFO] Generando: rom/game.gb"
+    44	    
+    45	    mkdir -p build rom
+    46	
+    47	    # Buscamos archivos .c y .s (estándar GBDK). 
+    48	    # Los archivos .asm suelen ser de RGBDS, así que buscamos su versión ya compilada (.o)
+    49	   # Buscamos archivos .c, .s y .o ignorando 'build' y 'ext'
+    50	    SOURCES=$(find . \( -name "*.c" -o -name "*.s" -o -name "*.o" \) -not -path "./build/*" -not -path "./ext/*")
+    51	    
+    52	    # Buscamos directorios de cabeceras (.h) ignorando 'build' y 'ext'
+    53	    INC_DIRS=$(find . -name "*.h" -not -path "./build/*" -not -path "./ext/*" -exec dirname {} + | sort -u | sed 's/^/-I/')
+    54	
+    55	    # --- 4. COMPILACIÓN ---
+    56	    # Borramos la ROM anterior para no abrir una versión vieja por error si la compilación falla
+    57	    rm -f "$ROM_FILE"
+    58	
+    59	    # lcc transforma tu código C en un archivo que la Game Boy entiende.
+    60	    $LCC -Wa-l -Wl-m -Wl-j $INC_DIRS -o "$ROM_FILE" $SOURCES > build/errores.log 2>&1
+    61	
+    62	    if [ $? -eq 0 ]; then
+    63	        # Si todo sale bien, movemos los archivos temporales a 'build' para limpiar la carpeta
+    64	        # El flag -f y el || true evitan que el script se detenga si no hay archivos que mover
+    65	        mv -f *.map *.noi *.o *.lst *.rel *.sym *.asm build/ 2>/dev/null || true
+    66	        
+    67	        echo -e "\033[0;32m [+] ÉXITO: ROM Generada como game.gb\033[0m"
+    68	        echo "----------------------------------------------------------"
+    69	        echo " [!] Cierra el emulador para volver a compilar"
+    70	        echo " [!] Cierra esta terminal para cerrar el emulador."
+    71	        echo "----------------------------------------------------------"
+    72	        
+    73	        if [ -n "$EMULADOR" ]; then
+    74	            # Lanzamos el emulador y el script espera aquí hasta que se cierre
+    75	            $EMULADOR "$ROM_FILE" > /dev/null 2>&1
+    76	        else
+    77	            # Si no hay emulador conocido, intentamos abrir con el sistema
+    78	            xdg-open "$ROM_FILE" > /dev/null 2>&1
+    79	        fi
+    80	    else
+    81	        # --- 5. GESTIÓN DE ERRORES ---
+    82	        echo "----------------------------------------------------------"
+    83	        echo -e "\033[0;31m [ ERROR DE CÓDIGO ]\033[0m"
+    84	        echo "----------------------------------------------------------"
+    85	        cat build/errores.log
+    86	        echo "----------------------------------------------------------"
+    87	        echo " [!] Corrige los errores en tu código."
+    88	        echo -e "\033[1;33m [>] Presiona ENTER para reintentar la compilación...\033[0m"
+    89	        read
+    90	        echo "----------------------------------------------------------"
+    91	    fi
+    92	done
+    93	
+    94	
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/pelota/pelota_init.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void pelota_init(void){
+     4	    
+     5	    pelota = (Entity*)entity_create(0, 0, 4);
+     6	    if(pelota) {
+     7	        pelota->x = 80;
+     8	        pelota->y = 72;
+     9	        pelota->vx = 0;
+    10	        pelota->vy = 0;
+    11	        pelota->vx_max = 64;
+    12	        pelota->vy_max =64;
+    13	        pelota->dx=0;
+    14	        pelota->dy=0;
+    15	        pelota->ax=1;
+    16	        pelota->ay=1;
+    17	  
+    18	        pelota->tile_id = 2;
+    19	        //pelota->tile_list = brillo_pelota; // Al ser NULL/0, el motor no gasta ciclos en set_sprite_tile
+    20	        pelota->list_size = 0;
+    21	    }
+    22	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/pelota/pelota_step.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void pelota_step(void) {
+     4	
+     5	        // --- MOVIMIENTO X ---
+     6	
+     7	    // Usamos XOR (^) para saber si solo uno está presionado (evita sumas y comparaciones)
+     8	    uint8_t control = joystick_xpos(); 
+     9	
+    10	    if(control) {
+    11	        // En lugar de: 1 - 2 * joy_l
+    12	        // Usamos un simple if para asignar la dirección
+    13	        if (joystick_xpos() == -1) pelota->dx = -1; else pelota->dx = 1;
+    14	        
+    15	        // En lugar de: pelota->vx += control * pelota->dx * pelota->ax
+    16	        // Como sabemos que control es 1, sumamos o restamos la aceleración directamente
+    17	        if (pelota->dx == 1) pelota->vx += pelota->ax; else pelota->vx -= pelota->ax;
+    18	    } else {
+    19	        // Fricción manual rápida (reemplaza sign() y multiplicaciones)
+    20	        if (pelota->vx > 0) pelota->vx--;
+    21	        else if (pelota->vx < 0) pelota->vx++;
+    22	        
+    23	        if (abs(pelota->vx) < 5) pelota->vx = 0;
+    24	    }
+    25	
+    26	    // Límite de velocidad (reemplaza sign() * max)
+    27	    if (pelota->vx > pelota->vx_max) pelota->vx = pelota->vx_max;
+    28	    else if (pelota->vx < -pelota->vx_max) pelota->vx = -pelota->vx_max;
+    29	
+    30	    pelota->x2 += pelota->vx;
+    31	    pelota->x = (pelota->x2 >> 5);
+    32	
+    33	    // --- MOVIMIENTO Y ---
+    34	    uint8_t controly = joystick_ypos();
+    35	
+    36	    if(controly) {
+    37	        if (joystick_ypos()==-1) pelota->dy = -1; else pelota->dy = 1;
+    38	        
+    39	        if (pelota->dy == 1) pelota->vy += pelota->ay; else pelota->vy -= pelota->ay;
+    40	    } else {
+    41	        if (pelota->vy > 0) pelota->vy--;
+    42	        else if (pelota->vy < 0) pelota->vy++;
+    43	        
+    44	        if (abs(pelota->vy) < 5) pelota->vy = 0;
+    45	    }
+    46	
+    47	    if (pelota->vy > pelota->vy_max) pelota->vy = pelota->vy_max;
+    48	    else if (pelota->vy < -pelota->vy_max) pelota->vy = -pelota->vy_max;
+    49	
+    50	    pelota->y2 += pelota->vy;
+    51	    pelota->y = (pelota->y2 >> 5);
+    52	
+    53	
+    54	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/game_objects.h
+----------------------------------------------------------
+     1	#ifndef GAME_OBJECTS_H
+     2	#define GAME_OBJECTS_H
+     3	
+     4	#include "../../engine/objects/entity_mgr.h"
+     5	
+     6	// EL USUARIO DEFINE SU PROPIA ESTRUCTURA (Importante: x, y, tile_id, active deben ir primero)
+     7	struct Entity {
+     8	    int16_t x, y;      // Posición en píxeles (para el dibujo)
+     9	    int16_t x2, y2;    // Posición sub-píxel (Precisión fija)
+    10	    int16_t vx, vy;    // Velocidad actual
+    11	    int16_t ax, ay;    // Aceleración
+    12	    int16_t vx_max, vy_max; // Velocidad máxima
+    13	    int8_t dx, dy;     // Dirección actual (-1, 0, 1)
+    14	
+    15	    uint8_t tile_id;    // El tile actual que se está mostrando
+    16	    uint8_t active;
+    17	    
+    18	    // --- NUEVAS CLAVES ---
+    19	    uint8_t* tile_list; // Lista de IDs de tiles (arreglo)
+    20	    uint8_t list_size;  // Cuántos tiles hay en la lista (0 = tile fijo)
+    21	    uint8_t frame_idx;  // En qué posición de la lista estamos (para animar)
+    22	    
+    23	};
+    24	
+    25	#define MI_CANTIDAD_ENTIDADES 20 // ¡El usuario decide el número!
+    26	
+    27	extern Entity mi_pool_personalizado[MI_CANTIDAD_ENTIDADES]; // <--- FALTA ESTO
+    28	extern Entity* pelota;
+    29	extern uint8_t brillo_pelota[]; // <--- FALTA ESTO
+    30	
+    31	/* --- Objetos --- */
+    32	void object_init(void);
+    33	void object_step(void);
+    34	void object_draw(void);
+    35	
+    36	void pelota_init(void);
+    37	void pelota_step(void);
+    38	
+    39	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/game_objects.c
+----------------------------------------------------------
+     1	#include "game_objects.h"
+     2	
+     3	// El usuario reserva la memoria real aquí
+     4	Entity mi_pool_personalizado[MI_CANTIDAD_ENTIDADES];
+     5	Entity* pelota;
+     6	uint8_t brillo_pelota[] = {2,3,4}; // Ciclo de animación
+     7	
+     8	
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/_object/object_draw.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void object_draw(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/_object/object_init.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void object_init(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/objects/_object/object_step.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void object_step(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/game_step.c
+----------------------------------------------------------
+     1	#include "../engine/game_bridge.h"
+     2	
+     3	void game_step(void) {
+     4	    object_step();
+     5	    pelota_step();
+     6	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/game_init.c
+----------------------------------------------------------
+     1	#include "../engine/game_bridge.h"
+     2	
+     3	void game_init(void) {
+     4	    entity_init(mi_pool_personalizado, MI_CANTIDAD_ENTIDADES, sizeof(Entity));
+     5	    #ifdef MODO_DEBUG
+     6	        debug_init();
+     7	     #endif
+     8	
+     9	    object_init();
+    10	    pelota_init();
+    11	    room01_init();
+    12	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/rooms/rooms_all.h
+----------------------------------------------------------
+     1	#ifndef ROOMS_ALL_H
+     2	#define ROOMS_ALL_H
+     3	
+     4	void room01_init(void);
+     5	void room01_step(void);
+     6	
+     7	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/rooms/room01/room01_step.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void room01_step(void){
+     4	    
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/rooms/room01/room01_init.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void room01_init(void){
+     4	
+     5	    // 2. Dibujo del Escenario
+     6	    uint8_t x, y; // <-- Decláralas aquí afuera
+     7	    for(x = 0; x < 20; x++) {
+     8	        for(y = 0; y < 18; y++) {
+     9	            set_bkg_tile_xy(x, y, 1);
+    10	        }
+    11	    }
+    12	
+    13	    // Equivalente a un "Create Event" en Game Maker
+    14	    sound_loop(&snd_coin); 
+    15	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/game_draw.c
+----------------------------------------------------------
+     1	#include "../engine/game_bridge.h"
+     2	
+     3	void game_draw(void) {
+     4	    object_draw();
+     5	    #ifdef MODO_DEBUG
+     6	        debug_begin();
+     7	        debug_watch(pelota->x);
+     8	        debug_watch(pelota->y);
+     9	    #endif
+    10	
+    11	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sounds/sample_song.c
+----------------------------------------------------------
+     1	#include "../../engine/sounds/hUGEDriver.h"
+     2	#include <stddef.h>
+     3	
+     4	static const unsigned char order_cnt = 68;
+     5	
+     6	static const unsigned char P0[] = {
+     7	    DN(C_5,1,0x2FF),
+     8	    DN(___,0,0x2FF),
+     9	    DN(C_3,0,0x216),
+    10	    DN(___,0,0x218),
+    11	    DN(___,0,0x000),
+    12	    DN(___,0,0x000),
+    13	    DN(___,0,0x000),
+    14	    DN(___,0,0x000),
+    15	    DN(C_6,1,0x2FF),
+    16	    DN(___,0,0x2FF),
+    17	    DN(C_3,0,0x216),
+    18	    DN(___,0,0x218),
+    19	    DN(___,0,0x000),
+    20	    DN(___,0,0x000),
+    21	    DN(___,0,0x000),
+    22	    DN(___,0,0x000),
+    23	    DN(C_5,1,0x2FF),
+    24	    DN(___,0,0x2FF),
+    25	    DN(C_3,0,0x216),
+    26	    DN(___,0,0x218),
+    27	    DN(C_5,1,0x2FF),
+    28	    DN(___,0,0x2FF),
+    29	    DN(C_3,0,0x216),
+    30	    DN(___,0,0x218),
+    31	    DN(C_6,1,0x2FF),
+    32	    DN(___,0,0x2FF),
+    33	    DN(C_3,0,0x216),
+    34	    DN(___,0,0x218),
+    35	    DN(___,0,0x000),
+    36	    DN(___,0,0x000),
+    37	    DN(___,0,0x000),
+    38	    DN(___,0,0x000),
+    39	    DN(C_5,1,0x2FF),
+    40	    DN(___,0,0x2FF),
+    41	    DN(C_3,0,0x216),
+    42	    DN(___,0,0x218),
+    43	    DN(___,0,0x000),
+    44	    DN(___,0,0x000),
+    45	    DN(___,0,0x000),
+    46	    DN(___,0,0x000),
+    47	    DN(C_6,1,0x2FF),
+    48	    DN(___,0,0x2FF),
+    49	    DN(C_3,0,0x216),
+    50	    DN(___,0,0x218),
+    51	    DN(C_5,1,0x2FF),
+    52	    DN(___,0,0x2FF),
+    53	    DN(C_3,0,0x216),
+    54	    DN(___,0,0x218),
+    55	    DN(___,0,0x000),
+    56	    DN(___,0,0x000),
+    57	    DN(___,0,0x000),
+    58	    DN(___,0,0x000),
+    59	    DN(C_5,1,0x2FF),
+    60	    DN(___,0,0x2FF),
+    61	    DN(C_3,0,0x216),
+    62	    DN(___,0,0x218),
+    63	    DN(C_6,1,0x2FF),
+    64	    DN(___,0,0x2FF),
+    65	    DN(C_3,0,0x216),
+    66	    DN(___,0,0x218),
+    67	    DN(___,0,0x000),
+    68	    DN(___,0,0x000),
+    69	    DN(___,0,0x000),
+    70	    DN(___,0,0x000),
+    71	};
+    72	static const unsigned char P1[] = {
+    73	    DN(___,0,0x000),
+    74	    DN(___,0,0x000),
+    75	    DN(___,0,0x000),
+    76	    DN(___,0,0x000),
+    77	    DN(C_5,2,0x2FF),
+    78	    DN(___,0,0x2FF),
+    79	    DN(C_3,0,0x216),
+    80	    DN(___,0,0x218),
+    81	    DN(___,0,0x000),
+    82	    DN(___,0,0x000),
+    83	    DN(___,0,0x000),
+    84	    DN(___,0,0x000),
+    85	    DN(C_6,2,0x2FF),
+    86	    DN(___,0,0x2FF),
+    87	    DN(C_3,0,0x216),
+    88	    DN(___,0,0x218),
+    89	    DN(___,0,0x000),
+    90	    DN(___,0,0x000),
+    91	    DN(___,0,0x000),
+    92	    DN(___,0,0x000),
+    93	    DN(C_5,2,0x2FF),
+    94	    DN(___,0,0x2FF),
+    95	    DN(C_3,0,0x216),
+    96	    DN(___,0,0x218),
+    97	    DN(C_5,2,0x2FF),
+    98	    DN(___,0,0x2FF),
+    99	    DN(C_3,0,0x216),
+   100	    DN(___,0,0x218),
+   101	    DN(C_6,2,0x2FF),
+   102	    DN(___,0,0x2FF),
+   103	    DN(C_3,0,0x216),
+   104	    DN(___,0,0x218),
+   105	    DN(___,0,0x000),
+   106	    DN(___,0,0x000),
+   107	    DN(___,0,0x000),
+   108	    DN(___,0,0x000),
+   109	    DN(C_5,2,0x2FF),
+   110	    DN(___,0,0x2FF),
+   111	    DN(C_3,0,0x216),
+   112	    DN(___,0,0x218),
+   113	    DN(___,0,0x000),
+   114	    DN(___,0,0x000),
+   115	    DN(___,0,0x000),
+   116	    DN(___,0,0x000),
+   117	    DN(C_6,2,0x2FF),
+   118	    DN(___,0,0x2FF),
+   119	    DN(C_3,0,0x216),
+   120	    DN(___,0,0x218),
+   121	    DN(C_5,2,0x2FF),
+   122	    DN(___,0,0x2FF),
+   123	    DN(C_3,0,0x216),
+   124	    DN(___,0,0x218),
+   125	    DN(___,0,0x000),
+   126	    DN(___,0,0x000),
+   127	    DN(___,0,0x000),
+   128	    DN(___,0,0x000),
+   129	    DN(C_5,2,0x2FF),
+   130	    DN(___,0,0x2FF),
+   131	    DN(C_3,0,0x216),
+   132	    DN(___,0,0x218),
+   133	    DN(C_6,2,0x2FF),
+   134	    DN(___,0,0x2FF),
+   135	    DN(C_3,0,0x216),
+   136	    DN(___,0,0x218),
+   137	};
+   138	static const unsigned char P2[] = {
+   139	    DN(___,0,0x000),
+   140	    DN(___,0,0x000),
+   141	    DN(___,0,0x000),
+   142	    DN(___,0,0x000),
+   143	    DN(___,0,0x000),
+   144	    DN(___,0,0x000),
+   145	    DN(___,0,0x000),
+   146	    DN(___,0,0x000),
+   147	    DN(___,0,0x000),
+   148	    DN(___,0,0x000),
+   149	    DN(___,0,0x000),
+   150	    DN(___,0,0x000),
+   151	    DN(___,0,0x000),
+   152	    DN(___,0,0x000),
+   153	    DN(___,0,0x000),
+   154	    DN(___,0,0x000),
+   155	    DN(___,0,0x000),
+   156	    DN(___,0,0x000),
+   157	    DN(___,0,0x000),
+   158	    DN(___,0,0x000),
+   159	    DN(___,0,0x000),
+   160	    DN(___,0,0x000),
+   161	    DN(___,0,0x000),
+   162	    DN(___,0,0x000),
+   163	    DN(___,0,0x000),
+   164	    DN(___,0,0x000),
+   165	    DN(___,0,0x000),
+   166	    DN(___,0,0x000),
+   167	    DN(___,0,0x000),
+   168	    DN(___,0,0x000),
+   169	    DN(___,0,0x000),
+   170	    DN(___,0,0x000),
+   171	    DN(___,0,0x000),
+   172	    DN(___,0,0x000),
+   173	    DN(___,0,0x000),
+   174	    DN(___,0,0x000),
+   175	    DN(___,0,0x000),
+   176	    DN(___,0,0x000),
+   177	    DN(___,0,0x000),
+   178	    DN(___,0,0x000),
+   179	    DN(___,0,0x000),
+   180	    DN(___,0,0x000),
+   181	    DN(___,0,0x000),
+   182	    DN(___,0,0x000),
+   183	    DN(___,0,0x000),
+   184	    DN(___,0,0x000),
+   185	    DN(___,0,0x000),
+   186	    DN(___,0,0x000),
+   187	    DN(___,0,0x000),
+   188	    DN(___,0,0x000),
+   189	    DN(___,0,0x000),
+   190	    DN(___,0,0x000),
+   191	    DN(___,0,0x000),
+   192	    DN(___,0,0x000),
+   193	    DN(___,0,0x000),
+   194	    DN(___,0,0x000),
+   195	    DN(___,0,0x000),
+   196	    DN(___,0,0x000),
+   197	    DN(___,0,0x000),
+   198	    DN(___,0,0x000),
+   199	    DN(___,0,0x000),
+   200	    DN(___,0,0x000),
+   201	    DN(___,0,0x000),
+   202	    DN(___,0,0x000),
+   203	};
+   204	static const unsigned char P3[] = {
+   205	    DN(F_7,1,0x000),
+   206	    DN(F_6,2,0x000),
+   207	    DN(___,0,0x000),
+   208	    DN(___,0,0x000),
+   209	    DN(___,0,0x000),
+   210	    DN(___,0,0x000),
+   211	    DN(___,0,0x000),
+   212	    DN(___,0,0x000),
+   213	    DN(C_7,3,0x000),
+   214	    DN(Ds8,3,0x000),
+   215	    DN(___,0,0x000),
+   216	    DN(___,0,0x000),
+   217	    DN(___,0,0x000),
+   218	    DN(___,0,0x000),
+   219	    DN(___,0,0x000),
+   220	    DN(___,0,0x000),
+   221	    DN(F_7,1,0x000),
+   222	    DN(F_6,2,0x000),
+   223	    DN(___,0,0x000),
+   224	    DN(___,0,0x000),
+   225	    DN(F_7,1,0x000),
+   226	    DN(F_6,2,0x000),
+   227	    DN(___,0,0x000),
+   228	    DN(___,0,0x000),
+   229	    DN(C_7,3,0x000),
+   230	    DN(Ds8,3,0x000),
+   231	    DN(___,0,0x000),
+   232	    DN(___,0,0x000),
+   233	    DN(___,0,0x000),
+   234	    DN(___,0,0x000),
+   235	    DN(___,0,0x000),
+   236	    DN(___,0,0x000),
+   237	    DN(F_7,1,0x000),
+   238	    DN(F_6,2,0x000),
+   239	    DN(___,0,0x000),
+   240	    DN(___,0,0x000),
+   241	    DN(___,0,0x000),
+   242	    DN(___,0,0x000),
+   243	    DN(___,0,0x000),
+   244	    DN(___,0,0x000),
+   245	    DN(C_7,3,0x000),
+   246	    DN(Ds8,3,0x000),
+   247	    DN(___,0,0x000),
+   248	    DN(___,0,0x000),
+   249	    DN(F_7,1,0x000),
+   250	    DN(F_6,2,0x000),
+   251	    DN(___,0,0x000),
+   252	    DN(___,0,0x000),
+   253	    DN(___,0,0x000),
+   254	    DN(___,0,0x000),
+   255	    DN(___,0,0x000),
+   256	    DN(___,0,0x000),
+   257	    DN(F_7,1,0x000),
+   258	    DN(F_6,2,0x000),
+   259	    DN(___,0,0x000),
+   260	    DN(___,0,0x000),
+   261	    DN(C_7,3,0x000),
+   262	    DN(Ds8,3,0x000),
+   263	    DN(___,0,0x000),
+   264	    DN(___,0,0x000),
+   265	    DN(___,0,0x000),
+   266	    DN(___,0,0x000),
+   267	    DN(___,0,0x000),
+   268	    DN(___,0,0x000),
+   269	};
+   270	static const unsigned char P4[] = {
+   271	    DN(C_4,4,0xC0F),
+   272	    DN(___,0,0x000),
+   273	    DN(C_4,5,0xC0F),
+   274	    DN(___,0,0x000),
+   275	    DN(C_4,6,0xC07),
+   276	    DN(___,0,0x000),
+   277	    DN(C_4,7,0xC07),
+   278	    DN(___,0,0x000),
+   279	    DN(C_4,6,0xC0F),
+   280	    DN(___,0,0x000),
+   281	    DN(C_4,5,0xC0F),
+   282	    DN(___,0,0x000),
+   283	    DN(C_4,4,0xC07),
+   284	    DN(___,0,0x000),
+   285	    DN(C_4,5,0xC07),
+   286	    DN(___,0,0x000),
+   287	    DN(C_4,6,0xC0F),
+   288	    DN(___,0,0x000),
+   289	    DN(C_4,7,0xC0F),
+   290	    DN(___,0,0x000),
+   291	    DN(G_3,6,0xC0F),
+   292	    DN(___,0,0x000),
+   293	    DN(G_3,5,0xC0F),
+   294	    DN(___,0,0x000),
+   295	    DN(As3,4,0xC0F),
+   296	    DN(___,0,0x000),
+   297	    DN(As3,5,0xC0F),
+   298	    DN(___,0,0x000),
+   299	    DN(C_4,6,0xC0F),
+   300	    DN(___,0,0x000),
+   301	    DN(C_4,7,0xC0F),
+   302	    DN(___,0,0x000),
+   303	    DN(C_4,6,0xC07),
+   304	    DN(___,0,0x000),
+   305	    DN(C_4,5,0xC07),
+   306	    DN(___,0,0x000),
+   307	    DN(C_4,4,0xC0F),
+   308	    DN(___,0,0x000),
+   309	    DN(C_4,5,0xC0F),
+   310	    DN(___,0,0x000),
+   311	    DN(C_4,6,0xC07),
+   312	    DN(___,0,0x000),
+   313	    DN(C_4,7,0xC07),
+   314	    DN(___,0,0x000),
+   315	    DN(C_4,6,0xC0F),
+   316	    DN(___,0,0x000),
+   317	    DN(C_4,5,0xC0F),
+   318	    DN(___,0,0x000),
+   319	    DN(C_4,4,0xC0F),
+   320	    DN(___,0,0x000),
+   321	    DN(C_4,5,0xC0F),
+   322	    DN(___,0,0x000),
+   323	    DN(G_3,6,0xC0F),
+   324	    DN(___,0,0x000),
+   325	    DN(G_3,7,0xC0F),
+   326	    DN(___,0,0x000),
+   327	    DN(As3,6,0xC0F),
+   328	    DN(___,0,0x000),
+   329	    DN(As3,5,0xC0F),
+   330	    DN(___,0,0x000),
+   331	    DN(G_3,4,0xC0F),
+   332	    DN(___,0,0x000),
+   333	    DN(G_3,5,0xC0F),
+   334	    DN(___,0,0x000),
+   335	};
+   336	static const unsigned char P5[] = {
+   337	    DN(Ds4,4,0xC0F),
+   338	    DN(___,0,0x000),
+   339	    DN(Ds4,5,0xC0F),
+   340	    DN(___,0,0x000),
+   341	    DN(Ds4,6,0xC07),
+   342	    DN(___,0,0x000),
+   343	    DN(Ds4,7,0xC07),
+   344	    DN(___,0,0x000),
+   345	    DN(Ds4,6,0xC0F),
+   346	    DN(___,0,0x000),
+   347	    DN(Ds4,5,0xC0F),
+   348	    DN(___,0,0x000),
+   349	    DN(Ds4,4,0xC07),
+   350	    DN(___,0,0x000),
+   351	    DN(Ds4,5,0xC07),
+   352	    DN(___,0,0x000),
+   353	    DN(Ds4,6,0xC0F),
+   354	    DN(___,0,0x000),
+   355	    DN(Ds4,7,0xC0F),
+   356	    DN(___,0,0x000),
+   357	    DN(As3,6,0xC0F),
+   358	    DN(___,0,0x000),
+   359	    DN(As3,5,0xC0F),
+   360	    DN(___,0,0x000),
+   361	    DN(Cs4,4,0xC0F),
+   362	    DN(___,0,0x000),
+   363	    DN(Cs4,5,0xC0F),
+   364	    DN(___,0,0x000),
+   365	    DN(Ds4,6,0xC0F),
+   366	    DN(___,0,0x000),
+   367	    DN(Ds4,7,0xC0F),
+   368	    DN(___,0,0x000),
+   369	    DN(Ds4,6,0xC07),
+   370	    DN(___,0,0x000),
+   371	    DN(Ds4,5,0xC07),
+   372	    DN(___,0,0x000),
+   373	    DN(Ds4,4,0xC0F),
+   374	    DN(___,0,0x000),
+   375	    DN(Ds4,5,0xC0F),
+   376	    DN(___,0,0x000),
+   377	    DN(Ds4,6,0xC07),
+   378	    DN(___,0,0x000),
+   379	    DN(Ds4,7,0xC07),
+   380	    DN(___,0,0x000),
+   381	    DN(Ds4,6,0xC0F),
+   382	    DN(___,0,0x000),
+   383	    DN(Ds4,5,0xC0F),
+   384	    DN(___,0,0x000),
+   385	    DN(Ds4,4,0xC0F),
+   386	    DN(___,0,0x000),
+   387	    DN(Ds4,5,0xC0F),
+   388	    DN(___,0,0x000),
+   389	    DN(As3,6,0xC0F),
+   390	    DN(___,0,0x000),
+   391	    DN(As3,7,0xC0F),
+   392	    DN(___,0,0x000),
+   393	    DN(Cs4,6,0xC0F),
+   394	    DN(___,0,0x000),
+   395	    DN(Cs4,5,0xC0F),
+   396	    DN(___,0,0x000),
+   397	    DN(As3,4,0xC0F),
+   398	    DN(___,0,0x000),
+   399	    DN(As3,5,0xC0F),
+   400	    DN(___,0,0x000),
+   401	};
+   402	static const unsigned char P6[] = {
+   403	    DN(F_4,4,0xC0F),
+   404	    DN(___,0,0x000),
+   405	    DN(F_4,5,0xC0F),
+   406	    DN(___,0,0x000),
+   407	    DN(F_4,6,0xC07),
+   408	    DN(___,0,0x000),
+   409	    DN(F_4,7,0xC07),
+   410	    DN(___,0,0x000),
+   411	    DN(F_4,6,0xC0F),
+   412	    DN(___,0,0x000),
+   413	    DN(F_4,5,0xC0F),
+   414	    DN(___,0,0x000),
+   415	    DN(F_4,4,0xC07),
+   416	    DN(___,0,0x000),
+   417	    DN(F_4,5,0xC07),
+   418	    DN(___,0,0x000),
+   419	    DN(F_4,6,0xC0F),
+   420	    DN(___,0,0x000),
+   421	    DN(F_4,7,0xC0F),
+   422	    DN(___,0,0x000),
+   423	    DN(C_4,6,0xC0F),
+   424	    DN(___,0,0x000),
+   425	    DN(C_4,5,0xC0F),
+   426	    DN(___,0,0x000),
+   427	    DN(Ds4,4,0xC0F),
+   428	    DN(___,0,0x000),
+   429	    DN(Ds4,5,0xC0F),
+   430	    DN(___,0,0x000),
+   431	    DN(G_4,6,0xC0F),
+   432	    DN(___,0,0x000),
+   433	    DN(G_4,7,0xC0F),
+   434	    DN(___,0,0x000),
+   435	    DN(G_4,6,0xC07),
+   436	    DN(___,0,0x000),
+   437	    DN(G_4,5,0xC07),
+   438	    DN(___,0,0x000),
+   439	    DN(G_4,4,0xC0F),
+   440	    DN(___,0,0x000),
+   441	    DN(G_4,5,0xC0F),
+   442	    DN(___,0,0x000),
+   443	    DN(G_4,6,0xC07),
+   444	    DN(___,0,0x000),
+   445	    DN(G_4,7,0xC07),
+   446	    DN(___,0,0x000),
+   447	    DN(G_4,6,0xC0F),
+   448	    DN(___,0,0x000),
+   449	    DN(G_4,5,0xC0F),
+   450	    DN(___,0,0x000),
+   451	    DN(G_4,4,0xC0F),
+   452	    DN(___,0,0x000),
+   453	    DN(G_4,5,0xC0F),
+   454	    DN(___,0,0x000),
+   455	    DN(Ds4,6,0xC0F),
+   456	    DN(___,0,0x000),
+   457	    DN(Ds4,7,0xC0F),
+   458	    DN(___,0,0x000),
+   459	    DN(D_4,6,0xC0F),
+   460	    DN(___,0,0x000),
+   461	    DN(D_4,5,0xC0F),
+   462	    DN(___,0,0x000),
+   463	    DN(As3,4,0xC0F),
+   464	    DN(___,0,0x000),
+   465	    DN(As3,5,0xC0F),
+   466	    DN(___,0,0x000),
+   467	};
+   468	static const unsigned char P7[] = {
+   469	    DN(F_7,1,0x000),
+   470	    DN(F_6,2,0x000),
+   471	    DN(___,0,0x000),
+   472	    DN(___,0,0x000),
+   473	    DN(___,0,0x000),
+   474	    DN(___,0,0x000),
+   475	    DN(___,0,0x000),
+   476	    DN(___,0,0x000),
+   477	    DN(C_7,3,0x000),
+   478	    DN(Ds8,3,0x000),
+   479	    DN(___,0,0x000),
+   480	    DN(___,0,0x000),
+   481	    DN(___,0,0x000),
+   482	    DN(___,0,0x000),
+   483	    DN(___,0,0x000),
+   484	    DN(___,0,0x000),
+   485	    DN(F_7,1,0x000),
+   486	    DN(F_6,2,0x000),
+   487	    DN(___,0,0x000),
+   488	    DN(___,0,0x000),
+   489	    DN(F_7,1,0x000),
+   490	    DN(F_6,2,0x000),
+   491	    DN(___,0,0x000),
+   492	    DN(___,0,0x000),
+   493	    DN(C_7,3,0x000),
+   494	    DN(Ds8,3,0x000),
+   495	    DN(___,0,0x000),
+   496	    DN(___,0,0x000),
+   497	    DN(___,0,0x000),
+   498	    DN(___,0,0x000),
+   499	    DN(___,0,0x000),
+   500	    DN(___,0,0x000),
+   501	    DN(C_7,3,0x000),
+   502	    DN(Ds8,3,0xC65),
+   503	    DN(___,0,0x000),
+   504	    DN(___,0,0x000),
+   505	    DN(___,0,0x000),
+   506	    DN(___,0,0x000),
+   507	    DN(___,0,0x000),
+   508	    DN(___,0,0x000),
+   509	    DN(___,0,0x000),
+   510	    DN(___,0,0x000),
+   511	    DN(___,0,0x000),
+   512	    DN(___,0,0x000),
+   513	    DN(___,0,0x000),
+   514	    DN(___,0,0x000),
+   515	    DN(___,0,0x000),
+   516	    DN(___,0,0x000),
+   517	    DN(___,0,0x000),
+   518	    DN(___,0,0x000),
+   519	    DN(___,0,0x000),
+   520	    DN(___,0,0x000),
+   521	    DN(Ds8,3,0xCC0),
+   522	    DN(___,0,0x000),
+   523	    DN(___,0,0x000),
+   524	    DN(___,0,0x000),
+   525	    DN(B_7,0,0x000),
+   526	    DN(As7,0,0x000),
+   527	    DN(A_7,0,0x000),
+   528	    DN(Fs7,0,0x000),
+   529	    DN(F_7,0,0x000),
+   530	    DN(E_7,0,0x000),
+   531	    DN(Ds7,0,0x000),
+   532	    DN(D_7,0,0x000),
+   533	};
+   534	static const unsigned char P8[] = {
+   535	    DN(F_4,4,0xC0F),
+   536	    DN(___,0,0x000),
+   537	    DN(F_4,5,0xC0F),
+   538	    DN(___,0,0x000),
+   539	    DN(F_4,6,0xC07),
+   540	    DN(___,0,0x000),
+   541	    DN(F_4,7,0xC07),
+   542	    DN(___,0,0x000),
+   543	    DN(F_4,6,0xC0F),
+   544	    DN(___,0,0x000),
+   545	    DN(F_4,5,0xC0F),
+   546	    DN(___,0,0x000),
+   547	    DN(F_4,4,0xC07),
+   548	    DN(___,0,0x000),
+   549	    DN(F_4,5,0xC07),
+   550	    DN(___,0,0x000),
+   551	    DN(F_4,6,0xC0F),
+   552	    DN(___,0,0x000),
+   553	    DN(F_4,7,0xC0F),
+   554	    DN(___,0,0x000),
+   555	    DN(Ds4,6,0xC0F),
+   556	    DN(___,0,0x000),
+   557	    DN(Ds4,5,0xC0F),
+   558	    DN(___,0,0x000),
+   559	    DN(D_4,4,0xC0F),
+   560	    DN(___,0,0x000),
+   561	    DN(D_4,5,0xC0F),
+   562	    DN(___,0,0x000),
+   563	    DN(As3,6,0xC0F),
+   564	    DN(___,0,0x000),
+   565	    DN(As3,7,0xC0F),
+   566	    DN(___,0,0x000),
+   567	    DN(As3,6,0xC07),
+   568	    DN(___,0,0x000),
+   569	    DN(As3,5,0xC07),
+   570	    DN(___,0,0x000),
+   571	    DN(As3,4,0xC07),
+   572	    DN(___,0,0x000),
+   573	    DN(As3,5,0xC07),
+   574	    DN(___,0,0x000),
+   575	    DN(As3,6,0xC03),
+   576	    DN(___,0,0x000),
+   577	    DN(As3,7,0xC03),
+   578	    DN(___,0,0x000),
+   579	    DN(As3,6,0xC03),
+   580	    DN(___,0,0x000),
+   581	    DN(As3,5,0xC03),
+   582	    DN(___,0,0x000),
+   583	    DN(As3,4,0xC07),
+   584	    DN(___,0,0x000),
+   585	    DN(As3,5,0xC07),
+   586	    DN(___,0,0x000),
+   587	    DN(As3,6,0xC07),
+   588	    DN(___,0,0x000),
+   589	    DN(As3,7,0xC07),
+   590	    DN(___,0,0x000),
+   591	    DN(As3,6,0xC0F),
+   592	    DN(___,0,0x000),
+   593	    DN(As3,5,0xC0F),
+   594	    DN(___,0,0x000),
+   595	    DN(As3,4,0xC0F),
+   596	    DN(___,0,0x000),
+   597	    DN(As3,5,0xC0F),
+   598	    DN(___,0,0x000),
+   599	};
+   600	static const unsigned char P9[] = {
+   601	    DN(C_6,3,0xC0F),
+   602	    DN(C_6,4,0xC0F),
+   603	    DN(G_6,3,0xC07),
+   604	    DN(G_6,4,0xC07),
+   605	    DN(Ds6,3,0xC0F),
+   606	    DN(Ds6,4,0xC0F),
+   607	    DN(C_6,3,0xC07),
+   608	    DN(C_6,4,0xC07),
+   609	    DN(G_6,3,0xC0F),
+   610	    DN(G_6,4,0xC0F),
+   611	    DN(G_6,3,0xC07),
+   612	    DN(G_6,4,0xC07),
+   613	    DN(C_6,3,0xC0F),
+   614	    DN(C_6,4,0xC0F),
+   615	    DN(G_6,3,0xC07),
+   616	    DN(G_6,4,0xC07),
+   617	    DN(Ds6,3,0xC0F),
+   618	    DN(Ds6,4,0xC0F),
+   619	    DN(C_6,3,0xC07),
+   620	    DN(C_6,4,0xC07),
+   621	    DN(G_6,3,0xC0F),
+   622	    DN(G_6,4,0xC0F),
+   623	    DN(G_6,3,0xC07),
+   624	    DN(G_6,4,0xC07),
+   625	    DN(C_6,3,0xC0F),
+   626	    DN(C_6,4,0xC0F),
+   627	    DN(G_6,3,0xC07),
+   628	    DN(G_6,4,0xC07),
+   629	    DN(Ds6,3,0xC0F),
+   630	    DN(Ds6,4,0xC0F),
+   631	    DN(C_6,3,0xC07),
+   632	    DN(C_6,4,0xC07),
+   633	    DN(G_6,3,0xC0F),
+   634	    DN(G_6,4,0xC0F),
+   635	    DN(G_6,3,0xC07),
+   636	    DN(G_6,4,0xC07),
+   637	    DN(C_6,3,0xC0F),
+   638	    DN(C_6,4,0xC0F),
+   639	    DN(G_6,3,0xC07),
+   640	    DN(G_6,4,0xC07),
+   641	    DN(Ds6,3,0xC0F),
+   642	    DN(Ds6,4,0xC0F),
+   643	    DN(C_6,3,0xC07),
+   644	    DN(C_6,4,0xC07),
+   645	    DN(G_6,3,0xC0F),
+   646	    DN(G_6,4,0xC0F),
+   647	    DN(G_6,3,0xC07),
+   648	    DN(G_6,4,0xC07),
+   649	    DN(C_6,3,0xC0F),
+   650	    DN(C_6,4,0xC0F),
+   651	    DN(G_6,3,0xC07),
+   652	    DN(G_6,4,0xC07),
+   653	    DN(Ds6,3,0xC0F),
+   654	    DN(Ds6,4,0xC0F),
+   655	    DN(C_6,3,0xC07),
+   656	    DN(C_6,4,0xC07),
+   657	    DN(G_6,3,0xC0F),
+   658	    DN(G_6,4,0xC0F),
+   659	    DN(G_6,3,0xC07),
+   660	    DN(G_6,4,0xC07),
+   661	    DN(Ds6,3,0xC0F),
+   662	    DN(Ds6,4,0xC0F),
+   663	    DN(G_6,3,0xC07),
+   664	    DN(G_6,4,0xC07),
+   665	};
+   666	static const unsigned char P10[] = {
+   667	    DN(C_5,3,0x900),
+   668	    DN(Ds5,0,0x000),
+   669	    DN(G_5,0,0x940),
+   670	    DN(C_5,0,0x000),
+   671	    DN(Ds5,0,0x980),
+   672	    DN(G_5,0,0x000),
+   673	    DN(C_5,0,0x9C0),
+   674	    DN(Ds5,0,0x000),
+   675	    DN(G_5,3,0x900),
+   676	    DN(C_5,0,0x000),
+   677	    DN(Ds5,0,0x940),
+   678	    DN(G_5,0,0x000),
+   679	    DN(C_5,0,0x980),
+   680	    DN(Ds5,0,0x000),
+   681	    DN(G_5,0,0x9C0),
+   682	    DN(C_5,0,0x000),
+   683	    DN(Ds5,3,0x900),
+   684	    DN(G_5,0,0x000),
+   685	    DN(C_5,0,0x940),
+   686	    DN(Ds5,0,0x000),
+   687	    DN(G_5,0,0x980),
+   688	    DN(C_5,0,0x000),
+   689	    DN(Ds5,0,0x9C0),
+   690	    DN(G_5,0,0x000),
+   691	    DN(C_5,3,0x900),
+   692	    DN(Ds5,0,0x000),
+   693	    DN(G_5,0,0x940),
+   694	    DN(C_5,0,0x000),
+   695	    DN(Ds5,0,0x980),
+   696	    DN(G_5,0,0x000),
+   697	    DN(C_5,0,0x9C0),
+   698	    DN(Ds5,0,0x000),
+   699	    DN(G_5,3,0x900),
+   700	    DN(C_5,0,0x000),
+   701	    DN(Ds5,0,0x940),
+   702	    DN(G_5,0,0x000),
+   703	    DN(C_5,0,0x980),
+   704	    DN(Ds5,0,0x000),
+   705	    DN(G_5,0,0x9C0),
+   706	    DN(C_5,0,0x000),
+   707	    DN(Ds5,3,0x900),
+   708	    DN(G_5,0,0x000),
+   709	    DN(C_5,0,0x940),
+   710	    DN(Ds5,0,0x000),
+   711	    DN(G_5,0,0x980),
+   712	    DN(C_5,0,0x000),
+   713	    DN(Ds5,0,0x9C0),
+   714	    DN(G_5,0,0x000),
+   715	    DN(C_5,3,0x900),
+   716	    DN(Ds5,0,0x000),
+   717	    DN(G_5,0,0x940),
+   718	    DN(C_5,0,0x000),
+   719	    DN(Ds5,0,0x980),
+   720	    DN(G_5,0,0x000),
+   721	    DN(C_5,0,0x9C0),
+   722	    DN(Ds5,0,0x000),
+   723	    DN(G_5,3,0x900),
+   724	    DN(C_5,0,0x000),
+   725	    DN(Ds5,0,0x940),
+   726	    DN(G_5,0,0x000),
+   727	    DN(C_5,0,0x980),
+   728	    DN(Ds5,0,0x000),
+   729	    DN(G_5,0,0x9C0),
+   730	    DN(C_5,0,0x000),
+   731	};
+   732	static const unsigned char P11[] = {
+   733	    DN(C_5,4,0x000),
+   734	    DN(C_3,5,0x000),
+   735	    DN(___,0,0x000),
+   736	    DN(___,0,0x000),
+   737	    DN(C_3,5,0x000),
+   738	    DN(___,0,0x000),
+   739	    DN(___,0,0x000),
+   740	    DN(___,0,0x000),
+   741	    DN(Fs5,6,0x000),
+   742	    DN(C_3,5,0x000),
+   743	    DN(___,0,0x000),
+   744	    DN(___,0,0x000),
+   745	    DN(C_5,4,0x000),
+   746	    DN(C_3,5,0x000),
+   747	    DN(___,0,0x000),
+   748	    DN(___,0,0x000),
+   749	    DN(C_3,5,0x000),
+   750	    DN(___,0,0x000),
+   751	    DN(___,0,0x000),
+   752	    DN(___,0,0x000),
+   753	    DN(C_5,4,0x000),
+   754	    DN(G_3,5,0x000),
+   755	    DN(___,0,0x000),
+   756	    DN(___,0,0x000),
+   757	    DN(Fs5,6,0x000),
+   758	    DN(As3,5,0x000),
+   759	    DN(___,0,0x000),
+   760	    DN(___,0,0x000),
+   761	    DN(C_4,5,0x000),
+   762	    DN(___,0,0x000),
+   763	    DN(___,0,0x000),
+   764	    DN(___,0,0x000),
+   765	    DN(C_5,4,0x000),
+   766	    DN(C_3,5,0x000),
+   767	    DN(___,0,0x000),
+   768	    DN(___,0,0x000),
+   769	    DN(C_3,5,0x000),
+   770	    DN(___,0,0x000),
+   771	    DN(___,0,0x000),
+   772	    DN(___,0,0x000),
+   773	    DN(Fs5,6,0x000),
+   774	    DN(C_3,5,0x000),
+   775	    DN(___,0,0x000),
+   776	    DN(___,0,0x000),
+   777	    DN(C_5,4,0x000),
+   778	    DN(C_3,5,0x000),
+   779	    DN(___,0,0x000),
+   780	    DN(___,0,0x000),
+   781	    DN(C_3,5,0x000),
+   782	    DN(___,0,0x000),
+   783	    DN(___,0,0x000),
+   784	    DN(___,0,0x000),
+   785	    DN(C_5,4,0x000),
+   786	    DN(G_3,5,0x000),
+   787	    DN(___,0,0x000),
+   788	    DN(___,0,0x000),
+   789	    DN(Fs5,6,0x000),
+   790	    DN(As3,5,0x000),
+   791	    DN(___,0,0x000),
+   792	    DN(___,0,0x000),
+   793	    DN(C_4,5,0x000),
+   794	    DN(___,0,0x000),
+   795	    DN(___,0,0x000),
+   796	    DN(___,0,0x000),
+   797	};
+   798	static const unsigned char P12[] = {
+   799	    DN(Ds5,4,0x000),
+   800	    DN(Ds3,5,0x000),
+   801	    DN(___,0,0x000),
+   802	    DN(___,0,0x000),
+   803	    DN(Ds3,5,0x000),
+   804	    DN(___,0,0x000),
+   805	    DN(___,0,0x000),
+   806	    DN(___,0,0x000),
+   807	    DN(A_5,6,0x000),
+   808	    DN(Ds3,5,0x000),
+   809	    DN(___,0,0x000),
+   810	    DN(___,0,0x000),
+   811	    DN(Ds5,4,0x000),
+   812	    DN(Ds3,5,0x000),
+   813	    DN(___,0,0x000),
+   814	    DN(___,0,0x000),
+   815	    DN(Ds3,5,0x000),
+   816	    DN(___,0,0x000),
+   817	    DN(___,0,0x000),
+   818	    DN(___,0,0x000),
+   819	    DN(Ds5,4,0x000),
+   820	    DN(As3,5,0x000),
+   821	    DN(___,0,0x000),
+   822	    DN(___,0,0x000),
+   823	    DN(A_5,6,0x000),
+   824	    DN(Cs4,5,0x000),
+   825	    DN(___,0,0x000),
+   826	    DN(___,0,0x000),
+   827	    DN(Ds4,5,0x000),
+   828	    DN(___,0,0x000),
+   829	    DN(___,0,0x000),
+   830	    DN(___,0,0x000),
+   831	    DN(Ds5,4,0x000),
+   832	    DN(Ds3,5,0x000),
+   833	    DN(___,0,0x000),
+   834	    DN(___,0,0x000),
+   835	    DN(Ds3,5,0x000),
+   836	    DN(___,0,0x000),
+   837	    DN(___,0,0x000),
+   838	    DN(___,0,0x000),
+   839	    DN(A_5,6,0x000),
+   840	    DN(Ds3,5,0x000),
+   841	    DN(___,0,0x000),
+   842	    DN(___,0,0x000),
+   843	    DN(Ds5,4,0x000),
+   844	    DN(Ds3,5,0x000),
+   845	    DN(___,0,0x000),
+   846	    DN(___,0,0x000),
+   847	    DN(Ds3,5,0x000),
+   848	    DN(___,0,0x000),
+   849	    DN(___,0,0x000),
+   850	    DN(___,0,0x000),
+   851	    DN(Ds5,4,0x000),
+   852	    DN(As3,5,0x000),
+   853	    DN(___,0,0x000),
+   854	    DN(___,0,0x000),
+   855	    DN(A_5,6,0x000),
+   856	    DN(Cs4,5,0x000),
+   857	    DN(___,0,0x000),
+   858	    DN(___,0,0x000),
+   859	    DN(Ds4,5,0x000),
+   860	    DN(___,0,0x000),
+   861	    DN(___,0,0x000),
+   862	    DN(___,0,0x000),
+   863	};
+   864	static const unsigned char P13[] = {
+   865	    DN(Ds5,3,0x900),
+   866	    DN(G_5,0,0x000),
+   867	    DN(As5,0,0x940),
+   868	    DN(Ds5,0,0x000),
+   869	    DN(G_5,0,0x980),
+   870	    DN(As5,0,0x000),
+   871	    DN(Ds5,0,0x9C0),
+   872	    DN(G_5,0,0x000),
+   873	    DN(As5,3,0x900),
+   874	    DN(Ds5,0,0x000),
+   875	    DN(G_5,0,0x940),
+   876	    DN(As5,0,0x000),
+   877	    DN(Ds5,0,0x980),
+   878	    DN(G_5,0,0x000),
+   879	    DN(As5,0,0x9C0),
+   880	    DN(Ds5,0,0x000),
+   881	    DN(G_5,3,0x900),
+   882	    DN(As5,0,0x000),
+   883	    DN(Ds5,0,0x940),
+   884	    DN(G_5,0,0x000),
+   885	    DN(As5,0,0x980),
+   886	    DN(Ds5,0,0x000),
+   887	    DN(G_5,0,0x9C0),
+   888	    DN(As5,0,0x000),
+   889	    DN(Ds5,3,0x900),
+   890	    DN(G_5,0,0x000),
+   891	    DN(As5,0,0x940),
+   892	    DN(Ds5,0,0x000),
+   893	    DN(G_5,0,0x980),
+   894	    DN(As5,0,0x000),
+   895	    DN(Ds5,0,0x9C0),
+   896	    DN(G_5,0,0x000),
+   897	    DN(As5,3,0x900),
+   898	    DN(Ds5,0,0x000),
+   899	    DN(G_5,0,0x940),
+   900	    DN(As5,0,0x000),
+   901	    DN(Ds5,0,0x980),
+   902	    DN(G_5,0,0x000),
+   903	    DN(As5,0,0x9C0),
+   904	    DN(Ds5,0,0x000),
+   905	    DN(G_5,3,0x900),
+   906	    DN(As5,0,0x000),
+   907	    DN(Ds5,0,0x940),
+   908	    DN(G_5,0,0x000),
+   909	    DN(As5,0,0x980),
+   910	    DN(Ds5,0,0x000),
+   911	    DN(G_5,0,0x9C0),
+   912	    DN(As5,0,0x000),
+   913	    DN(Ds5,3,0x900),
+   914	    DN(G_5,0,0x000),
+   915	    DN(As5,0,0x940),
+   916	    DN(Ds5,0,0x000),
+   917	    DN(G_5,0,0x980),
+   918	    DN(As5,0,0x000),
+   919	    DN(Ds5,0,0x9C0),
+   920	    DN(G_5,0,0x000),
+   921	    DN(As5,3,0x900),
+   922	    DN(Ds5,0,0x000),
+   923	    DN(G_5,0,0x940),
+   924	    DN(As5,0,0x000),
+   925	    DN(Ds5,0,0x980),
+   926	    DN(G_5,0,0x000),
+   927	    DN(As5,0,0x9C0),
+   928	    DN(Ds5,0,0x000),
+   929	};
+   930	static const unsigned char P14[] = {
+   931	    DN(Ds6,3,0xC0F),
+   932	    DN(Ds6,4,0xC0F),
+   933	    DN(As6,3,0xC07),
+   934	    DN(As6,4,0xC07),
+   935	    DN(G_6,3,0xC0F),
+   936	    DN(G_6,4,0xC0F),
+   937	    DN(Ds6,3,0xC07),
+   938	    DN(Ds6,4,0xC07),
+   939	    DN(As6,3,0xC0F),
+   940	    DN(As6,4,0xC0F),
+   941	    DN(G_6,3,0xC07),
+   942	    DN(G_6,4,0xC07),
+   943	    DN(Ds6,3,0xC0F),
+   944	    DN(Ds6,4,0xC0F),
+   945	    DN(As6,3,0xC07),
+   946	    DN(As6,4,0xC07),
+   947	    DN(G_6,3,0xC0F),
+   948	    DN(G_6,4,0xC0F),
+   949	    DN(Ds6,3,0xC07),
+   950	    DN(Ds6,4,0xC07),
+   951	    DN(As6,3,0xC0F),
+   952	    DN(As6,4,0xC0F),
+   953	    DN(G_6,3,0xC07),
+   954	    DN(G_6,4,0xC07),
+   955	    DN(Ds6,3,0xC0F),
+   956	    DN(Ds6,4,0xC0F),
+   957	    DN(As6,3,0xC07),
+   958	    DN(As6,4,0xC07),
+   959	    DN(G_6,3,0xC0F),
+   960	    DN(G_6,4,0xC0F),
+   961	    DN(Ds6,3,0xC07),
+   962	    DN(Ds6,4,0xC07),
+   963	    DN(As6,3,0xC0F),
+   964	    DN(As6,4,0xC0F),
+   965	    DN(G_6,3,0xC07),
+   966	    DN(G_6,4,0xC07),
+   967	    DN(Ds6,3,0xC0F),
+   968	    DN(Ds6,4,0xC0F),
+   969	    DN(As6,3,0xC07),
+   970	    DN(As6,4,0xC07),
+   971	    DN(G_6,3,0xC0F),
+   972	    DN(G_6,4,0xC0F),
+   973	    DN(Ds6,3,0xC07),
+   974	    DN(Ds6,4,0xC07),
+   975	    DN(As6,3,0xC0F),
+   976	    DN(As6,4,0xC0F),
+   977	    DN(G_6,3,0xC07),
+   978	    DN(G_6,4,0xC07),
+   979	    DN(Ds6,3,0xC0F),
+   980	    DN(Ds6,4,0xC0F),
+   981	    DN(As6,3,0xC07),
+   982	    DN(As6,4,0xC07),
+   983	    DN(G_6,3,0xC0F),
+   984	    DN(G_6,4,0xC0F),
+   985	    DN(Ds6,3,0xC07),
+   986	    DN(Ds6,4,0xC07),
+   987	    DN(As6,3,0xC0F),
+   988	    DN(As6,4,0xC0F),
+   989	    DN(G_6,3,0xC07),
+   990	    DN(G_6,4,0xC07),
+   991	    DN(Ds6,3,0xC0F),
+   992	    DN(Ds6,4,0xC0F),
+   993	    DN(As6,3,0xC07),
+   994	    DN(As6,4,0xC07),
+   995	};
+   996	static const unsigned char P15[] = {
+   997	    DN(F_5,4,0x000),
+   998	    DN(F_3,5,0x000),
+   999	    DN(___,0,0x000),
+  1000	    DN(___,0,0x000),
+  1001	    DN(F_3,5,0x000),
+  1002	    DN(___,0,0x000),
+  1003	    DN(___,0,0x000),
+  1004	    DN(___,0,0x000),
+  1005	    DN(B_5,6,0x000),
+  1006	    DN(F_3,5,0x000),
+  1007	    DN(___,0,0x000),
+  1008	    DN(___,0,0x000),
+  1009	    DN(F_5,4,0x000),
+  1010	    DN(F_3,5,0x000),
+  1011	    DN(___,0,0x000),
+  1012	    DN(___,0,0x000),
+  1013	    DN(F_3,5,0x000),
+  1014	    DN(___,0,0x000),
+  1015	    DN(___,0,0x000),
+  1016	    DN(___,0,0x000),
+  1017	    DN(F_5,4,0x000),
+  1018	    DN(C_4,5,0x000),
+  1019	    DN(___,0,0x000),
+  1020	    DN(___,0,0x000),
+  1021	    DN(B_5,6,0x000),
+  1022	    DN(Ds4,5,0x000),
+  1023	    DN(___,0,0x000),
+  1024	    DN(___,0,0x000),
+  1025	    DN(F_4,5,0x000),
+  1026	    DN(___,0,0x000),
+  1027	    DN(___,0,0x000),
+  1028	    DN(___,0,0x000),
+  1029	    DN(F_5,4,0x000),
+  1030	    DN(F_3,5,0x000),
+  1031	    DN(___,0,0x000),
+  1032	    DN(___,0,0x000),
+  1033	    DN(F_3,5,0x000),
+  1034	    DN(___,0,0x000),
+  1035	    DN(___,0,0x000),
+  1036	    DN(___,0,0x000),
+  1037	    DN(B_5,6,0x000),
+  1038	    DN(F_3,5,0x000),
+  1039	    DN(___,0,0x000),
+  1040	    DN(___,0,0x000),
+  1041	    DN(F_5,4,0x000),
+  1042	    DN(F_3,5,0x000),
+  1043	    DN(___,0,0x000),
+  1044	    DN(___,0,0x000),
+  1045	    DN(F_3,5,0x000),
+  1046	    DN(___,0,0x000),
+  1047	    DN(___,0,0x000),
+  1048	    DN(___,0,0x000),
+  1049	    DN(F_5,4,0x000),
+  1050	    DN(C_4,5,0x000),
+  1051	    DN(___,0,0x000),
+  1052	    DN(___,0,0x000),
+  1053	    DN(B_5,6,0x000),
+  1054	    DN(Ds4,5,0x000),
+  1055	    DN(___,0,0x000),
+  1056	    DN(___,0,0x000),
+  1057	    DN(F_4,5,0x000),
+  1058	    DN(___,0,0x000),
+  1059	    DN(___,0,0x000),
+  1060	    DN(___,0,0x000),
+  1061	};
+  1062	static const unsigned char P16[] = {
+  1063	    DN(F_5,3,0x900),
+  1064	    DN(A_5,0,0x000),
+  1065	    DN(C_6,0,0x940),
+  1066	    DN(F_5,0,0x000),
+  1067	    DN(A_5,0,0x980),
+  1068	    DN(C_6,0,0x000),
+  1069	    DN(F_5,0,0x9C0),
+  1070	    DN(A_5,0,0x000),
+  1071	    DN(C_6,3,0x900),
+  1072	    DN(F_5,0,0x000),
+  1073	    DN(A_5,0,0x940),
+  1074	    DN(C_6,0,0x000),
+  1075	    DN(F_5,0,0x980),
+  1076	    DN(A_5,0,0x000),
+  1077	    DN(C_6,0,0x9C0),
+  1078	    DN(F_5,0,0x000),
+  1079	    DN(A_5,3,0x900),
+  1080	    DN(C_6,0,0x000),
+  1081	    DN(F_5,0,0x940),
+  1082	    DN(A_5,0,0x000),
+  1083	    DN(C_6,0,0x980),
+  1084	    DN(F_5,0,0x000),
+  1085	    DN(A_5,0,0x9C0),
+  1086	    DN(C_6,0,0x000),
+  1087	    DN(F_5,3,0x900),
+  1088	    DN(A_5,0,0x000),
+  1089	    DN(C_6,0,0x940),
+  1090	    DN(F_5,0,0x000),
+  1091	    DN(A_5,0,0x980),
+  1092	    DN(C_6,0,0x000),
+  1093	    DN(F_5,0,0x9C0),
+  1094	    DN(A_5,0,0x000),
+  1095	    DN(C_6,3,0x900),
+  1096	    DN(F_5,0,0x000),
+  1097	    DN(A_5,0,0x940),
+  1098	    DN(C_6,0,0x000),
+  1099	    DN(F_5,0,0x980),
+  1100	    DN(A_5,0,0x000),
+  1101	    DN(C_6,0,0x9C0),
+  1102	    DN(F_5,0,0x000),
+  1103	    DN(A_5,3,0x900),
+  1104	    DN(C_6,0,0x000),
+  1105	    DN(F_5,0,0x940),
+  1106	    DN(A_5,0,0x000),
+  1107	    DN(C_6,0,0x980),
+  1108	    DN(F_5,0,0x000),
+  1109	    DN(A_5,0,0x9C0),
+  1110	    DN(C_6,0,0x000),
+  1111	    DN(F_5,3,0x900),
+  1112	    DN(A_5,0,0x000),
+  1113	    DN(C_6,0,0x940),
+  1114	    DN(F_5,0,0x000),
+  1115	    DN(A_5,0,0x980),
+  1116	    DN(C_6,0,0x000),
+  1117	    DN(F_5,0,0x9C0),
+  1118	    DN(A_5,0,0x000),
+  1119	    DN(C_6,3,0x900),
+  1120	    DN(F_5,0,0x000),
+  1121	    DN(A_5,0,0x940),
+  1122	    DN(C_6,0,0x000),
+  1123	    DN(F_5,0,0x980),
+  1124	    DN(A_5,0,0x000),
+  1125	    DN(C_6,0,0x9C0),
+  1126	    DN(F_5,0,0x000),
+  1127	};
+  1128	static const unsigned char P17[] = {
+  1129	    DN(F_6,3,0xC0F),
+  1130	    DN(F_6,4,0xC0F),
+  1131	    DN(C_7,3,0xC07),
+  1132	    DN(C_7,4,0xC07),
+  1133	    DN(A_6,3,0xC0F),
+  1134	    DN(A_6,4,0xC0F),
+  1135	    DN(F_6,3,0xC07),
+  1136	    DN(F_6,4,0xC07),
+  1137	    DN(C_7,3,0xC0F),
+  1138	    DN(C_7,4,0xC0F),
+  1139	    DN(A_6,3,0xC07),
+  1140	    DN(A_6,4,0xC07),
+  1141	    DN(F_6,3,0xC0F),
+  1142	    DN(F_6,4,0xC0F),
+  1143	    DN(C_7,3,0xC07),
+  1144	    DN(C_7,4,0xC07),
+  1145	    DN(A_6,3,0xC0F),
+  1146	    DN(A_6,4,0xC0F),
+  1147	    DN(F_6,3,0xC07),
+  1148	    DN(F_6,4,0xC07),
+  1149	    DN(C_7,3,0xC0F),
+  1150	    DN(C_7,4,0xC0F),
+  1151	    DN(A_6,3,0xC07),
+  1152	    DN(A_6,4,0xC07),
+  1153	    DN(F_6,3,0xC0F),
+  1154	    DN(F_6,4,0xC0F),
+  1155	    DN(C_7,3,0xC07),
+  1156	    DN(C_7,4,0xC07),
+  1157	    DN(A_6,3,0xC0F),
+  1158	    DN(A_6,4,0xC0F),
+  1159	    DN(F_6,3,0xC07),
+  1160	    DN(F_6,4,0xC07),
+  1161	    DN(C_7,3,0xC0F),
+  1162	    DN(C_7,4,0xC0F),
+  1163	    DN(A_6,3,0xC07),
+  1164	    DN(A_6,4,0xC07),
+  1165	    DN(F_6,3,0xC0F),
+  1166	    DN(F_6,4,0xC0F),
+  1167	    DN(C_7,3,0xC07),
+  1168	    DN(C_7,4,0xC07),
+  1169	    DN(A_6,3,0xC0F),
+  1170	    DN(A_6,4,0xC0F),
+  1171	    DN(F_6,3,0xC07),
+  1172	    DN(F_6,4,0xC07),
+  1173	    DN(C_7,3,0xC0F),
+  1174	    DN(C_7,4,0xC0F),
+  1175	    DN(A_6,3,0xC07),
+  1176	    DN(A_6,4,0xC07),
+  1177	    DN(F_6,3,0xC0F),
+  1178	    DN(F_6,4,0xC0F),
+  1179	    DN(C_7,3,0xC07),
+  1180	    DN(C_7,4,0xC07),
+  1181	    DN(A_6,3,0xC0F),
+  1182	    DN(A_6,4,0xC0F),
+  1183	    DN(F_6,3,0xC07),
+  1184	    DN(F_6,4,0xC07),
+  1185	    DN(C_7,3,0xC0F),
+  1186	    DN(C_7,4,0xC0F),
+  1187	    DN(A_6,3,0xC07),
+  1188	    DN(A_6,4,0xC07),
+  1189	    DN(F_6,3,0xC0F),
+  1190	    DN(F_6,4,0xC0F),
+  1191	    DN(C_7,3,0xC07),
+  1192	    DN(C_7,4,0xC07),
+  1193	};
+  1194	static const unsigned char P18[] = {
+  1195	    DN(F_6,3,0xC0F),
+  1196	    DN(F_6,4,0xC0F),
+  1197	    DN(C_7,3,0xC07),
+  1198	    DN(C_7,4,0xC07),
+  1199	    DN(Gs6,3,0xC0F),
+  1200	    DN(Gs6,4,0xC0F),
+  1201	    DN(F_6,3,0xC07),
+  1202	    DN(F_6,4,0xC07),
+  1203	    DN(C_7,3,0xC0F),
+  1204	    DN(C_7,4,0xC0F),
+  1205	    DN(Gs6,3,0xC07),
+  1206	    DN(Gs6,4,0xC07),
+  1207	    DN(F_6,3,0xC0F),
+  1208	    DN(F_6,4,0xC0F),
+  1209	    DN(C_7,3,0xC07),
+  1210	    DN(C_7,4,0xC07),
+  1211	    DN(Gs6,3,0xC0F),
+  1212	    DN(Gs6,4,0xC0F),
+  1213	    DN(F_6,3,0xC07),
+  1214	    DN(F_6,4,0xC07),
+  1215	    DN(C_7,3,0xC0F),
+  1216	    DN(C_7,4,0xC0F),
+  1217	    DN(Gs6,3,0xC07),
+  1218	    DN(Gs6,4,0xC07),
+  1219	    DN(F_6,3,0xC0F),
+  1220	    DN(F_6,4,0xC0F),
+  1221	    DN(C_7,3,0xC07),
+  1222	    DN(C_7,4,0xC07),
+  1223	    DN(Gs6,3,0xC0F),
+  1224	    DN(Gs6,4,0xC0F),
+  1225	    DN(F_6,3,0xC07),
+  1226	    DN(F_6,4,0xC07),
+  1227	    DN(B_6,3,0xC0F),
+  1228	    DN(B_6,4,0xC0F),
+  1229	    DN(Gs6,3,0xC07),
+  1230	    DN(Gs6,4,0xC07),
+  1231	    DN(D_6,3,0xC0F),
+  1232	    DN(D_6,4,0xC0F),
+  1233	    DN(B_6,3,0xC07),
+  1234	    DN(B_6,4,0xC07),
+  1235	    DN(G_6,3,0xC0F),
+  1236	    DN(G_6,4,0xC0F),
+  1237	    DN(D_6,3,0xC07),
+  1238	    DN(D_6,4,0xC07),
+  1239	    DN(B_6,3,0xC0F),
+  1240	    DN(B_6,4,0xC0F),
+  1241	    DN(G_6,3,0xC07),
+  1242	    DN(G_6,4,0xC07),
+  1243	    DN(D_6,3,0xC0F),
+  1244	    DN(D_6,4,0xC0F),
+  1245	    DN(B_6,3,0xC07),
+  1246	    DN(B_6,4,0xC07),
+  1247	    DN(G_6,3,0xC0F),
+  1248	    DN(G_6,4,0xC0F),
+  1249	    DN(D_6,3,0xC07),
+  1250	    DN(D_6,4,0xC07),
+  1251	    DN(B_6,3,0xC0F),
+  1252	    DN(B_6,4,0xC0F),
+  1253	    DN(G_6,3,0xC07),
+  1254	    DN(G_6,4,0xC07),
+  1255	    DN(D_6,3,0xC07),
+  1256	    DN(D_6,4,0xC07),
+  1257	    DN(B_6,3,0xC03),
+  1258	    DN(B_6,4,0xC03),
+  1259	};
+  1260	static const unsigned char P19[] = {
+  1261	    DN(F_5,4,0x000),
+  1262	    DN(F_3,5,0x000),
+  1263	    DN(___,0,0x000),
+  1264	    DN(___,0,0x000),
+  1265	    DN(F_3,5,0x000),
+  1266	    DN(___,0,0x000),
+  1267	    DN(___,0,0x000),
+  1268	    DN(___,0,0x000),
+  1269	    DN(B_5,6,0x000),
+  1270	    DN(F_3,5,0x000),
+  1271	    DN(___,0,0x000),
+  1272	    DN(___,0,0x000),
+  1273	    DN(F_5,4,0x000),
+  1274	    DN(F_3,5,0x000),
+  1275	    DN(___,0,0x000),
+  1276	    DN(___,0,0x000),
+  1277	    DN(F_3,5,0x000),
+  1278	    DN(___,0,0x000),
+  1279	    DN(___,0,0x000),
+  1280	    DN(___,0,0x000),
+  1281	    DN(F_5,4,0x000),
+  1282	    DN(C_4,5,0x000),
+  1283	    DN(___,0,0x000),
+  1284	    DN(___,0,0x000),
+  1285	    DN(B_5,6,0x000),
+  1286	    DN(Ds4,5,0x000),
+  1287	    DN(___,0,0x000),
+  1288	    DN(___,0,0x000),
+  1289	    DN(F_4,5,0x000),
+  1290	    DN(___,0,0x000),
+  1291	    DN(___,0,0x000),
+  1292	    DN(___,0,0x000),
+  1293	    DN(D_5,4,0x000),
+  1294	    DN(D_3,5,0x000),
+  1295	    DN(___,0,0x000),
+  1296	    DN(___,0,0x000),
+  1297	    DN(D_3,5,0x000),
+  1298	    DN(___,0,0x000),
+  1299	    DN(___,0,0x000),
+  1300	    DN(___,0,0x000),
+  1301	    DN(Gs5,6,0x000),
+  1302	    DN(D_3,5,0x000),
+  1303	    DN(___,0,0x000),
+  1304	    DN(___,0,0x000),
+  1305	    DN(D_5,4,0x000),
+  1306	    DN(D_3,5,0x000),
+  1307	    DN(___,0,0x000),
+  1308	    DN(___,0,0x000),
+  1309	    DN(D_3,5,0x000),
+  1310	    DN(___,0,0x000),
+  1311	    DN(___,0,0x000),
+  1312	    DN(___,0,0x000),
+  1313	    DN(D_5,4,0x000),
+  1314	    DN(G_3,5,0x000),
+  1315	    DN(___,0,0x000),
+  1316	    DN(___,0,0x000),
+  1317	    DN(Gs5,6,0x000),
+  1318	    DN(B_3,5,0x000),
+  1319	    DN(___,0,0x000),
+  1320	    DN(___,0,0x000),
+  1321	    DN(D_4,5,0x000),
+  1322	    DN(___,0,0x000),
+  1323	    DN(___,0,0x000),
+  1324	    DN(___,0,0x000),
+  1325	};
+  1326	static const unsigned char P20[] = {
+  1327	    DN(F_5,3,0x900),
+  1328	    DN(Gs5,0,0x000),
+  1329	    DN(C_6,0,0x940),
+  1330	    DN(F_5,0,0x000),
+  1331	    DN(Gs5,0,0x980),
+  1332	    DN(C_6,0,0x000),
+  1333	    DN(F_5,0,0x9C0),
+  1334	    DN(Gs5,0,0x000),
+  1335	    DN(C_6,3,0x900),
+  1336	    DN(F_5,0,0x000),
+  1337	    DN(Gs5,0,0x940),
+  1338	    DN(C_6,0,0x000),
+  1339	    DN(F_5,0,0x980),
+  1340	    DN(Gs5,0,0x000),
+  1341	    DN(C_6,0,0x9C0),
+  1342	    DN(F_5,0,0x000),
+  1343	    DN(Gs5,3,0x900),
+  1344	    DN(C_6,0,0x000),
+  1345	    DN(F_5,0,0x940),
+  1346	    DN(Gs5,0,0x000),
+  1347	    DN(C_6,0,0x980),
+  1348	    DN(F_5,0,0x000),
+  1349	    DN(Gs5,0,0x9C0),
+  1350	    DN(C_6,0,0x000),
+  1351	    DN(F_5,3,0x900),
+  1352	    DN(Gs5,0,0x000),
+  1353	    DN(C_6,0,0x940),
+  1354	    DN(F_5,0,0x000),
+  1355	    DN(Gs5,0,0x980),
+  1356	    DN(C_6,0,0x000),
+  1357	    DN(F_5,0,0x9C0),
+  1358	    DN(Gs5,0,0x000),
+  1359	    DN(B_5,3,0xC03),
+  1360	    DN(D_5,0,0x000),
+  1361	    DN(G_5,0,0x940),
+  1362	    DN(B_5,0,0x000),
+  1363	    DN(D_5,0,0x980),
+  1364	    DN(G_5,0,0x000),
+  1365	    DN(B_5,0,0x9C0),
+  1366	    DN(D_5,0,0x000),
+  1367	    DN(G_5,3,0xC02),
+  1368	    DN(B_5,0,0x000),
+  1369	    DN(D_5,0,0x940),
+  1370	    DN(G_5,0,0x000),
+  1371	    DN(B_5,0,0x980),
+  1372	    DN(D_5,0,0x000),
+  1373	    DN(G_5,0,0x9C0),
+  1374	    DN(B_5,0,0x000),
+  1375	    DN(D_5,3,0xC01),
+  1376	    DN(G_5,0,0x000),
+  1377	    DN(B_5,0,0x940),
+  1378	    DN(D_5,0,0x000),
+  1379	    DN(G_5,0,0x980),
+  1380	    DN(B_5,0,0x000),
+  1381	    DN(D_5,0,0x9C0),
+  1382	    DN(G_5,0,0x000),
+  1383	    DN(B_5,3,0xC01),
+  1384	    DN(D_5,0,0x000),
+  1385	    DN(G_5,0,0x940),
+  1386	    DN(B_5,0,0x000),
+  1387	    DN(D_5,0,0x980),
+  1388	    DN(G_5,0,0x000),
+  1389	    DN(B_5,0,0x9C0),
+  1390	    DN(D_5,0,0x000),
+  1391	};
+  1392	static const unsigned char P21[] = {
+  1393	    DN(C_6,4,0xC0F),
+  1394	    DN(___,0,0x000),
+  1395	    DN(C_6,5,0xC0F),
+  1396	    DN(___,0,0x000),
+  1397	    DN(C_6,6,0xC0F),
+  1398	    DN(___,0,0x000),
+  1399	    DN(C_6,7,0xC07),
+  1400	    DN(___,0,0x000),
+  1401	    DN(C_6,6,0xC07),
+  1402	    DN(___,0,0x000),
+  1403	    DN(C_6,5,0xC03),
+  1404	    DN(___,0,0x000),
+  1405	    DN(D_6,4,0xC0F),
+  1406	    DN(___,0,0x000),
+  1407	    DN(D_6,5,0xC0F),
+  1408	    DN(___,0,0x000),
+  1409	    DN(D_6,6,0xC0F),
+  1410	    DN(___,0,0x000),
+  1411	    DN(D_6,7,0xC07),
+  1412	    DN(___,0,0x000),
+  1413	    DN(D_6,6,0xC07),
+  1414	    DN(___,0,0x000),
+  1415	    DN(D_6,5,0xC03),
+  1416	    DN(___,0,0x000),
+  1417	    DN(D_6,4,0xC0F),
+  1418	    DN(Ds6,0,0x304),
+  1419	    DN(Ds6,5,0xC0F),
+  1420	    DN(___,0,0x000),
+  1421	    DN(Ds6,6,0xC0F),
+  1422	    DN(___,0,0x000),
+  1423	    DN(Ds6,7,0xC07),
+  1424	    DN(___,0,0x000),
+  1425	    DN(Ds6,6,0xC07),
+  1426	    DN(___,0,0x000),
+  1427	    DN(Ds6,5,0xC03),
+  1428	    DN(___,0,0x000),
+  1429	    DN(Ds6,4,0xC03),
+  1430	    DN(___,0,0x000),
+  1431	    DN(Ds6,5,0xC03),
+  1432	    DN(___,0,0x000),
+  1433	    DN(D_6,6,0xC0F),
+  1434	    DN(___,0,0x000),
+  1435	    DN(D_6,7,0xC0F),
+  1436	    DN(___,0,0x000),
+  1437	    DN(D_6,6,0xC0F),
+  1438	    DN(___,0,0x000),
+  1439	    DN(D_6,5,0xC07),
+  1440	    DN(___,0,0x000),
+  1441	    DN(C_6,4,0xC0F),
+  1442	    DN(___,0,0x000),
+  1443	    DN(C_6,5,0xC0F),
+  1444	    DN(___,0,0x000),
+  1445	    DN(C_6,6,0xC0F),
+  1446	    DN(___,0,0x000),
+  1447	    DN(C_6,7,0xC07),
+  1448	    DN(___,0,0x000),
+  1449	    DN(As5,6,0xC0F),
+  1450	    DN(___,0,0x000),
+  1451	    DN(As5,5,0xC0F),
+  1452	    DN(___,0,0x000),
+  1453	    DN(As5,4,0xC0F),
+  1454	    DN(___,0,0x000),
+  1455	    DN(As5,5,0xC07),
+  1456	    DN(___,0,0x000),
+  1457	};
+  1458	static const unsigned char P22[] = {
+  1459	    DN(G_5,4,0xC0F),
+  1460	    DN(___,0,0x000),
+  1461	    DN(G_5,5,0xC0F),
+  1462	    DN(___,0,0x000),
+  1463	    DN(G_5,6,0xC0F),
+  1464	    DN(___,0,0x000),
+  1465	    DN(G_5,7,0xC07),
+  1466	    DN(___,0,0x000),
+  1467	    DN(As5,6,0xC0F),
+  1468	    DN(___,0,0x000),
+  1469	    DN(As5,5,0xC07),
+  1470	    DN(___,0,0x000),
+  1471	    DN(F_5,4,0xC0F),
+  1472	    DN(___,0,0x000),
+  1473	    DN(F_5,5,0xC0F),
+  1474	    DN(___,0,0x000),
+  1475	    DN(F_5,6,0xC0F),
+  1476	    DN(___,0,0x000),
+  1477	    DN(F_5,7,0xC07),
+  1478	    DN(___,0,0x000),
+  1479	    DN(As5,6,0xC0F),
+  1480	    DN(___,0,0x000),
+  1481	    DN(As5,5,0xC07),
+  1482	    DN(___,0,0x000),
+  1483	    DN(F_5,4,0xC0F),
+  1484	    DN(G_5,0,0x304),
+  1485	    DN(G_5,5,0xC0F),
+  1486	    DN(___,0,0x000),
+  1487	    DN(G_5,6,0xC0F),
+  1488	    DN(___,0,0x000),
+  1489	    DN(G_5,7,0xC0F),
+  1490	    DN(___,0,0x000),
+  1491	    DN(G_5,6,0xC0F),
+  1492	    DN(___,0,0x000),
+  1493	    DN(G_5,5,0xC0F),
+  1494	    DN(___,0,0x000),
+  1495	    DN(G_5,4,0xC07),
+  1496	    DN(___,0,0x000),
+  1497	    DN(G_5,5,0xC07),
+  1498	    DN(___,0,0x000),
+  1499	    DN(G_5,6,0xC07),
+  1500	    DN(___,0,0x000),
+  1501	    DN(G_5,7,0xC07),
+  1502	    DN(___,0,0x000),
+  1503	    DN(G_5,6,0xC03),
+  1504	    DN(___,0,0x000),
+  1505	    DN(G_5,5,0xC03),
+  1506	    DN(___,0,0x000),
+  1507	    DN(G_5,4,0xC03),
+  1508	    DN(___,0,0x000),
+  1509	    DN(G_5,5,0xC03),
+  1510	    DN(___,0,0x000),
+  1511	    DN(G_5,6,0xC03),
+  1512	    DN(___,0,0x000),
+  1513	    DN(G_5,7,0xC03),
+  1514	    DN(___,0,0x000),
+  1515	    DN(C_6,6,0xC0F),
+  1516	    DN(___,0,0x000),
+  1517	    DN(C_6,5,0xC07),
+  1518	    DN(___,0,0x000),
+  1519	    DN(D_6,4,0xC0F),
+  1520	    DN(___,0,0x000),
+  1521	    DN(D_6,5,0xC07),
+  1522	    DN(___,0,0x000),
+  1523	};
+  1524	static const unsigned char P23[] = {
+  1525	    DN(Ds6,4,0xC0F),
+  1526	    DN(___,0,0x000),
+  1527	    DN(Ds6,5,0xC0F),
+  1528	    DN(___,0,0x000),
+  1529	    DN(Ds6,6,0xC0F),
+  1530	    DN(___,0,0x000),
+  1531	    DN(Ds6,7,0xC07),
+  1532	    DN(___,0,0x000),
+  1533	    DN(Ds6,6,0xC07),
+  1534	    DN(___,0,0x000),
+  1535	    DN(Ds6,5,0xC03),
+  1536	    DN(___,0,0x000),
+  1537	    DN(F_6,4,0xC0F),
+  1538	    DN(___,0,0x000),
+  1539	    DN(F_6,5,0xC0F),
+  1540	    DN(___,0,0x000),
+  1541	    DN(F_6,6,0xC0F),
+  1542	    DN(___,0,0x000),
+  1543	    DN(F_6,7,0xC07),
+  1544	    DN(___,0,0x000),
+  1545	    DN(F_6,6,0xC07),
+  1546	    DN(___,0,0x000),
+  1547	    DN(F_6,5,0xC03),
+  1548	    DN(___,0,0x000),
+  1549	    DN(F_6,4,0xC0F),
+  1550	    DN(G_6,0,0x304),
+  1551	    DN(G_6,5,0xC0F),
+  1552	    DN(___,0,0x000),
+  1553	    DN(G_6,6,0xC0F),
+  1554	    DN(___,0,0x000),
+  1555	    DN(G_6,7,0xC0F),
+  1556	    DN(___,0,0x000),
+  1557	    DN(G_6,6,0xC0F),
+  1558	    DN(___,0,0x000),
+  1559	    DN(G_6,5,0xC07),
+  1560	    DN(___,0,0x000),
+  1561	    DN(G_6,4,0xC03),
+  1562	    DN(___,0,0x000),
+  1563	    DN(G_6,5,0xC03),
+  1564	    DN(___,0,0x000),
+  1565	    DN(As6,6,0xC0F),
+  1566	    DN(___,0,0x000),
+  1567	    DN(As6,7,0xC0F),
+  1568	    DN(___,0,0x000),
+  1569	    DN(As6,6,0xC0F),
+  1570	    DN(___,0,0x000),
+  1571	    DN(As6,5,0xC07),
+  1572	    DN(___,0,0x000),
+  1573	    DN(F_6,4,0xC0F),
+  1574	    DN(___,0,0x000),
+  1575	    DN(F_6,5,0xC0F),
+  1576	    DN(___,0,0x000),
+  1577	    DN(F_6,6,0xC0F),
+  1578	    DN(___,0,0x000),
+  1579	    DN(F_6,7,0xC07),
+  1580	    DN(___,0,0x000),
+  1581	    DN(Ds6,6,0xC0F),
+  1582	    DN(___,0,0x000),
+  1583	    DN(Ds6,5,0xC0F),
+  1584	    DN(___,0,0x000),
+  1585	    DN(Ds6,4,0xC0F),
+  1586	    DN(___,0,0x000),
+  1587	    DN(Ds6,5,0xC07),
+  1588	    DN(___,0,0x000),
+  1589	};
+  1590	static const unsigned char P24[] = {
+  1591	    DN(F_6,4,0xC0F),
+  1592	    DN(___,0,0x000),
+  1593	    DN(F_6,5,0xC0F),
+  1594	    DN(___,0,0x000),
+  1595	    DN(F_6,6,0xC0F),
+  1596	    DN(___,0,0x000),
+  1597	    DN(F_6,7,0xC0F),
+  1598	    DN(___,0,0x000),
+  1599	    DN(F_6,6,0xC07),
+  1600	    DN(___,0,0x000),
+  1601	    DN(F_6,5,0xC07),
+  1602	    DN(___,0,0x000),
+  1603	    DN(F_6,4,0xC07),
+  1604	    DN(___,0,0x000),
+  1605	    DN(F_6,5,0xC07),
+  1606	    DN(___,0,0x000),
+  1607	    DN(F_6,6,0xC07),
+  1608	    DN(___,0,0x000),
+  1609	    DN(F_6,7,0xC07),
+  1610	    DN(___,0,0x000),
+  1611	    DN(F_6,6,0xC03),
+  1612	    DN(___,0,0x000),
+  1613	    DN(F_6,5,0xC03),
+  1614	    DN(___,0,0x000),
+  1615	    DN(F_6,4,0xC03),
+  1616	    DN(___,0,0x000),
+  1617	    DN(F_6,5,0xC03),
+  1618	    DN(___,0,0x000),
+  1619	    DN(F_6,6,0xC03),
+  1620	    DN(___,0,0x000),
+  1621	    DN(F_6,7,0xC03),
+  1622	    DN(___,0,0x000),
+  1623	    DN(F_6,6,0xC0F),
+  1624	    DN(G_6,0,0x308),
+  1625	    DN(G_6,5,0xC0F),
+  1626	    DN(___,0,0x000),
+  1627	    DN(G_6,4,0xC0F),
+  1628	    DN(___,0,0x000),
+  1629	    DN(G_6,5,0xC0F),
+  1630	    DN(___,0,0x000),
+  1631	    DN(G_6,6,0xC0F),
+  1632	    DN(___,0,0x000),
+  1633	    DN(G_6,7,0xC07),
+  1634	    DN(___,0,0x000),
+  1635	    DN(G_6,6,0xC07),
+  1636	    DN(___,0,0x000),
+  1637	    DN(G_6,5,0xC03),
+  1638	    DN(___,0,0x000),
+  1639	    DN(D_6,4,0xC0F),
+  1640	    DN(___,0,0x000),
+  1641	    DN(D_6,5,0xC0F),
+  1642	    DN(___,0,0x000),
+  1643	    DN(D_6,6,0xC0F),
+  1644	    DN(___,0,0x000),
+  1645	    DN(D_6,7,0xC0F),
+  1646	    DN(___,0,0x000),
+  1647	    DN(D_6,6,0xC0F),
+  1648	    DN(___,0,0x000),
+  1649	    DN(D_6,5,0xC07),
+  1650	    DN(___,0,0x000),
+  1651	    DN(D_6,4,0xC07),
+  1652	    DN(___,0,0x000),
+  1653	    DN(D_6,5,0xC03),
+  1654	    DN(___,0,0x000),
+  1655	};
+  1656	static const unsigned char P25[] = {
+  1657	    DN(C_6,4,0xC0F),
+  1658	    DN(___,0,0x000),
+  1659	    DN(C_6,5,0xC0F),
+  1660	    DN(___,0,0x000),
+  1661	    DN(C_6,6,0xC0F),
+  1662	    DN(___,0,0x000),
+  1663	    DN(C_6,7,0xC07),
+  1664	    DN(___,0,0x000),
+  1665	    DN(C_6,6,0xC07),
+  1666	    DN(___,0,0x000),
+  1667	    DN(C_6,5,0xC03),
+  1668	    DN(___,0,0x000),
+  1669	    DN(D_6,4,0xC0F),
+  1670	    DN(___,0,0x000),
+  1671	    DN(D_6,5,0xC0F),
+  1672	    DN(___,0,0x000),
+  1673	    DN(D_6,6,0xC0F),
+  1674	    DN(___,0,0x000),
+  1675	    DN(D_6,7,0xC07),
+  1676	    DN(___,0,0x000),
+  1677	    DN(D_6,6,0xC07),
+  1678	    DN(___,0,0x000),
+  1679	    DN(D_6,5,0xC03),
+  1680	    DN(___,0,0x000),
+  1681	    DN(D_6,4,0xC0F),
+  1682	    DN(Ds6,0,0x304),
+  1683	    DN(Ds6,5,0xC0F),
+  1684	    DN(___,0,0x000),
+  1685	    DN(Ds6,6,0xC0F),
+  1686	    DN(___,0,0x000),
+  1687	    DN(Ds6,7,0xC07),
+  1688	    DN(___,0,0x000),
+  1689	    DN(Ds6,6,0xC07),
+  1690	    DN(___,0,0x000),
+  1691	    DN(Ds6,5,0xC03),
+  1692	    DN(___,0,0x000),
+  1693	    DN(F_6,4,0xC0F),
+  1694	    DN(___,0,0x000),
+  1695	    DN(F_6,5,0xC0F),
+  1696	    DN(___,0,0x000),
+  1697	    DN(F_6,6,0xC0F),
+  1698	    DN(___,0,0x000),
+  1699	    DN(F_6,7,0xC07),
+  1700	    DN(___,0,0x000),
+  1701	    DN(F_6,6,0xC07),
+  1702	    DN(___,0,0x000),
+  1703	    DN(F_6,5,0xC03),
+  1704	    DN(___,0,0x000),
+  1705	    DN(G_6,4,0xC0F),
+  1706	    DN(___,0,0x000),
+  1707	    DN(G_6,5,0xC0F),
+  1708	    DN(___,0,0x000),
+  1709	    DN(G_6,6,0xC0F),
+  1710	    DN(___,0,0x000),
+  1711	    DN(G_6,7,0xC07),
+  1712	    DN(___,0,0x000),
+  1713	    DN(As6,6,0xC0F),
+  1714	    DN(___,0,0x000),
+  1715	    DN(As6,5,0xC0F),
+  1716	    DN(___,0,0x000),
+  1717	    DN(As6,4,0xC0F),
+  1718	    DN(___,0,0x000),
+  1719	    DN(As6,5,0xC07),
+  1720	    DN(___,0,0x000),
+  1721	};
+  1722	static const unsigned char P26[] = {
+  1723	    DN(C_7,4,0xC0F),
+  1724	    DN(___,0,0x000),
+  1725	    DN(C_7,5,0xC0F),
+  1726	    DN(___,0,0x000),
+  1727	    DN(C_7,6,0xC0F),
+  1728	    DN(___,0,0x000),
+  1729	    DN(C_7,7,0xC07),
+  1730	    DN(___,0,0x000),
+  1731	    DN(C_7,6,0xC07),
+  1732	    DN(___,0,0x000),
+  1733	    DN(C_7,5,0xC03),
+  1734	    DN(___,0,0x000),
+  1735	    DN(As6,4,0xC0F),
+  1736	    DN(___,0,0x000),
+  1737	    DN(As6,5,0xC0F),
+  1738	    DN(___,0,0x000),
+  1739	    DN(As6,6,0xC0F),
+  1740	    DN(___,0,0x000),
+  1741	    DN(As6,7,0xC07),
+  1742	    DN(___,0,0x000),
+  1743	    DN(As6,6,0xC07),
+  1744	    DN(___,0,0x000),
+  1745	    DN(As6,5,0xC03),
+  1746	    DN(___,0,0x000),
+  1747	    DN(As6,4,0xC0F),
+  1748	    DN(C_7,0,0x304),
+  1749	    DN(C_7,5,0xC0F),
+  1750	    DN(___,0,0x000),
+  1751	    DN(C_7,6,0xC0F),
+  1752	    DN(___,0,0x000),
+  1753	    DN(C_7,7,0xC0F),
+  1754	    DN(___,0,0x000),
+  1755	    DN(C_7,6,0xC0F),
+  1756	    DN(___,0,0x000),
+  1757	    DN(C_7,5,0xC0F),
+  1758	    DN(___,0,0x000),
+  1759	    DN(C_7,4,0xC07),
+  1760	    DN(___,0,0x000),
+  1761	    DN(C_7,5,0xC07),
+  1762	    DN(___,0,0x000),
+  1763	    DN(C_7,6,0xC07),
+  1764	    DN(___,0,0x000),
+  1765	    DN(C_7,7,0xC07),
+  1766	    DN(___,0,0x000),
+  1767	    DN(C_7,6,0xC03),
+  1768	    DN(___,0,0x000),
+  1769	    DN(C_7,5,0xC03),
+  1770	    DN(___,0,0x000),
+  1771	    DN(C_7,4,0xC03),
+  1772	    DN(___,0,0x000),
+  1773	    DN(C_7,5,0xC03),
+  1774	    DN(___,0,0x000),
+  1775	    DN(C_7,6,0xC03),
+  1776	    DN(___,0,0x000),
+  1777	    DN(C_7,7,0xC03),
+  1778	    DN(___,0,0x000),
+  1779	    DN(C_7,6,0xC0F),
+  1780	    DN(___,0,0x000),
+  1781	    DN(C_7,5,0xC07),
+  1782	    DN(___,0,0x000),
+  1783	    DN(D_7,4,0xC0F),
+  1784	    DN(___,0,0x000),
+  1785	    DN(D_7,5,0xC07),
+  1786	    DN(___,0,0x000),
+  1787	};
+  1788	static const unsigned char P27[] = {
+  1789	    DN(Ds7,4,0xC0F),
+  1790	    DN(___,0,0x000),
+  1791	    DN(Ds7,5,0xC0F),
+  1792	    DN(___,0,0x000),
+  1793	    DN(Ds7,6,0xC0F),
+  1794	    DN(___,0,0x000),
+  1795	    DN(Ds7,7,0xC07),
+  1796	    DN(___,0,0x000),
+  1797	    DN(Ds7,6,0xC07),
+  1798	    DN(___,0,0x000),
+  1799	    DN(Ds7,5,0xC03),
+  1800	    DN(___,0,0x000),
+  1801	    DN(D_7,4,0xC0F),
+  1802	    DN(___,0,0x000),
+  1803	    DN(D_7,5,0xC0F),
+  1804	    DN(___,0,0x000),
+  1805	    DN(D_7,6,0xC0F),
+  1806	    DN(___,0,0x000),
+  1807	    DN(D_7,7,0xC07),
+  1808	    DN(___,0,0x000),
+  1809	    DN(D_7,6,0xC07),
+  1810	    DN(___,0,0x000),
+  1811	    DN(D_7,5,0xC03),
+  1812	    DN(___,0,0x000),
+  1813	    DN(D_7,4,0xC0F),
+  1814	    DN(Ds7,0,0x304),
+  1815	    DN(Ds7,5,0xC0F),
+  1816	    DN(___,0,0x000),
+  1817	    DN(Ds7,6,0xC0F),
+  1818	    DN(___,0,0x000),
+  1819	    DN(Ds7,7,0xC0F),
+  1820	    DN(___,0,0x000),
+  1821	    DN(Ds7,6,0xC0F),
+  1822	    DN(___,0,0x000),
+  1823	    DN(Ds7,5,0xC0F),
+  1824	    DN(___,0,0x000),
+  1825	    DN(Ds7,4,0xC07),
+  1826	    DN(___,0,0x000),
+  1827	    DN(Ds7,5,0xC03),
+  1828	    DN(___,0,0x000),
+  1829	    DN(F_7,6,0xC0F),
+  1830	    DN(___,0,0x000),
+  1831	    DN(F_7,7,0xC0F),
+  1832	    DN(___,0,0x000),
+  1833	    DN(F_7,6,0xC0F),
+  1834	    DN(___,0,0x000),
+  1835	    DN(F_7,5,0xC07),
+  1836	    DN(___,0,0x000),
+  1837	    DN(G_7,4,0xC0F),
+  1838	    DN(___,0,0x000),
+  1839	    DN(G_7,5,0xC0F),
+  1840	    DN(___,0,0x000),
+  1841	    DN(G_7,6,0xC0F),
+  1842	    DN(___,0,0x000),
+  1843	    DN(G_7,7,0xC07),
+  1844	    DN(___,0,0x000),
+  1845	    DN(Gs7,6,0xC0F),
+  1846	    DN(___,0,0x000),
+  1847	    DN(Gs7,5,0xC0F),
+  1848	    DN(___,0,0x000),
+  1849	    DN(Gs7,4,0xC0F),
+  1850	    DN(___,0,0x000),
+  1851	    DN(Gs7,5,0xC07),
+  1852	    DN(___,0,0x000),
+  1853	};
+  1854	static const unsigned char P28[] = {
+  1855	    DN(G_7,4,0xC0F),
+  1856	    DN(___,0,0x000),
+  1857	    DN(Gs7,5,0xC0F),
+  1858	    DN(___,0,0x000),
+  1859	    DN(G_7,6,0xC0F),
+  1860	    DN(___,0,0x000),
+  1861	    DN(Gs7,7,0xC0F),
+  1862	    DN(___,0,0x000),
+  1863	    DN(G_7,6,0xC07),
+  1864	    DN(___,0,0x000),
+  1865	    DN(Gs7,5,0xC07),
+  1866	    DN(___,0,0x000),
+  1867	    DN(G_7,4,0xC07),
+  1868	    DN(___,0,0x000),
+  1869	    DN(Gs7,5,0xC07),
+  1870	    DN(___,0,0x000),
+  1871	    DN(G_7,6,0xC03),
+  1872	    DN(___,0,0x000),
+  1873	    DN(Gs7,7,0xC03),
+  1874	    DN(___,0,0x000),
+  1875	    DN(G_7,6,0xC03),
+  1876	    DN(___,0,0x000),
+  1877	    DN(Gs7,5,0xC03),
+  1878	    DN(___,0,0x000),
+  1879	    DN(G_7,4,0xC03),
+  1880	    DN(___,0,0x000),
+  1881	    DN(Gs7,5,0xC03),
+  1882	    DN(___,0,0x000),
+  1883	    DN(G_7,6,0xC03),
+  1884	    DN(___,0,0x000),
+  1885	    DN(Gs7,7,0xC03),
+  1886	    DN(___,0,0x000),
+  1887	    DN(G_7,6,0xC03),
+  1888	    DN(___,0,0x000),
+  1889	    DN(___,0,0xE00),
+  1890	    DN(___,0,0x000),
+  1891	    DN(___,0,0x000),
+  1892	    DN(___,0,0x000),
+  1893	    DN(___,0,0x000),
+  1894	    DN(___,0,0x000),
+  1895	    DN(___,0,0x000),
+  1896	    DN(___,0,0x000),
+  1897	    DN(___,0,0x000),
+  1898	    DN(___,0,0x000),
+  1899	    DN(___,0,0x000),
+  1900	    DN(___,0,0x000),
+  1901	    DN(___,0,0x000),
+  1902	    DN(___,0,0x000),
+  1903	    DN(___,0,0x000),
+  1904	    DN(___,0,0x000),
+  1905	    DN(___,0,0x000),
+  1906	    DN(___,0,0x000),
+  1907	    DN(___,0,0x000),
+  1908	    DN(___,0,0x000),
+  1909	    DN(___,0,0x000),
+  1910	    DN(___,0,0x000),
+  1911	    DN(___,0,0x000),
+  1912	    DN(___,0,0x000),
+  1913	    DN(___,0,0x000),
+  1914	    DN(___,0,0x000),
+  1915	    DN(___,0,0x000),
+  1916	    DN(___,0,0x000),
+  1917	    DN(___,0,0x000),
+  1918	    DN(___,0,0x000),
+  1919	};
+  1920	static const unsigned char P29[] = {
+  1921	    DN(C_5,4,0x000),
+  1922	    DN(C_3,5,0x000),
+  1923	    DN(___,0,0x000),
+  1924	    DN(___,0,0x000),
+  1925	    DN(C_3,5,0x000),
+  1926	    DN(___,0,0x000),
+  1927	    DN(___,0,0x000),
+  1928	    DN(___,0,0x000),
+  1929	    DN(Fs5,6,0x000),
+  1930	    DN(C_3,5,0x000),
+  1931	    DN(___,0,0x000),
+  1932	    DN(___,0,0x000),
+  1933	    DN(C_5,4,0x000),
+  1934	    DN(C_3,5,0x000),
+  1935	    DN(___,0,0x000),
+  1936	    DN(___,0,0x000),
+  1937	    DN(C_3,5,0x000),
+  1938	    DN(___,0,0x000),
+  1939	    DN(___,0,0x000),
+  1940	    DN(___,0,0x000),
+  1941	    DN(C_5,4,0x000),
+  1942	    DN(Gs3,5,0x000),
+  1943	    DN(___,0,0x000),
+  1944	    DN(___,0,0x000),
+  1945	    DN(Fs5,6,0x000),
+  1946	    DN(C_4,5,0x000),
+  1947	    DN(___,0,0x000),
+  1948	    DN(___,0,0x000),
+  1949	    DN(Ds4,5,0x000),
+  1950	    DN(___,0,0x000),
+  1951	    DN(___,0,0x000),
+  1952	    DN(___,0,0x000),
+  1953	    DN(C_5,4,0x000),
+  1954	    DN(C_3,5,0x000),
+  1955	    DN(___,0,0x000),
+  1956	    DN(___,0,0x000),
+  1957	    DN(C_3,5,0x000),
+  1958	    DN(___,0,0x000),
+  1959	    DN(___,0,0x000),
+  1960	    DN(___,0,0x000),
+  1961	    DN(Fs5,6,0x000),
+  1962	    DN(C_3,5,0x000),
+  1963	    DN(___,0,0x000),
+  1964	    DN(___,0,0x000),
+  1965	    DN(C_5,4,0x000),
+  1966	    DN(C_3,5,0x000),
+  1967	    DN(___,0,0x000),
+  1968	    DN(___,0,0x000),
+  1969	    DN(C_3,5,0x000),
+  1970	    DN(___,0,0x000),
+  1971	    DN(___,0,0x000),
+  1972	    DN(___,0,0x000),
+  1973	    DN(C_5,4,0x000),
+  1974	    DN(Gs3,5,0x000),
+  1975	    DN(___,0,0x000),
+  1976	    DN(___,0,0x000),
+  1977	    DN(Fs5,6,0x000),
+  1978	    DN(C_4,5,0x000),
+  1979	    DN(___,0,0x000),
+  1980	    DN(___,0,0x000),
+  1981	    DN(Ds4,5,0x000),
+  1982	    DN(___,0,0x000),
+  1983	    DN(___,0,0x000),
+  1984	    DN(___,0,0x000),
+  1985	};
+  1986	static const unsigned char P30[] = {
+  1987	    DN(C_5,3,0x900),
+  1988	    DN(Ds5,0,0x000),
+  1989	    DN(Gs5,0,0x940),
+  1990	    DN(C_5,0,0x000),
+  1991	    DN(Ds5,0,0x980),
+  1992	    DN(Gs5,0,0x000),
+  1993	    DN(C_5,0,0x9C0),
+  1994	    DN(Ds5,0,0x000),
+  1995	    DN(Gs5,3,0x900),
+  1996	    DN(C_5,0,0x000),
+  1997	    DN(Ds5,0,0x940),
+  1998	    DN(Gs5,0,0x000),
+  1999	    DN(C_5,0,0x980),
+  2000	    DN(Ds5,0,0x000),
+  2001	    DN(Gs5,0,0x9C0),
+  2002	    DN(C_5,0,0x000),
+  2003	    DN(Ds5,3,0x900),
+  2004	    DN(Gs5,0,0x000),
+  2005	    DN(C_5,0,0x940),
+  2006	    DN(Ds5,0,0x000),
+  2007	    DN(Gs5,0,0x980),
+  2008	    DN(C_5,0,0x000),
+  2009	    DN(Ds5,0,0x9C0),
+  2010	    DN(Gs5,0,0x000),
+  2011	    DN(C_5,3,0x900),
+  2012	    DN(Ds5,0,0x000),
+  2013	    DN(Gs5,0,0x940),
+  2014	    DN(C_5,0,0x000),
+  2015	    DN(Ds5,0,0x980),
+  2016	    DN(Gs5,0,0x000),
+  2017	    DN(C_5,0,0x9C0),
+  2018	    DN(Ds5,0,0x000),
+  2019	    DN(Gs5,3,0x900),
+  2020	    DN(C_5,0,0x000),
+  2021	    DN(Ds5,0,0x940),
+  2022	    DN(Gs5,0,0x000),
+  2023	    DN(C_5,0,0x980),
+  2024	    DN(Ds5,0,0x000),
+  2025	    DN(Gs5,0,0x9C0),
+  2026	    DN(C_5,0,0x000),
+  2027	    DN(Ds5,3,0x900),
+  2028	    DN(Gs5,0,0x000),
+  2029	    DN(C_5,0,0x940),
+  2030	    DN(Ds5,0,0x000),
+  2031	    DN(Gs5,0,0x980),
+  2032	    DN(C_5,0,0x000),
+  2033	    DN(Ds5,0,0x9C0),
+  2034	    DN(Gs5,0,0x000),
+  2035	    DN(C_5,3,0x900),
+  2036	    DN(Ds5,0,0x000),
+  2037	    DN(Gs5,0,0x940),
+  2038	    DN(C_5,0,0x000),
+  2039	    DN(Ds5,0,0x980),
+  2040	    DN(Gs5,0,0x000),
+  2041	    DN(C_5,0,0x9C0),
+  2042	    DN(Ds5,0,0x000),
+  2043	    DN(Gs5,3,0x900),
+  2044	    DN(C_5,0,0x000),
+  2045	    DN(Ds5,0,0x940),
+  2046	    DN(Gs5,0,0x000),
+  2047	    DN(C_5,0,0x980),
+  2048	    DN(Ds5,0,0x000),
+  2049	    DN(Gs5,0,0x9C0),
+  2050	    DN(C_5,0,0x000),
+  2051	};
+  2052	static const unsigned char P31[] = {
+  2053	    DN(Gs6,4,0x000),
+  2054	    DN(C_6,4,0x000),
+  2055	    DN(Ds6,5,0x000),
+  2056	    DN(Gs6,5,0x000),
+  2057	    DN(C_6,6,0x000),
+  2058	    DN(Ds6,6,0x000),
+  2059	    DN(Gs6,7,0x000),
+  2060	    DN(C_6,7,0x000),
+  2061	    DN(Ds6,6,0x000),
+  2062	    DN(Gs6,6,0x000),
+  2063	    DN(C_6,5,0x000),
+  2064	    DN(Ds6,5,0x000),
+  2065	    DN(Gs6,4,0x000),
+  2066	    DN(C_6,4,0x000),
+  2067	    DN(Ds6,5,0x000),
+  2068	    DN(Gs6,5,0x000),
+  2069	    DN(C_6,6,0x000),
+  2070	    DN(Ds6,6,0x000),
+  2071	    DN(Gs6,7,0x000),
+  2072	    DN(C_6,7,0x000),
+  2073	    DN(Ds6,6,0x000),
+  2074	    DN(Gs6,6,0x000),
+  2075	    DN(C_6,5,0x000),
+  2076	    DN(Ds6,5,0x000),
+  2077	    DN(Gs6,4,0x000),
+  2078	    DN(C_6,4,0x000),
+  2079	    DN(Ds6,5,0x000),
+  2080	    DN(Gs6,5,0x000),
+  2081	    DN(C_6,6,0x000),
+  2082	    DN(Ds6,6,0x000),
+  2083	    DN(Gs6,7,0x000),
+  2084	    DN(C_6,7,0x000),
+  2085	    DN(Ds6,6,0x000),
+  2086	    DN(Gs6,6,0x000),
+  2087	    DN(C_6,5,0x000),
+  2088	    DN(Ds6,5,0x000),
+  2089	    DN(Gs6,4,0x000),
+  2090	    DN(C_6,4,0x000),
+  2091	    DN(Ds6,5,0x000),
+  2092	    DN(Gs6,5,0x000),
+  2093	    DN(C_6,6,0x000),
+  2094	    DN(Ds6,6,0x000),
+  2095	    DN(Gs6,7,0x000),
+  2096	    DN(C_6,7,0x000),
+  2097	    DN(Ds6,6,0x000),
+  2098	    DN(Gs6,6,0x000),
+  2099	    DN(C_6,5,0x000),
+  2100	    DN(Ds6,5,0x000),
+  2101	    DN(Gs6,4,0x000),
+  2102	    DN(C_6,4,0x000),
+  2103	    DN(Ds6,5,0x000),
+  2104	    DN(Gs6,5,0x000),
+  2105	    DN(C_6,6,0x000),
+  2106	    DN(Ds6,6,0x000),
+  2107	    DN(Gs6,7,0x000),
+  2108	    DN(C_6,7,0x000),
+  2109	    DN(Ds6,6,0x000),
+  2110	    DN(Gs6,6,0x000),
+  2111	    DN(C_6,5,0x000),
+  2112	    DN(Ds6,5,0x000),
+  2113	    DN(Gs6,4,0x000),
+  2114	    DN(C_6,4,0x000),
+  2115	    DN(Ds6,5,0x000),
+  2116	    DN(Gs6,5,0x000),
+  2117	};
+  2118	static const unsigned char P32[] = {
+  2119	    DN(C_5,4,0x000),
+  2120	    DN(D_3,5,0x000),
+  2121	    DN(___,0,0x000),
+  2122	    DN(___,0,0x000),
+  2123	    DN(D_3,5,0x000),
+  2124	    DN(___,0,0x000),
+  2125	    DN(___,0,0x000),
+  2126	    DN(___,0,0x000),
+  2127	    DN(Fs5,6,0x000),
+  2128	    DN(D_3,5,0x000),
+  2129	    DN(___,0,0x000),
+  2130	    DN(___,0,0x000),
+  2131	    DN(C_5,4,0x000),
+  2132	    DN(D_3,5,0x000),
+  2133	    DN(___,0,0x000),
+  2134	    DN(___,0,0x000),
+  2135	    DN(D_3,5,0x000),
+  2136	    DN(___,0,0x000),
+  2137	    DN(___,0,0x000),
+  2138	    DN(___,0,0x000),
+  2139	    DN(C_5,4,0x000),
+  2140	    DN(As3,5,0x000),
+  2141	    DN(___,0,0x000),
+  2142	    DN(___,0,0x000),
+  2143	    DN(Fs5,6,0x000),
+  2144	    DN(D_4,5,0x000),
+  2145	    DN(___,0,0x000),
+  2146	    DN(___,0,0x000),
+  2147	    DN(F_4,5,0x000),
+  2148	    DN(___,0,0x000),
+  2149	    DN(___,0,0x000),
+  2150	    DN(___,0,0x000),
+  2151	    DN(C_5,4,0x000),
+  2152	    DN(D_3,5,0x000),
+  2153	    DN(___,0,0x000),
+  2154	    DN(___,0,0x000),
+  2155	    DN(D_3,5,0x000),
+  2156	    DN(___,0,0x000),
+  2157	    DN(___,0,0x000),
+  2158	    DN(___,0,0x000),
+  2159	    DN(Fs5,6,0x000),
+  2160	    DN(D_3,5,0x000),
+  2161	    DN(___,0,0x000),
+  2162	    DN(___,0,0x000),
+  2163	    DN(C_5,4,0x000),
+  2164	    DN(D_3,5,0x000),
+  2165	    DN(___,0,0x000),
+  2166	    DN(___,0,0x000),
+  2167	    DN(D_3,5,0x000),
+  2168	    DN(___,0,0x000),
+  2169	    DN(___,0,0x000),
+  2170	    DN(___,0,0x000),
+  2171	    DN(C_5,4,0x000),
+  2172	    DN(As3,5,0x000),
+  2173	    DN(___,0,0x000),
+  2174	    DN(___,0,0x000),
+  2175	    DN(Fs5,6,0x000),
+  2176	    DN(D_4,5,0x000),
+  2177	    DN(___,0,0x000),
+  2178	    DN(___,0,0x000),
+  2179	    DN(F_4,5,0x000),
+  2180	    DN(___,0,0x000),
+  2181	    DN(___,0,0x000),
+  2182	    DN(___,0,0x000),
+  2183	};
+  2184	static const unsigned char P33[] = {
+  2185	    DN(D_5,3,0x900),
+  2186	    DN(F_5,0,0x000),
+  2187	    DN(As5,0,0x940),
+  2188	    DN(D_5,0,0x000),
+  2189	    DN(F_5,0,0x980),
+  2190	    DN(As5,0,0x000),
+  2191	    DN(D_5,0,0x9C0),
+  2192	    DN(F_5,0,0x000),
+  2193	    DN(As5,3,0x900),
+  2194	    DN(D_5,0,0x000),
+  2195	    DN(F_5,0,0x940),
+  2196	    DN(As5,0,0x000),
+  2197	    DN(D_5,0,0x980),
+  2198	    DN(F_5,0,0x000),
+  2199	    DN(As5,0,0x9C0),
+  2200	    DN(D_5,0,0x000),
+  2201	    DN(F_5,3,0x900),
+  2202	    DN(As5,0,0x000),
+  2203	    DN(D_5,0,0x940),
+  2204	    DN(F_5,0,0x000),
+  2205	    DN(As5,0,0x980),
+  2206	    DN(D_5,0,0x000),
+  2207	    DN(F_5,0,0x9C0),
+  2208	    DN(As5,0,0x000),
+  2209	    DN(D_5,3,0x900),
+  2210	    DN(F_5,0,0x000),
+  2211	    DN(As5,0,0x940),
+  2212	    DN(D_5,0,0x000),
+  2213	    DN(F_5,0,0x980),
+  2214	    DN(As5,0,0x000),
+  2215	    DN(D_5,0,0x9C0),
+  2216	    DN(F_5,0,0x000),
+  2217	    DN(As5,3,0x900),
+  2218	    DN(D_5,0,0x000),
+  2219	    DN(F_5,0,0x940),
+  2220	    DN(As5,0,0x000),
+  2221	    DN(D_5,0,0x980),
+  2222	    DN(F_5,0,0x000),
+  2223	    DN(As5,0,0x9C0),
+  2224	    DN(D_5,0,0x000),
+  2225	    DN(F_5,3,0x900),
+  2226	    DN(As5,0,0x000),
+  2227	    DN(D_5,0,0x940),
+  2228	    DN(F_5,0,0x000),
+  2229	    DN(As5,0,0x980),
+  2230	    DN(D_5,0,0x000),
+  2231	    DN(F_5,0,0x9C0),
+  2232	    DN(As5,0,0x000),
+  2233	    DN(D_5,3,0x900),
+  2234	    DN(F_5,0,0x000),
+  2235	    DN(As5,0,0x940),
+  2236	    DN(D_5,0,0x000),
+  2237	    DN(F_5,0,0x980),
+  2238	    DN(As5,0,0x000),
+  2239	    DN(D_5,0,0x9C0),
+  2240	    DN(F_5,0,0x000),
+  2241	    DN(As5,3,0x900),
+  2242	    DN(D_5,0,0x000),
+  2243	    DN(F_5,0,0x940),
+  2244	    DN(As5,0,0x000),
+  2245	    DN(D_5,0,0x980),
+  2246	    DN(F_5,0,0x000),
+  2247	    DN(As5,0,0x9C0),
+  2248	    DN(D_5,0,0x000),
+  2249	};
+  2250	static const unsigned char P34[] = {
+  2251	    DN(As6,4,0x000),
+  2252	    DN(D_6,4,0x000),
+  2253	    DN(F_6,5,0x000),
+  2254	    DN(As6,5,0x000),
+  2255	    DN(D_6,6,0x000),
+  2256	    DN(F_6,6,0x000),
+  2257	    DN(As6,7,0x000),
+  2258	    DN(D_6,7,0x000),
+  2259	    DN(F_6,6,0x000),
+  2260	    DN(As6,6,0x000),
+  2261	    DN(D_6,5,0x000),
+  2262	    DN(F_6,5,0x000),
+  2263	    DN(As6,4,0x000),
+  2264	    DN(D_6,4,0x000),
+  2265	    DN(F_6,5,0x000),
+  2266	    DN(As6,5,0x000),
+  2267	    DN(D_6,6,0x000),
+  2268	    DN(F_6,6,0x000),
+  2269	    DN(As6,7,0x000),
+  2270	    DN(D_6,7,0x000),
+  2271	    DN(F_6,6,0x000),
+  2272	    DN(As6,6,0x000),
+  2273	    DN(D_6,5,0x000),
+  2274	    DN(F_6,5,0x000),
+  2275	    DN(As6,4,0x000),
+  2276	    DN(D_6,4,0x000),
+  2277	    DN(F_6,5,0x000),
+  2278	    DN(As6,5,0x000),
+  2279	    DN(D_6,6,0x000),
+  2280	    DN(F_6,6,0x000),
+  2281	    DN(As6,7,0x000),
+  2282	    DN(D_6,7,0x000),
+  2283	    DN(F_6,6,0x000),
+  2284	    DN(As6,6,0x000),
+  2285	    DN(D_6,5,0x000),
+  2286	    DN(F_6,5,0x000),
+  2287	    DN(As6,4,0x000),
+  2288	    DN(D_6,4,0x000),
+  2289	    DN(F_6,5,0x000),
+  2290	    DN(As6,5,0x000),
+  2291	    DN(D_6,6,0x000),
+  2292	    DN(F_6,6,0x000),
+  2293	    DN(As6,7,0x000),
+  2294	    DN(D_6,7,0x000),
+  2295	    DN(F_6,6,0x000),
+  2296	    DN(As6,6,0x000),
+  2297	    DN(D_6,5,0x000),
+  2298	    DN(F_6,5,0x000),
+  2299	    DN(As6,4,0x000),
+  2300	    DN(D_6,4,0x000),
+  2301	    DN(F_6,5,0x000),
+  2302	    DN(As6,5,0x000),
+  2303	    DN(D_6,6,0x000),
+  2304	    DN(F_6,6,0x000),
+  2305	    DN(As6,7,0x000),
+  2306	    DN(D_6,7,0x000),
+  2307	    DN(F_6,6,0x000),
+  2308	    DN(As6,6,0x000),
+  2309	    DN(D_6,5,0x000),
+  2310	    DN(F_6,5,0x000),
+  2311	    DN(As6,4,0x000),
+  2312	    DN(D_6,4,0x000),
+  2313	    DN(F_6,5,0x000),
+  2314	    DN(As6,5,0x000),
+  2315	};
+  2316	static const unsigned char P35[] = {
+  2317	    DN(Ds5,3,0x900),
+  2318	    DN(G_5,0,0x000),
+  2319	    DN(C_6,0,0x940),
+  2320	    DN(Ds5,0,0x000),
+  2321	    DN(G_5,0,0x980),
+  2322	    DN(C_6,0,0x000),
+  2323	    DN(Ds5,0,0x9C0),
+  2324	    DN(G_5,0,0x000),
+  2325	    DN(C_6,3,0x900),
+  2326	    DN(Ds5,0,0x000),
+  2327	    DN(G_5,0,0x940),
+  2328	    DN(C_6,0,0x000),
+  2329	    DN(Ds5,0,0x980),
+  2330	    DN(G_5,0,0x000),
+  2331	    DN(C_6,0,0x9C0),
+  2332	    DN(Ds5,0,0x000),
+  2333	    DN(G_5,3,0x900),
+  2334	    DN(C_6,0,0x000),
+  2335	    DN(Ds5,0,0x940),
+  2336	    DN(G_5,0,0x000),
+  2337	    DN(C_6,0,0x980),
+  2338	    DN(Ds5,0,0x000),
+  2339	    DN(G_5,0,0x9C0),
+  2340	    DN(C_6,0,0x000),
+  2341	    DN(Ds5,3,0x900),
+  2342	    DN(G_5,0,0x000),
+  2343	    DN(C_6,0,0x940),
+  2344	    DN(Ds5,0,0x000),
+  2345	    DN(G_5,0,0x980),
+  2346	    DN(C_6,0,0x000),
+  2347	    DN(Ds5,0,0x9C0),
+  2348	    DN(G_5,0,0x000),
+  2349	    DN(C_6,3,0x900),
+  2350	    DN(Ds5,0,0x000),
+  2351	    DN(G_5,0,0x940),
+  2352	    DN(C_6,0,0x000),
+  2353	    DN(Ds5,0,0x980),
+  2354	    DN(G_5,0,0x000),
+  2355	    DN(C_6,0,0x9C0),
+  2356	    DN(Ds5,0,0x000),
+  2357	    DN(G_5,3,0x900),
+  2358	    DN(C_6,0,0x000),
+  2359	    DN(Ds5,0,0x940),
+  2360	    DN(G_5,0,0x000),
+  2361	    DN(C_6,0,0x980),
+  2362	    DN(Ds5,0,0x000),
+  2363	    DN(G_5,0,0x9C0),
+  2364	    DN(C_6,0,0x000),
+  2365	    DN(Ds5,3,0x900),
+  2366	    DN(G_5,0,0x000),
+  2367	    DN(C_6,0,0x940),
+  2368	    DN(Ds5,0,0x000),
+  2369	    DN(G_5,0,0x980),
+  2370	    DN(C_6,0,0x000),
+  2371	    DN(Ds5,0,0x9C0),
+  2372	    DN(G_5,0,0x000),
+  2373	    DN(C_6,3,0x900),
+  2374	    DN(Ds5,0,0x000),
+  2375	    DN(G_5,0,0x940),
+  2376	    DN(C_6,0,0x000),
+  2377	    DN(Ds5,0,0x980),
+  2378	    DN(G_5,0,0x000),
+  2379	    DN(C_6,0,0x9C0),
+  2380	    DN(Ds5,0,0x000),
+  2381	};
+  2382	static const unsigned char P36[] = {
+  2383	    DN(C_7,4,0x000),
+  2384	    DN(Ds6,4,0x000),
+  2385	    DN(G_6,5,0x000),
+  2386	    DN(C_7,5,0x000),
+  2387	    DN(Ds6,6,0x000),
+  2388	    DN(G_6,6,0x000),
+  2389	    DN(C_7,7,0x000),
+  2390	    DN(Ds6,7,0x000),
+  2391	    DN(G_6,6,0x000),
+  2392	    DN(C_7,6,0x000),
+  2393	    DN(Ds6,5,0x000),
+  2394	    DN(G_6,5,0x000),
+  2395	    DN(C_7,4,0x000),
+  2396	    DN(Ds6,4,0x000),
+  2397	    DN(G_6,5,0x000),
+  2398	    DN(C_7,5,0x000),
+  2399	    DN(Ds6,6,0x000),
+  2400	    DN(G_6,6,0x000),
+  2401	    DN(C_7,7,0x000),
+  2402	    DN(Ds6,7,0x000),
+  2403	    DN(G_6,6,0x000),
+  2404	    DN(C_7,6,0x000),
+  2405	    DN(Ds6,5,0x000),
+  2406	    DN(G_6,5,0x000),
+  2407	    DN(C_7,4,0x000),
+  2408	    DN(Ds6,4,0x000),
+  2409	    DN(G_6,5,0x000),
+  2410	    DN(C_7,5,0x000),
+  2411	    DN(Ds6,6,0x000),
+  2412	    DN(G_6,6,0x000),
+  2413	    DN(C_7,7,0x000),
+  2414	    DN(Ds6,7,0x000),
+  2415	    DN(G_6,6,0x000),
+  2416	    DN(C_7,6,0x000),
+  2417	    DN(Ds6,5,0x000),
+  2418	    DN(G_6,5,0x000),
+  2419	    DN(C_7,4,0x000),
+  2420	    DN(Ds6,4,0x000),
+  2421	    DN(G_6,5,0x000),
+  2422	    DN(C_7,5,0x000),
+  2423	    DN(Ds6,6,0x000),
+  2424	    DN(G_6,6,0x000),
+  2425	    DN(C_7,7,0x000),
+  2426	    DN(Ds6,7,0x000),
+  2427	    DN(G_6,6,0x000),
+  2428	    DN(C_7,6,0x000),
+  2429	    DN(Ds6,5,0x000),
+  2430	    DN(G_6,5,0x000),
+  2431	    DN(C_7,4,0x000),
+  2432	    DN(Ds6,4,0x000),
+  2433	    DN(G_6,5,0x000),
+  2434	    DN(C_7,5,0x000),
+  2435	    DN(Ds6,6,0x000),
+  2436	    DN(G_6,6,0x000),
+  2437	    DN(C_7,7,0x000),
+  2438	    DN(Ds6,7,0x000),
+  2439	    DN(G_6,6,0x000),
+  2440	    DN(C_7,6,0x000),
+  2441	    DN(Ds6,5,0x000),
+  2442	    DN(G_6,5,0x000),
+  2443	    DN(C_7,4,0x000),
+  2444	    DN(Ds6,4,0x000),
+  2445	    DN(G_6,5,0x000),
+  2446	    DN(C_7,5,0x000),
+  2447	};
+  2448	static const unsigned char P37[] = {
+  2449	    DN(G_6,4,0x000),
+  2450	    DN(C_6,4,0x000),
+  2451	    DN(Ds6,5,0x000),
+  2452	    DN(G_6,5,0x000),
+  2453	    DN(C_6,6,0x000),
+  2454	    DN(Ds6,6,0x000),
+  2455	    DN(G_6,7,0x000),
+  2456	    DN(C_6,7,0x000),
+  2457	    DN(Ds6,6,0x000),
+  2458	    DN(G_6,6,0x000),
+  2459	    DN(C_6,5,0x000),
+  2460	    DN(Ds6,5,0x000),
+  2461	    DN(G_6,4,0x000),
+  2462	    DN(C_6,4,0x000),
+  2463	    DN(Ds6,5,0x000),
+  2464	    DN(G_6,5,0x000),
+  2465	    DN(C_6,6,0x000),
+  2466	    DN(Ds6,6,0x000),
+  2467	    DN(G_6,7,0x000),
+  2468	    DN(C_6,7,0x000),
+  2469	    DN(Ds6,6,0x000),
+  2470	    DN(G_6,6,0x000),
+  2471	    DN(C_6,5,0x000),
+  2472	    DN(Ds6,5,0x000),
+  2473	    DN(G_6,4,0x000),
+  2474	    DN(C_6,4,0x000),
+  2475	    DN(Ds6,5,0x000),
+  2476	    DN(G_6,5,0x000),
+  2477	    DN(C_6,6,0x000),
+  2478	    DN(Ds6,6,0x000),
+  2479	    DN(G_6,7,0x000),
+  2480	    DN(C_6,7,0x000),
+  2481	    DN(Ds6,6,0x000),
+  2482	    DN(G_6,6,0x000),
+  2483	    DN(C_6,5,0x000),
+  2484	    DN(Ds6,5,0x000),
+  2485	    DN(G_6,4,0x000),
+  2486	    DN(C_6,4,0x000),
+  2487	    DN(Ds6,5,0x000),
+  2488	    DN(G_6,5,0x000),
+  2489	    DN(C_6,6,0x000),
+  2490	    DN(Ds6,6,0x000),
+  2491	    DN(G_6,7,0x000),
+  2492	    DN(C_6,7,0x000),
+  2493	    DN(Ds6,6,0x000),
+  2494	    DN(G_6,6,0x000),
+  2495	    DN(C_6,5,0x000),
+  2496	    DN(Ds6,5,0x000),
+  2497	    DN(G_6,4,0x000),
+  2498	    DN(C_6,4,0x000),
+  2499	    DN(Ds6,5,0x000),
+  2500	    DN(G_6,5,0x000),
+  2501	    DN(C_6,6,0x000),
+  2502	    DN(Ds6,6,0x000),
+  2503	    DN(G_6,7,0x000),
+  2504	    DN(C_6,7,0x000),
+  2505	    DN(Ds6,6,0x000),
+  2506	    DN(G_6,6,0x000),
+  2507	    DN(C_6,5,0x000),
+  2508	    DN(Ds6,5,0x000),
+  2509	    DN(G_6,4,0x000),
+  2510	    DN(C_6,4,0x000),
+  2511	    DN(Ds6,5,0x000),
+  2512	    DN(G_6,5,0x000),
+  2513	};
+  2514	static const unsigned char P38[] = {
+  2515	    DN(G_4,3,0x900),
+  2516	    DN(C_5,0,0x000),
+  2517	    DN(Ds5,0,0x940),
+  2518	    DN(G_4,0,0x000),
+  2519	    DN(C_5,0,0x980),
+  2520	    DN(Ds5,0,0x000),
+  2521	    DN(G_4,0,0x9C0),
+  2522	    DN(C_5,0,0x000),
+  2523	    DN(Ds5,3,0x900),
+  2524	    DN(G_4,0,0x000),
+  2525	    DN(C_5,0,0x940),
+  2526	    DN(Ds5,0,0x000),
+  2527	    DN(G_4,0,0x980),
+  2528	    DN(C_5,0,0x000),
+  2529	    DN(Ds5,0,0x9C0),
+  2530	    DN(G_4,0,0x000),
+  2531	    DN(C_5,3,0x900),
+  2532	    DN(Ds5,0,0x000),
+  2533	    DN(G_4,0,0x940),
+  2534	    DN(C_5,0,0x000),
+  2535	    DN(Ds5,0,0x980),
+  2536	    DN(G_4,0,0x000),
+  2537	    DN(C_5,0,0x9C0),
+  2538	    DN(Ds5,0,0x000),
+  2539	    DN(G_4,3,0x900),
+  2540	    DN(C_5,0,0x000),
+  2541	    DN(Ds5,0,0x940),
+  2542	    DN(G_4,0,0x000),
+  2543	    DN(C_5,0,0x980),
+  2544	    DN(Ds5,0,0x000),
+  2545	    DN(G_4,0,0x9C0),
+  2546	    DN(C_5,0,0x000),
+  2547	    DN(Ds5,3,0x900),
+  2548	    DN(G_4,0,0x000),
+  2549	    DN(C_5,0,0x940),
+  2550	    DN(Ds5,0,0x000),
+  2551	    DN(G_4,0,0x980),
+  2552	    DN(C_5,0,0x000),
+  2553	    DN(Ds5,0,0x9C0),
+  2554	    DN(G_4,0,0x000),
+  2555	    DN(C_5,3,0x900),
+  2556	    DN(Ds5,0,0x000),
+  2557	    DN(G_4,0,0x940),
+  2558	    DN(C_5,0,0x000),
+  2559	    DN(Ds5,0,0x980),
+  2560	    DN(G_4,0,0x000),
+  2561	    DN(C_5,0,0x9C0),
+  2562	    DN(Ds5,0,0x000),
+  2563	    DN(G_4,3,0x900),
+  2564	    DN(C_5,0,0x000),
+  2565	    DN(Ds5,0,0x940),
+  2566	    DN(G_4,0,0x000),
+  2567	    DN(C_5,0,0x980),
+  2568	    DN(Ds5,0,0x000),
+  2569	    DN(G_4,0,0x9C0),
+  2570	    DN(C_5,0,0x000),
+  2571	    DN(Ds5,3,0x900),
+  2572	    DN(G_4,0,0x000),
+  2573	    DN(C_5,0,0x940),
+  2574	    DN(Ds5,0,0x000),
+  2575	    DN(G_4,0,0x980),
+  2576	    DN(C_5,0,0x000),
+  2577	    DN(Ds5,0,0x9C0),
+  2578	    DN(G_4,0,0x000),
+  2579	};
+  2580	static const unsigned char P39[] = {
+  2581	    DN(Ds6,4,0x000),
+  2582	    DN(G_5,4,0x000),
+  2583	    DN(C_6,5,0x000),
+  2584	    DN(Ds6,5,0x000),
+  2585	    DN(G_5,6,0x000),
+  2586	    DN(C_6,6,0x000),
+  2587	    DN(Ds6,7,0x000),
+  2588	    DN(G_5,7,0x000),
+  2589	    DN(C_6,6,0x000),
+  2590	    DN(Ds6,6,0x000),
+  2591	    DN(G_5,5,0x000),
+  2592	    DN(C_6,5,0x000),
+  2593	    DN(Ds6,4,0x000),
+  2594	    DN(G_5,4,0x000),
+  2595	    DN(C_6,5,0x000),
+  2596	    DN(Ds6,5,0x000),
+  2597	    DN(G_5,6,0x000),
+  2598	    DN(C_6,6,0x000),
+  2599	    DN(Ds6,7,0x000),
+  2600	    DN(G_5,7,0x000),
+  2601	    DN(C_6,6,0x000),
+  2602	    DN(Ds6,6,0x000),
+  2603	    DN(G_5,5,0x000),
+  2604	    DN(C_6,5,0x000),
+  2605	    DN(Ds6,4,0x000),
+  2606	    DN(G_5,4,0x000),
+  2607	    DN(C_6,5,0x000),
+  2608	    DN(Ds6,5,0x000),
+  2609	    DN(G_5,6,0x000),
+  2610	    DN(C_6,6,0x000),
+  2611	    DN(Ds6,7,0x000),
+  2612	    DN(G_5,7,0x000),
+  2613	    DN(C_6,6,0x000),
+  2614	    DN(Ds6,6,0x000),
+  2615	    DN(G_5,5,0x000),
+  2616	    DN(C_6,5,0x000),
+  2617	    DN(Ds6,4,0x000),
+  2618	    DN(G_5,4,0x000),
+  2619	    DN(C_6,5,0x000),
+  2620	    DN(Ds6,5,0x000),
+  2621	    DN(G_5,6,0x000),
+  2622	    DN(C_6,6,0x000),
+  2623	    DN(Ds6,7,0x000),
+  2624	    DN(G_5,7,0x000),
+  2625	    DN(C_6,6,0x000),
+  2626	    DN(Ds6,6,0x000),
+  2627	    DN(G_5,5,0x000),
+  2628	    DN(C_6,5,0x000),
+  2629	    DN(Ds6,4,0x000),
+  2630	    DN(G_5,4,0x000),
+  2631	    DN(C_6,5,0x000),
+  2632	    DN(Ds6,5,0x000),
+  2633	    DN(G_5,6,0x000),
+  2634	    DN(C_6,6,0x000),
+  2635	    DN(Ds6,7,0x000),
+  2636	    DN(G_5,7,0x000),
+  2637	    DN(C_6,6,0x000),
+  2638	    DN(Ds6,6,0x000),
+  2639	    DN(G_5,5,0x000),
+  2640	    DN(C_6,5,0x000),
+  2641	    DN(Ds6,4,0x000),
+  2642	    DN(G_5,4,0x000),
+  2643	    DN(C_6,5,0x000),
+  2644	    DN(Ds6,5,0xB0B),
+  2645	};
+  2646	
+  2647	static const unsigned char itNoiseSP1[] = {
+  2648	    DN(___,0,0x000),
+  2649	    DN(22,2,0x000),
+  2650	    DN(5,0,0x000),
+  2651	    DN(5,0,0x000),
+  2652	    DN(5,0,0x000),
+  2653	    DN(5,0,0x000),
+  2654	    DN(5,0,0x000),
+  2655	    DN(___,0,0x000),
+  2656	    DN(___,0,0x000),
+  2657	    DN(___,0,0x000),
+  2658	    DN(___,0,0x000),
+  2659	    DN(___,0,0x000),
+  2660	    DN(___,0,0x000),
+  2661	    DN(___,0,0x000),
+  2662	    DN(___,0,0x000),
+  2663	    DN(___,0,0x000),
+  2664	    DN(___,0,0x000),
+  2665	    DN(___,0,0x000),
+  2666	    DN(___,0,0x000),
+  2667	    DN(___,0,0x000),
+  2668	    DN(___,0,0x000),
+  2669	    DN(___,0,0x000),
+  2670	    DN(___,0,0x000),
+  2671	    DN(___,0,0x000),
+  2672	    DN(___,0,0x000),
+  2673	    DN(___,0,0x000),
+  2674	    DN(___,0,0x000),
+  2675	    DN(___,0,0x000),
+  2676	    DN(___,0,0x000),
+  2677	    DN(___,0,0x000),
+  2678	    DN(___,0,0x000),
+  2679	    DN(___,1,0x000),
+  2680	};
+  2681	static const unsigned char itNoiseSP2[] = {
+  2682	    DN(___,0,0x000),
+  2683	    DN(58,2,0x000),
+  2684	    DN(5,0,0x000),
+  2685	    DN(5,0,0x000),
+  2686	    DN(5,0,0x000),
+  2687	    DN(5,0,0x000),
+  2688	    DN(5,0,0x000),
+  2689	    DN(___,0,0x000),
+  2690	    DN(___,0,0x000),
+  2691	    DN(___,0,0x000),
+  2692	    DN(___,0,0x000),
+  2693	    DN(___,0,0x000),
+  2694	    DN(___,0,0x000),
+  2695	    DN(___,0,0x000),
+  2696	    DN(___,0,0x000),
+  2697	    DN(___,0,0x000),
+  2698	    DN(___,0,0x000),
+  2699	    DN(___,0,0x000),
+  2700	    DN(___,0,0x000),
+  2701	    DN(___,0,0x000),
+  2702	    DN(___,0,0x000),
+  2703	    DN(___,0,0x000),
+  2704	    DN(___,0,0x000),
+  2705	    DN(___,0,0x000),
+  2706	    DN(___,0,0x000),
+  2707	    DN(___,0,0x000),
+  2708	    DN(___,0,0x000),
+  2709	    DN(___,0,0x000),
+  2710	    DN(___,0,0x000),
+  2711	    DN(___,0,0x000),
+  2712	    DN(___,0,0x000),
+  2713	    DN(___,1,0x000),
+  2714	};
+  2715	static const unsigned char itNoiseSP3[] = {
+  2716	    DN(___,0,0x000),
+  2717	    DN(26,2,0x000),
+  2718	    DN(44,0,0x000),
+  2719	    DN(44,0,0x000),
+  2720	    DN(44,0,0x000),
+  2721	    DN(44,0,0x000),
+  2722	    DN(44,0,0x000),
+  2723	    DN(___,0,0x000),
+  2724	    DN(___,0,0x000),
+  2725	    DN(___,0,0x000),
+  2726	    DN(___,0,0x000),
+  2727	    DN(___,0,0x000),
+  2728	    DN(___,0,0x000),
+  2729	    DN(___,0,0x000),
+  2730	    DN(___,0,0x000),
+  2731	    DN(___,0,0x000),
+  2732	    DN(___,0,0x000),
+  2733	    DN(___,0,0x000),
+  2734	    DN(___,0,0x000),
+  2735	    DN(___,0,0x000),
+  2736	    DN(___,0,0x000),
+  2737	    DN(___,0,0x000),
+  2738	    DN(___,0,0x000),
+  2739	    DN(___,0,0x000),
+  2740	    DN(___,0,0x000),
+  2741	    DN(___,0,0x000),
+  2742	    DN(___,0,0x000),
+  2743	    DN(___,0,0x000),
+  2744	    DN(___,0,0x000),
+  2745	    DN(___,0,0x000),
+  2746	    DN(___,0,0x000),
+  2747	    DN(___,1,0x000),
+  2748	};
+  2749	static const unsigned char itNoiseSP4[] = {
+  2750	    DN(___,0,0x000),
+  2751	    DN(36,2,0x000),
+  2752	    DN(36,0,0x000),
+  2753	    DN(36,0,0x000),
+  2754	    DN(36,0,0x000),
+  2755	    DN(36,0,0x000),
+  2756	    DN(36,0,0x000),
+  2757	    DN(___,0,0x000),
+  2758	    DN(___,0,0x000),
+  2759	    DN(___,0,0x000),
+  2760	    DN(___,0,0x000),
+  2761	    DN(___,0,0x000),
+  2762	    DN(___,0,0x000),
+  2763	    DN(___,0,0x000),
+  2764	    DN(___,0,0x000),
+  2765	    DN(___,0,0x000),
+  2766	    DN(___,0,0x000),
+  2767	    DN(___,0,0x000),
+  2768	    DN(___,0,0x000),
+  2769	    DN(___,0,0x000),
+  2770	    DN(___,0,0x000),
+  2771	    DN(___,0,0x000),
+  2772	    DN(___,0,0x000),
+  2773	    DN(___,0,0x000),
+  2774	    DN(___,0,0x000),
+  2775	    DN(___,0,0x000),
+  2776	    DN(___,0,0x000),
+  2777	    DN(___,0,0x000),
+  2778	    DN(___,0,0x000),
+  2779	    DN(___,0,0x000),
+  2780	    DN(___,0,0x000),
+  2781	    DN(___,1,0x000),
+  2782	};
+  2783	static const unsigned char itNoiseSP5[] = {
+  2784	    DN(___,0,0x000),
+  2785	    DN(36,2,0x000),
+  2786	    DN(36,0,0x000),
+  2787	    DN(36,0,0x000),
+  2788	    DN(36,0,0x000),
+  2789	    DN(36,0,0x000),
+  2790	    DN(36,0,0x000),
+  2791	    DN(___,0,0x000),
+  2792	    DN(___,0,0x000),
+  2793	    DN(___,0,0x000),
+  2794	    DN(___,0,0x000),
+  2795	    DN(___,0,0x000),
+  2796	    DN(___,0,0x000),
+  2797	    DN(___,0,0x000),
+  2798	    DN(___,0,0x000),
+  2799	    DN(___,0,0x000),
+  2800	    DN(___,0,0x000),
+  2801	    DN(___,0,0x000),
+  2802	    DN(___,0,0x000),
+  2803	    DN(___,0,0x000),
+  2804	    DN(___,0,0x000),
+  2805	    DN(___,0,0x000),
+  2806	    DN(___,0,0x000),
+  2807	    DN(___,0,0x000),
+  2808	    DN(___,0,0x000),
+  2809	    DN(___,0,0x000),
+  2810	    DN(___,0,0x000),
+  2811	    DN(___,0,0x000),
+  2812	    DN(___,0,0x000),
+  2813	    DN(___,0,0x000),
+  2814	    DN(___,0,0x000),
+  2815	    DN(___,1,0x000),
+  2816	};
+  2817	static const unsigned char itNoiseSP6[] = {
+  2818	    DN(___,0,0x000),
+  2819	    DN(36,2,0x000),
+  2820	    DN(36,0,0x000),
+  2821	    DN(36,0,0x000),
+  2822	    DN(36,0,0x000),
+  2823	    DN(36,0,0x000),
+  2824	    DN(36,0,0x000),
+  2825	    DN(___,0,0x000),
+  2826	    DN(___,0,0x000),
+  2827	    DN(___,0,0x000),
+  2828	    DN(___,0,0x000),
+  2829	    DN(___,0,0x000),
+  2830	    DN(___,0,0x000),
+  2831	    DN(___,0,0x000),
+  2832	    DN(___,0,0x000),
+  2833	    DN(___,0,0x000),
+  2834	    DN(___,0,0x000),
+  2835	    DN(___,0,0x000),
+  2836	    DN(___,0,0x000),
+  2837	    DN(___,0,0x000),
+  2838	    DN(___,0,0x000),
+  2839	    DN(___,0,0x000),
+  2840	    DN(___,0,0x000),
+  2841	    DN(___,0,0x000),
+  2842	    DN(___,0,0x000),
+  2843	    DN(___,0,0x000),
+  2844	    DN(___,0,0x000),
+  2845	    DN(___,0,0x000),
+  2846	    DN(___,0,0x000),
+  2847	    DN(___,0,0x000),
+  2848	    DN(___,0,0x000),
+  2849	    DN(___,1,0x000),
+  2850	};
+  2851	static const unsigned char itNoiseSP7[] = {
+  2852	    DN(___,0,0x000),
+  2853	    DN(36,2,0x000),
+  2854	    DN(36,0,0x000),
+  2855	    DN(36,0,0x000),
+  2856	    DN(36,0,0x000),
+  2857	    DN(36,0,0x000),
+  2858	    DN(36,0,0x000),
+  2859	    DN(___,0,0x000),
+  2860	    DN(___,0,0x000),
+  2861	    DN(___,0,0x000),
+  2862	    DN(___,0,0x000),
+  2863	    DN(___,0,0x000),
+  2864	    DN(___,0,0x000),
+  2865	    DN(___,0,0x000),
+  2866	    DN(___,0,0x000),
+  2867	    DN(___,0,0x000),
+  2868	    DN(___,0,0x000),
+  2869	    DN(___,0,0x000),
+  2870	    DN(___,0,0x000),
+  2871	    DN(___,0,0x000),
+  2872	    DN(___,0,0x000),
+  2873	    DN(___,0,0x000),
+  2874	    DN(___,0,0x000),
+  2875	    DN(___,0,0x000),
+  2876	    DN(___,0,0x000),
+  2877	    DN(___,0,0x000),
+  2878	    DN(___,0,0x000),
+  2879	    DN(___,0,0x000),
+  2880	    DN(___,0,0x000),
+  2881	    DN(___,0,0x000),
+  2882	    DN(___,0,0x000),
+  2883	    DN(___,1,0x000),
+  2884	};
+  2885	static const unsigned char itNoiseSP8[] = {
+  2886	    DN(___,0,0x000),
+  2887	    DN(36,2,0x000),
+  2888	    DN(36,0,0x000),
+  2889	    DN(36,0,0x000),
+  2890	    DN(36,0,0x000),
+  2891	    DN(36,0,0x000),
+  2892	    DN(36,0,0x000),
+  2893	    DN(___,0,0x000),
+  2894	    DN(___,0,0x000),
+  2895	    DN(___,0,0x000),
+  2896	    DN(___,0,0x000),
+  2897	    DN(___,0,0x000),
+  2898	    DN(___,0,0x000),
+  2899	    DN(___,0,0x000),
+  2900	    DN(___,0,0x000),
+  2901	    DN(___,0,0x000),
+  2902	    DN(___,0,0x000),
+  2903	    DN(___,0,0x000),
+  2904	    DN(___,0,0x000),
+  2905	    DN(___,0,0x000),
+  2906	    DN(___,0,0x000),
+  2907	    DN(___,0,0x000),
+  2908	    DN(___,0,0x000),
+  2909	    DN(___,0,0x000),
+  2910	    DN(___,0,0x000),
+  2911	    DN(___,0,0x000),
+  2912	    DN(___,0,0x000),
+  2913	    DN(___,0,0x000),
+  2914	    DN(___,0,0x000),
+  2915	    DN(___,0,0x000),
+  2916	    DN(___,0,0x000),
+  2917	    DN(___,1,0x000),
+  2918	};
+  2919	static const unsigned char itNoiseSP9[] = {
+  2920	    DN(___,0,0x000),
+  2921	    DN(36,2,0x000),
+  2922	    DN(36,0,0x000),
+  2923	    DN(36,0,0x000),
+  2924	    DN(36,0,0x000),
+  2925	    DN(36,0,0x000),
+  2926	    DN(36,0,0x000),
+  2927	    DN(___,0,0x000),
+  2928	    DN(___,0,0x000),
+  2929	    DN(___,0,0x000),
+  2930	    DN(___,0,0x000),
+  2931	    DN(___,0,0x000),
+  2932	    DN(___,0,0x000),
+  2933	    DN(___,0,0x000),
+  2934	    DN(___,0,0x000),
+  2935	    DN(___,0,0x000),
+  2936	    DN(___,0,0x000),
+  2937	    DN(___,0,0x000),
+  2938	    DN(___,0,0x000),
+  2939	    DN(___,0,0x000),
+  2940	    DN(___,0,0x000),
+  2941	    DN(___,0,0x000),
+  2942	    DN(___,0,0x000),
+  2943	    DN(___,0,0x000),
+  2944	    DN(___,0,0x000),
+  2945	    DN(___,0,0x000),
+  2946	    DN(___,0,0x000),
+  2947	    DN(___,0,0x000),
+  2948	    DN(___,0,0x000),
+  2949	    DN(___,0,0x000),
+  2950	    DN(___,0,0x000),
+  2951	    DN(___,1,0x000),
+  2952	};
+  2953	static const unsigned char itNoiseSP10[] = {
+  2954	    DN(___,0,0x000),
+  2955	    DN(36,2,0x000),
+  2956	    DN(36,0,0x000),
+  2957	    DN(36,0,0x000),
+  2958	    DN(36,0,0x000),
+  2959	    DN(36,0,0x000),
+  2960	    DN(36,0,0x000),
+  2961	    DN(___,0,0x000),
+  2962	    DN(___,0,0x000),
+  2963	    DN(___,0,0x000),
+  2964	    DN(___,0,0x000),
+  2965	    DN(___,0,0x000),
+  2966	    DN(___,0,0x000),
+  2967	    DN(___,0,0x000),
+  2968	    DN(___,0,0x000),
+  2969	    DN(___,0,0x000),
+  2970	    DN(___,0,0x000),
+  2971	    DN(___,0,0x000),
+  2972	    DN(___,0,0x000),
+  2973	    DN(___,0,0x000),
+  2974	    DN(___,0,0x000),
+  2975	    DN(___,0,0x000),
+  2976	    DN(___,0,0x000),
+  2977	    DN(___,0,0x000),
+  2978	    DN(___,0,0x000),
+  2979	    DN(___,0,0x000),
+  2980	    DN(___,0,0x000),
+  2981	    DN(___,0,0x000),
+  2982	    DN(___,0,0x000),
+  2983	    DN(___,0,0x000),
+  2984	    DN(___,0,0x000),
+  2985	    DN(___,1,0x000),
+  2986	};
+  2987	static const unsigned char itNoiseSP11[] = {
+  2988	    DN(___,0,0x000),
+  2989	    DN(36,2,0x000),
+  2990	    DN(36,0,0x000),
+  2991	    DN(36,0,0x000),
+  2992	    DN(36,0,0x000),
+  2993	    DN(36,0,0x000),
+  2994	    DN(36,0,0x000),
+  2995	    DN(___,0,0x000),
+  2996	    DN(___,0,0x000),
+  2997	    DN(___,0,0x000),
+  2998	    DN(___,0,0x000),
+  2999	    DN(___,0,0x000),
+  3000	    DN(___,0,0x000),
+  3001	    DN(___,0,0x000),
+  3002	    DN(___,0,0x000),
+  3003	    DN(___,0,0x000),
+  3004	    DN(___,0,0x000),
+  3005	    DN(___,0,0x000),
+  3006	    DN(___,0,0x000),
+  3007	    DN(___,0,0x000),
+  3008	    DN(___,0,0x000),
+  3009	    DN(___,0,0x000),
+  3010	    DN(___,0,0x000),
+  3011	    DN(___,0,0x000),
+  3012	    DN(___,0,0x000),
+  3013	    DN(___,0,0x000),
+  3014	    DN(___,0,0x000),
+  3015	    DN(___,0,0x000),
+  3016	    DN(___,0,0x000),
+  3017	    DN(___,0,0x000),
+  3018	    DN(___,0,0x000),
+  3019	    DN(___,1,0x000),
+  3020	};
+  3021	static const unsigned char itNoiseSP12[] = {
+  3022	    DN(___,0,0x000),
+  3023	    DN(36,2,0x000),
+  3024	    DN(36,0,0x000),
+  3025	    DN(36,0,0x000),
+  3026	    DN(36,0,0x000),
+  3027	    DN(36,0,0x000),
+  3028	    DN(36,0,0x000),
+  3029	    DN(___,0,0x000),
+  3030	    DN(___,0,0x000),
+  3031	    DN(___,0,0x000),
+  3032	    DN(___,0,0x000),
+  3033	    DN(___,0,0x000),
+  3034	    DN(___,0,0x000),
+  3035	    DN(___,0,0x000),
+  3036	    DN(___,0,0x000),
+  3037	    DN(___,0,0x000),
+  3038	    DN(___,0,0x000),
+  3039	    DN(___,0,0x000),
+  3040	    DN(___,0,0x000),
+  3041	    DN(___,0,0x000),
+  3042	    DN(___,0,0x000),
+  3043	    DN(___,0,0x000),
+  3044	    DN(___,0,0x000),
+  3045	    DN(___,0,0x000),
+  3046	    DN(___,0,0x000),
+  3047	    DN(___,0,0x000),
+  3048	    DN(___,0,0x000),
+  3049	    DN(___,0,0x000),
+  3050	    DN(___,0,0x000),
+  3051	    DN(___,0,0x000),
+  3052	    DN(___,0,0x000),
+  3053	    DN(___,1,0x000),
+  3054	};
+  3055	static const unsigned char itNoiseSP13[] = {
+  3056	    DN(___,0,0x000),
+  3057	    DN(36,2,0x000),
+  3058	    DN(36,0,0x000),
+  3059	    DN(36,0,0x000),
+  3060	    DN(36,0,0x000),
+  3061	    DN(36,0,0x000),
+  3062	    DN(36,0,0x000),
+  3063	    DN(___,0,0x000),
+  3064	    DN(___,0,0x000),
+  3065	    DN(___,0,0x000),
+  3066	    DN(___,0,0x000),
+  3067	    DN(___,0,0x000),
+  3068	    DN(___,0,0x000),
+  3069	    DN(___,0,0x000),
+  3070	    DN(___,0,0x000),
+  3071	    DN(___,0,0x000),
+  3072	    DN(___,0,0x000),
+  3073	    DN(___,0,0x000),
+  3074	    DN(___,0,0x000),
+  3075	    DN(___,0,0x000),
+  3076	    DN(___,0,0x000),
+  3077	    DN(___,0,0x000),
+  3078	    DN(___,0,0x000),
+  3079	    DN(___,0,0x000),
+  3080	    DN(___,0,0x000),
+  3081	    DN(___,0,0x000),
+  3082	    DN(___,0,0x000),
+  3083	    DN(___,0,0x000),
+  3084	    DN(___,0,0x000),
+  3085	    DN(___,0,0x000),
+  3086	    DN(___,0,0x000),
+  3087	    DN(___,1,0x000),
+  3088	};
+  3089	static const unsigned char itNoiseSP14[] = {
+  3090	    DN(___,0,0x000),
+  3091	    DN(36,2,0x000),
+  3092	    DN(36,0,0x000),
+  3093	    DN(36,0,0x000),
+  3094	    DN(36,0,0x000),
+  3095	    DN(36,0,0x000),
+  3096	    DN(36,0,0x000),
+  3097	    DN(___,0,0x000),
+  3098	    DN(___,0,0x000),
+  3099	    DN(___,0,0x000),
+  3100	    DN(___,0,0x000),
+  3101	    DN(___,0,0x000),
+  3102	    DN(___,0,0x000),
+  3103	    DN(___,0,0x000),
+  3104	    DN(___,0,0x000),
+  3105	    DN(___,0,0x000),
+  3106	    DN(___,0,0x000),
+  3107	    DN(___,0,0x000),
+  3108	    DN(___,0,0x000),
+  3109	    DN(___,0,0x000),
+  3110	    DN(___,0,0x000),
+  3111	    DN(___,0,0x000),
+  3112	    DN(___,0,0x000),
+  3113	    DN(___,0,0x000),
+  3114	    DN(___,0,0x000),
+  3115	    DN(___,0,0x000),
+  3116	    DN(___,0,0x000),
+  3117	    DN(___,0,0x000),
+  3118	    DN(___,0,0x000),
+  3119	    DN(___,0,0x000),
+  3120	    DN(___,0,0x000),
+  3121	    DN(___,1,0x000),
+  3122	};
+  3123	static const unsigned char itNoiseSP15[] = {
+  3124	    DN(___,0,0x000),
+  3125	    DN(36,2,0x000),
+  3126	    DN(36,0,0x000),
+  3127	    DN(36,0,0x000),
+  3128	    DN(36,0,0x000),
+  3129	    DN(36,0,0x000),
+  3130	    DN(36,0,0x000),
+  3131	    DN(___,0,0x000),
+  3132	    DN(___,0,0x000),
+  3133	    DN(___,0,0x000),
+  3134	    DN(___,0,0x000),
+  3135	    DN(___,0,0x000),
+  3136	    DN(___,0,0x000),
+  3137	    DN(___,0,0x000),
+  3138	    DN(___,0,0x000),
+  3139	    DN(___,0,0x000),
+  3140	    DN(___,0,0x000),
+  3141	    DN(___,0,0x000),
+  3142	    DN(___,0,0x000),
+  3143	    DN(___,0,0x000),
+  3144	    DN(___,0,0x000),
+  3145	    DN(___,0,0x000),
+  3146	    DN(___,0,0x000),
+  3147	    DN(___,0,0x000),
+  3148	    DN(___,0,0x000),
+  3149	    DN(___,0,0x000),
+  3150	    DN(___,0,0x000),
+  3151	    DN(___,0,0x000),
+  3152	    DN(___,0,0x000),
+  3153	    DN(___,0,0x000),
+  3154	    DN(___,0,0x000),
+  3155	    DN(___,1,0x000),
+  3156	};
+  3157	static const unsigned char* const order1[] = {P0,P0,P0,P0,P0,P0,P0,P0,P0,P0,P11,P11,P12,P15,P11,P11,P12,P19,P11,P11,P12,P15,P11,P11,P12,P19,P29,P32,P11,P11,P29,P32,P11,P11};
+  3158	static const unsigned char* const order2[] = {P1,P1,P1,P1,P1,P1,P1,P1,P1,P1,P10,P10,P13,P16,P10,P10,P13,P20,P10,P10,P13,P16,P10,P10,P13,P20,P30,P33,P35,P10,P30,P33,P35,P38};
+  3159	static const unsigned char* const order3[] = {P2,P2,P4,P4,P5,P6,P4,P4,P5,P8,P9,P9,P14,P17,P9,P9,P14,P18,P21,P22,P23,P24,P25,P26,P27,P28,P31,P34,P36,P37,P31,P34,P36,P39};
+  3160	static const unsigned char* const order4[] = {P3,P3,P3,P3,P3,P3,P3,P3,P3,P7,P3,P3,P3,P3,P3,P3,P3,P7,P3,P3,P3,P3,P3,P3,P3,P7,P3,P3,P3,P3,P3,P3,P3,P7};
+  3161	
+  3162	static const hUGEDutyInstr_t duty_instruments[] = {
+  3163	    {8,128,193,0,128},
+  3164	    {8,128,67,0,128},
+  3165	    {8,0,64,0,128},
+  3166	    {28,128,145,0,128},
+  3167	    {8,64,177,0,128},
+  3168	    {29,128,145,0,128},
+  3169	    {8,0,240,0,128},
+  3170	    {8,0,240,0,128},
+  3171	    {8,128,240,0,128},
+  3172	    {8,128,240,0,128},
+  3173	    {8,128,240,0,128},
+  3174	    {8,128,240,0,128},
+  3175	    {8,128,240,0,128},
+  3176	    {8,128,240,0,128},
+  3177	    {8,128,240,0,128},
+  3178	};
+  3179	static const hUGEWaveInstr_t wave_instruments[] = {
+  3180	    {0,64,0,0,128},
+  3181	    {0,64,1,0,128},
+  3182	    {0,64,2,0,128},
+  3183	    {0,64,3,0,128},
+  3184	    {0,64,4,0,128},
+  3185	    {0,64,5,0,128},
+  3186	    {0,64,6,0,128},
+  3187	    {0,32,0,0,128},
+  3188	    {0,32,0,0,128},
+  3189	    {0,32,0,0,128},
+  3190	    {0,32,0,0,128},
+  3191	    {0,32,11,0,128},
+  3192	    {0,32,12,0,128},
+  3193	    {0,32,13,0,128},
+  3194	    {0,32,14,0,128},
+  3195	};
+  3196	static const hUGENoiseInstr_t noise_instruments[] = {
+  3197	    {113,itNoiseSP1,0,0,0},
+  3198	    {113,itNoiseSP2,0,0,0},
+  3199	    {99,itNoiseSP3,0,0,0},
+  3200	    {240,itNoiseSP4,0,0,0},
+  3201	    {240,itNoiseSP5,0,0,0},
+  3202	    {240,itNoiseSP6,0,0,0},
+  3203	    {240,itNoiseSP7,0,0,0},
+  3204	    {240,itNoiseSP8,0,0,0},
+  3205	    {240,itNoiseSP9,0,0,0},
+  3206	    {240,itNoiseSP10,0,0,0},
+  3207	    {240,itNoiseSP11,0,0,0},
+  3208	    {240,itNoiseSP12,0,0,0},
+  3209	    {240,itNoiseSP13,0,0,0},
+  3210	    {240,itNoiseSP14,0,0,0},
+  3211	    {240,itNoiseSP15,0,0,0},
+  3212	};
+  3213	
+  3214	static const unsigned char waves[] = {
+  3215	    72,255,255,255,255,255,255,132,0,102,6,96,0,79,255,136,
+  3216	    0,0,0,0,0,0,0,0,221,221,221,221,221,221,221,221,
+  3217	    0,17,34,34,51,68,85,102,119,119,136,153,170,187,187,204,
+  3218	    0,0,0,0,0,0,0,0,0,187,187,187,187,187,187,187,
+  3219	    0,0,0,0,0,0,0,0,0,0,0,0,221,221,221,221,
+  3220	    0,0,0,0,0,0,0,0,0,0,0,0,13,221,221,221,
+  3221	    0,0,0,0,0,0,0,0,0,0,0,0,0,13,221,221,
+  3222	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3223	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3224	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3225	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3226	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3227	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3228	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3229	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3230	    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+  3231	};
+  3232	
+  3233	const hUGESong_t sample_song = {2, &order_cnt, order1, order2, order3,order4, duty_instruments, wave_instruments, noise_instruments, NULL, waves};
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sounds/_sound_data.c
+----------------------------------------------------------
+     1	#include "../../engine/sounds/sound_sys.h"
+     2	#include "_sound_data.h"
+     3	
+     4	extern const hUGESong_t sample_song;
+     5	static const SFX_d sfx_db[] = {
+     6	    {2, 0x00, 0x81, 0x42, 0x73, 0x86, 10}, // Moneda (C2)
+     7	    {1, 0x00, 0x81, 0x51, 0x5E, 0x86, 8},  // Disparo (C1)
+     8	    {4, 0x00, 0x3B, 0x64, 0x73, 0x80, 30}, // Explosion (C4)
+     9	    {1, 0x15, 0x81, 0x43, 0x73, 0x86, 15}, // Salto (C1)
+    10	    {1, 0x00, 0x82, 0x91, 0xFF, 0x87, 20}, // Error (C1 Grave)
+    11	    {2, 0x00, 0x42, 0x73, 0x20, 0x85, 40}, // Inicio (C2)
+    12	    {2, 0x00, 0x81, 0xF3, 0x73, 0x86, 25}, // Estrella (C2 Agudo)
+    13	    {1, 0x22, 0x81, 0x43, 0x73, 0x86, 30}, // Energia (C1 Sweep up)
+    14	    {4, 0x00, 0x01, 0x52, 0x11, 0x80, 15}, // Puerta (C4 Ruido bajo)
+    15	    {2, 0x00, 0x01, 0xF1, 0x73, 0x86, 50}  // Portal (C2 Modulado)
+    16	};
+    17	
+    18	const Sound snd_sample_song = { T_HUGE, &sample_song};
+    19	const Sound snd_coin = { T_SFX, &sfx_db[0] };
+    20	const Sound snd_shoot = { T_SFX, &sfx_db[1] };
+    21	const Sound snd_explode = { T_SFX, &sfx_db[2] };
+    22	const Sound snd_jump = { T_SFX, &sfx_db[3] };
+    23	const Sound snd_error = { T_SFX, &sfx_db[4] };
+    24	const Sound snd_start = { T_SFX, &sfx_db[5] };
+    25	const Sound snd_star = { T_SFX, &sfx_db[6] };
+    26	const Sound snd_powerup = { T_SFX, &sfx_db[7] };
+    27	const Sound snd_door = { T_SFX, &sfx_db[8] };
+    28	const Sound snd_portal = { T_SFX, &sfx_db[9] };
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sounds/_sound_data.h
+----------------------------------------------------------
+     1	#ifndef SONGS_MOD_H
+     2	#define SONGS_MOD_H
+     3	#include "../../engine/sounds/sound_sys.h"
+     4	
+     5	extern const Sound snd_sample_song;
+     6	extern const Sound snd_coin;
+     7	extern const Sound snd_shoot;
+     8	extern const Sound snd_explode;
+     9	extern const Sound snd_jump;
+    10	extern const Sound snd_error;
+    11	extern const Sound snd_start;
+    12	extern const Sound snd_star;
+    13	extern const Sound snd_powerup;
+    14	extern const Sound snd_door;
+    15	extern const Sound snd_portal;
+    16	
+    17	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sprites/tilesFondo.c
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 TILESFONDO.C
+     4	
+     5	 Tile Source File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 4
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	/* Start of tile array. */
+    26	unsigned char tilesFondo[] =
+    27	{
+    28	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    29	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    30	  0x01,0x00,0x01,0x00,0x01,0x00,0x01,0x00,
+    31	  0x01,0x00,0x01,0x00,0x01,0x00,0xFF,0x00,
+    32	  0x3C,0x3C,0x7A,0x46,0xDF,0xA1,0xF5,0x8B,
+    33	  0xEB,0x95,0xB5,0xCB,0x6A,0x56,0x3C,0x3C,
+    34	  0x3C,0x3C,0x00,0x42,0xFF,0xFF,0x00,0x81,
+    35	  0xFF,0xFF,0x00,0x81,0x7E,0x7E,0x00,0x3C,
+    36	  0x00,0x3C,0x7C,0x7C,0x45,0xC5,0x55,0xD5,
+    37	  0x5D,0xDD,0x41,0xC1,0x7E,0x7E,0x00,0x3C
+    38	};
+    39	
+    40	/* End of TILESFONDO.C */
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sprites/fuenteNumerica/fuenteNumerica.c
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 H
+     4	
+     5	 Include File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 11
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	
+    26	/* Bank of tiles. */
+    27	#define fuenteNumericaBank 0
+    28	/* Start of tile array. */
+    29	extern unsigned char fuenteNumerica[];
+    30	
+    31	/* End of H */
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sprites/fuenteNumerica/fuenteNumerica.h
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 FUENTENUMER
+     4	
+     5	 Tile Source File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 11
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	/* Start of tile array. */
+    26	unsigned char fuenteNumerica[] =
+    27	{
+    28	  0xFF,0x00,0xFF,0x18,0xFF,0x24,0xFF,0x24,
+    29	  0xFF,0x24,0xFF,0x24,0xFF,0x18,0xFF,0x00,
+    30	  0xFF,0x00,0xFF,0x08,0xFF,0x18,0xFF,0x08,
+    31	  0xFF,0x08,0xFF,0x08,0xFF,0x3C,0xFF,0x00,
+    32	  0xFF,0x00,0xFF,0x18,0xFF,0x24,0xFF,0x04,
+    33	  0xFF,0x08,0xFF,0x10,0xFF,0x3C,0xFF,0x00,
+    34	  0xFF,0x00,0xFF,0x18,0xFF,0x24,0xFF,0x08,
+    35	  0xFF,0x04,0xFF,0x24,0xFF,0x18,0xFF,0x00,
+    36	  0xFF,0x00,0xFF,0x08,0xFF,0x18,0xFF,0x28,
+    37	  0xFF,0x3C,0xFF,0x08,0xFF,0x08,0xFF,0x00,
+    38	  0xFF,0x00,0xFF,0x3C,0xFF,0x20,0xFF,0x38,
+    39	  0xFF,0x04,0xFF,0x04,0xFF,0x38,0xFF,0x00,
+    40	  0xFF,0x00,0xFF,0x18,0xFF,0x20,0xFF,0x38,
+    41	  0xFF,0x24,0xFF,0x24,0xFF,0x18,0xFF,0x00,
+    42	  0xFF,0x00,0xFF,0x3C,0xFF,0x04,0xFF,0x08,
+    43	  0xFF,0x08,0xFF,0x10,0xFF,0x10,0xFF,0x00,
+    44	  0xFF,0x00,0xFF,0x18,0xFF,0x24,0xFF,0x18,
+    45	  0xFF,0x24,0xFF,0x24,0xFF,0x18,0xFF,0x00,
+    46	  0xFF,0x00,0xFF,0x18,0xFF,0x24,0xFF,0x24,
+    47	  0xFF,0x1C,0xFF,0x04,0xFF,0x18,0xFF,0x00,
+    48	  0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,
+    49	  0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,
+    50	  0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,
+    51	  0xFF,0x3C,0xFF,0x00,0xFF,0x00,0xFF,0x00
+    52	};
+    53	
+    54	/* End of FUENTENUMER */
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/game/sprites/tilesFondo.h
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 TILESFONDO.H
+     4	
+     5	 Include File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 4
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	
+    26	/* Bank of tiles. */
+    27	#define tilesFondoBank 0
+    28	/* Start of tile array. */
+    29	extern unsigned char tilesFondo[];
+    30	
+    31	/* End of TILESFONDO.H */
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/objects/entity_mgr.h
+----------------------------------------------------------
+     1	#ifndef ENTITY_MANAGER_H
+     2	#define ENTITY_MANAGER_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <stdint.h>
+     6	
+     7	// El motor no sabe qué hay dentro, solo que existe
+     8	typedef struct Entity Entity; 
+     9	
+    10	// El motor ahora pide al usuario la memoria y el tamaño
+    11	void entity_init(Entity* storage, uint8_t max_count, uint16_t struct_size);
+    12	Entity* entity_create(int16_t x, int16_t y, uint8_t tile_id);
+    13	void entity_render_all(void);
+    14	
+    15	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/objects/entity_mgr.c
+----------------------------------------------------------
+     1	#include "entity_mgr.h"
+     2	
+     3	static Entity* pool;
+     4	static uint8_t max_entities;
+     5	static uint16_t entity_size;
+     6	
+     7	// Estructura mínima que el motor NECESITA ver para poder renderizar
+     8	// El truco es que el motor solo mapea los primeros bytes
+     9	typedef struct {
+    10	    int16_t x, y;
+    11	    uint8_t tile_id;
+    12	    uint8_t active;
+    13	} InternalEntity;
+    14	
+    15	void entity_init(Entity* storage, uint8_t max_count, uint16_t struct_size) {
+    16	    pool = storage;
+    17	    max_entities = max_count;
+    18	    entity_size = struct_size;
+    19	    
+    20	    for (uint8_t i = 0; i < max_entities; i++) {
+    21	        InternalEntity* e = (InternalEntity*)((uint8_t*)pool + (i * entity_size));
+    22	        e->active = 0;
+    23	        move_sprite(i, 0, 0);
+    24	    }
+    25	}
+    26	
+    27	Entity* entity_create(int16_t x, int16_t y, uint8_t tile_id) {
+    28	    for (uint8_t i = 0; i < max_entities; i++) {
+    29	        InternalEntity* e = (InternalEntity*)((uint8_t*)pool + (i * entity_size));
+    30	        if (!e->active) {
+    31	            e->x = x; e->y = y;
+    32	            e->tile_id = tile_id;
+    33	            e->active = 1;
+    34	            set_sprite_tile(i, tile_id);
+    35	            return (Entity*)e;
+    36	        }
+    37	    }
+    38	    return 0;
+    39	}
+    40	
+    41	void entity_render_all(void) {
+    42	    uint8_t i;
+    43	    typedef struct {
+    44	        int16_t x, y;
+    45	        
+    46	        uint8_t tile_id;
+    47	        uint8_t active;
+    48	        uint8_t* tile_list;
+    49	        uint8_t list_size;
+    50	    } Renderable;
+    51	
+    52	    for (i = 0; i < max_entities; i++) {
+    53	        Renderable* e = (Renderable*)((uint8_t*)pool + (i * entity_size));
+    54	        
+    55	        if (e->active) {
+    56	            // MÉTODO INTELIGENTE:
+    57	            // Si tiene una lista de más de 1 tile, actualizamos el hardware.
+    58	            // Si list_size es 0 o 1, NO llamamos a set_sprite_tile (ahorro de ciclos).
+    59	            if (e->list_size > 1) {
+    60	                set_sprite_tile(i, e->tile_id);
+    61	            }
+    62	
+    63	            move_sprite(i, (uint8_t)e->x + 8, (uint8_t)e->y + 16);
+    64	        } else {
+    65	            move_sprite(i, 0, 0);
+    66	        }
+    67	    }
+    68	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/main.c
+----------------------------------------------------------
+     1	#include "game_bridge.h"
+     2	
+     3	void main(void) {
+     4	    video_init();
+     5	    sound_init();
+     6	    video_load_tiles(tilesFondo, 5);
+     7	
+     8	    
+     9	    // Esperar a que el usuario pulse Start para generar una semilla aleatoria real
+    10	    waitpad(J_START); 
+    11	    initrand(DIV_REG); // DIV_REG es un registro de la GB que cambia constantemente
+    12	    
+    13	
+    14	    game_init();
+    15	
+    16	    while(1) {
+    17	        
+    18	        // 1. ACTUALIZAR INPUT (Crucial: Primero de la fila)
+    19	        // Esto guarda el estado del frame anterior y lee el nuevo.
+    20	        joystick_update();
+    21	
+    22	        // 2. LÓGICA (Aquí tus scripts usan joystick_check_button, etc.)
+    23	        game_step();
+    24	
+    25	        // 3. DIBUJO MANUAL
+    26	        game_draw();
+    27	
+    28	        // 4. RENDER DE ENTIDADES
+    29	        entity_render_all();
+    30	
+    31	        
+    32	
+    33	        // 5. AUDIO Y ESPERA DE V-BLANK
+    34	        audio_update();    
+    35	        wait_vbl_done();
+    36	    }
+    37	
+    38	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/math/math_util.h
+----------------------------------------------------------
+     1	#ifndef MATH_UTILS_H
+     2	#define MATH_UTILS_H
+     3	#include <gb/gb.h>
+     4	#include <stdint.h>
+     5	
+     6	#define true 1
+     7	#define false 0
+     8	#define pi 314
+     9	
+    10	// Macros de Game Maker (Alta velocidad)
+    11	#define abs(x) ((x)<0 ? -(x) : (x)) // Valor absoluto
+    12	#define sign(x) ((x)>0 ? 1 : ((x)<0 ? -1 : 0)) // Signo del número
+    13	#define sqr(x) ((int32_t)(x)*(x)) // Eleva al cuadrado
+    14	#define min(x,y) ((x)<(y) ? (x) : (y)) // Mínimo de dos valores
+    15	#define max(x,y) ((x)>(y) ? (x) : (y)) // Máximo de dos valores
+    16	#define mean(x,y) (((x)+(y)) >> 1) // Promedio de dos valores
+    17	#define degtorad(x) ((int32_t)(x)*175/10000) // Convierte grados a radianes (aproximado)
+    18	#define radtodeg(x) ((int32_t)(x)*5729/100) // Convierte radianes a grados (aproximado)
+    19	
+    20	// Funciones de Ángulo y Distancia
+    21	extern const int8_t sin_tbl[256]; // Tabla de seno escalada a 128
+    22	#define lengthdir_x(len, ang) ((int16_t)((int32_t)(len) * sin_tbl[(uint8_t)((ang)+64)]) >> 7) // X de un vector (longitud * cos)
+    23	#define lengthdir_y(len, ang) ((int16_t)((int32_t)(len) * sin_tbl[(uint8_t)(ang)]) >> 7) // Y de un vector (longitud * sin)
+    24	#define dsin(a) (sin_tbl[(uint8_t)(a)]) // Seno rápido (0-255)
+    25	#define dcos(a) (sin_tbl[(uint8_t)((a)+64)]) // Coseno rápido (0-255)
+    26	
+    27	uint16_t random(uint16_t x); // Genera número aleatorio entre 0 y x-1
+    28	uint16_t sqrt_int(uint32_t x); // Raíz cuadrada para números enteros
+    29	uint16_t point_distance(int16_t x1, int16_t y1, int16_t x2, int16_t y2); // Distancia euclidiana entre puntos
+    30	uint8_t point_direction(int16_t x1, int16_t y1, int16_t x2, int16_t y2); // Ángulo entre dos puntos (0-255)
+    31	int8_t angle_difference(uint8_t a, uint8_t b); // Diferencia más corta entre dos ángulos
+    32	
+    33	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/math/math_util.c
+----------------------------------------------------------
+     1	#include "math_util.h"
+     2	
+     3	// Retorna un número aleatorio menor que x
+     4	uint16_t random(uint16_t x) {
+     5	    return 0;
+     6	    if (x == 0) return 0;
+     7	    // rand() devuelve un valor entre 0 y RAND_MAX
+     8	    // El operador % (módulo) limita el resultado al rango [0, x-1]
+     9	    return (uint16_t)rand() % x;
+    10	    
+    11	}
+    12	
+    13	// Raíz cuadrada optimizada sin usar punto flotante
+    14	uint16_t sqrt_int(uint32_t x) {
+    15	    uint32_t res = 0;
+    16	    uint32_t bit = 1UL << 30; // El segundo bit más significativo de un uint32
+    17	    while (bit > x) bit >>= 2;
+    18	    while (bit != 0) {
+    19	        if (x >= res + bit) { x -= res + bit; res = (res >> 1) + bit; }
+    20	        else res >>= 1;
+    21	        bit >>= 2;
+    22	    }
+    23	    return res;
+    24	}
+    25	
+    26	// Eleva X a la potencia de N
+    27	int32_t power(int16_t x, uint8_t n) {
+    28	    int32_t res = 1;
+    29	    for(uint8_t i = 0; i < n; i++) res *= x;
+    30	    return res;
+    31	}
+    32	
+    33	// Calcula la distancia usando Pitágoras (x^2 + y^2 = h^2)
+    34	uint16_t point_distance(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    35	    int32_t dx = (int32_t)(x2 - x1);
+    36	    int32_t dy = (int32_t)(y2 - y1);
+    37	    return sqrt_int((uint32_t)(dx * dx + dy * dy));
+    38	}
+    39	
+    40	// Devuelve la diferencia más corta entre dos ángulos (-128 a 127).
+    41	// ¡Esta es la magia de usar 256 pasos! Al restar y forzar a un entero con signo de 8 bits (int8_t), 
+    42	// el hardware automáticamente encuentra el camino más corto hacia la izquierda o la derecha.
+    43	int8_t angle_difference(uint8_t angle1, uint8_t angle2) {
+    44	    return (int8_t)(angle1 - angle2);
+    45	}
+    46	
+    47	// Aproximación rápida del ángulo direccional (Devuelve 0-255)
+    48	uint8_t point_direction(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
+    49	    int16_t dx = x2 - x1;
+    50	    int16_t dy = y2 - y1;
+    51	    if (dx == 0 && dy == 0) return 0;
+    52	    // Lógica básica de cuadrantes simplificada para Game Boy
+    53	    if (abs(dx) > abs(dy)) {
+    54	        if (dx > 0) return (dy > 0) ? 32 : 224; // Derecha (Aprox)
+    55	        else return (dy > 0) ? 96 : 160;        // Izquierda (Aprox)
+    56	    } else {
+    57	        if (dy > 0) return 64;  // Abajo
+    58	        else return 192;        // Arriba
+    59	    }
+    60	}
+    61	
+    62	// Tabla Seno de 256 pasos (Amplitud de -127 a 127). Generada para alta precisión.
+    63	const int8_t sin_tbl[256] = {
+    64	      0,   3,   6,   9,  12,  15,  18,  21,  24,  28,  31,  34,  37,  40,  43,  46,
+    65	     48,  51,  54,  57,  60,  63,  65,  68,  71,  73,  76,  78,  81,  83,  85,  88,
+    66	     90,  92,  94,  96,  98, 100, 102, 104, 106, 108, 109, 111, 112, 114, 115, 117,
+    67	    118, 119, 120, 121, 122, 123, 124, 124, 125, 126, 126, 127, 127, 127, 127, 127,
+    68	    127, 127, 127, 127, 127, 127, 126, 126, 125, 124, 124, 123, 122, 121, 120, 119,
+    69	    118, 117, 115, 114, 112, 111, 109, 108, 106, 104, 102, 100,  98,  96,  94,  92,
+    70	     90,  88,  85,  83,  81,  78,  76,  73,  71,  68,  65,  63,  60,  57,  54,  51,
+    71	     48,  46,  43,  40,  37,  34,  31,  28,  24,  21,  18,  15,  12,   9,   6,   3,
+    72	      0,  -3,  -6,  -9, -12, -15, -18, -21, -24, -28, -31, -34, -37, -40, -43, -46,
+    73	    -48, -51, -54, -57, -60, -63, -65, -68, -71, -73, -76, -78, -81, -83, -85, -88,
+    74	    -90, -92, -94, -96, -98,-100,-102,-104,-106,-108,-109,-111,-112,-114,-115,-117,
+    75	   -118,-119,-120,-121,-122,-123,-124,-124,-125,-126,-126,-127,-127,-127,-127,-127,
+    76	   -127,-127,-127,-127,-127,-127,-126,-126,-125,-124,-124,-123,-122,-121,-120,-119,
+    77	   -118,-117,-115,-114,-112,-111,-109,-108,-106,-104,-102,-100, -98, -96, -94, -92,
+    78	    -90, -88, -85, -83, -81, -78, -76, -73, -71, -68, -65, -63, -60, -57, -54, -51,
+    79	    -48, -46, -43, -40, -37, -34, -31, -28, -24, -21, -18, -15, -12,  -9,  -6,  -3
+    80	};
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/game_bridge.h
+----------------------------------------------------------
+     1	#ifndef GAME_BRIDGE_H
+     2	#define GAME_BRIDGE_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <rand.h>    // <--- AÑADE ESTO para las funciones de azar
+     6	
+     7	// --- INCLUDES DEL MOTOR (Engine) ---
+     8	#include "video/video_sys.h"
+     9	#include "math/math_util.h"
+    10	#include "sounds/sound_sys.h"
+    11	#include "objects/entity_mgr.h"
+    12	#include "joystick/joystick_sys.h"
+    13	#include "debug/debug_sys.h"
+    14	
+    15	// --- INCLUDES DEL JUEGO (Game) ---
+    16	#include "../game/objects/game_objects.h"
+    17	#include "../game/sounds/_sound_data.h"
+    18	#include "../game/rooms/rooms_all.h"
+    19	#include "../game/sprites/tilesFondo.h"
+    20	
+    21	
+    22	/* * Estas son DECLARACIONES (Notifican que la función existe)
+    23	 * El motor llamará a estas funciones, pero la lógica real
+    24	 * estará en src/game/game_init.c y src/game/game_step.c
+    25	 */
+    26	
+    27	// Se ejecuta una sola vez al encender la Game Boy (Como Game Start)
+    28	void game_init(void);
+    29	
+    30	// Se ejecuta 60 veces por segundo (Como el Step Event de un objeto controlador)
+    31	void game_step(void);
+    32	
+    33	void game_draw(void);
+    34	
+    35	
+    36	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/video/video_sys.c
+----------------------------------------------------------
+     1	#include "video_sys.h"
+     2	
+     3	void video_init(void) {
+     4	    // Configuración de Paletas (Estándar: Negro, Gris D., Gris C., Blanco)
+     5	    BGP_REG = OBP0_REG = 0xE4;
+     6	
+     7	    // Inicialización de Capas
+     8	    DISPLAY_ON;
+     9	    SHOW_SPRITES;
+    10	    SHOW_BKG;
+    11	}
+    12	
+    13	void video_load_tiles(const uint8_t *data, uint8_t count) {
+    14	    // Cargamos los mismos tiles para Background y Sprites (opcional, pero común)
+    15	    set_bkg_data(0, count, data);
+    16	    set_sprite_data(0, count, data);
+    17	}
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/video/video_sys.h
+----------------------------------------------------------
+     1	#ifndef VIDEO_SYSTEM_H
+     2	#define VIDEO_SYSTEM_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <stdint.h>
+     6	
+     7	/**
+     8	 * Inicializa el hardware de video, paletas y activa capas.
+     9	 */
+    10	void video_init(void);
+    11	
+    12	/**
+    13	 * Carga datos de tiles en la memoria VRAM.
+    14	 * @param data Puntero a los bytes de los tiles.
+    15	 * @param count Cantidad de tiles a cargar.
+    16	 */
+    17	void video_load_tiles(const uint8_t *data, uint8_t count);
+    18	
+    19	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/sounds/hUGE.inc
+----------------------------------------------------------
+     1	MACRO dn ;; (note, instr, effect)
+     2	    db (\1 | ((\2 & %00010000) << 3))
+     3	    db (((\2 << 4) & $FF) | (\3 >> 8))
+     4	    db LOW(\3)
+     5	ENDM
+     6	
+     7	DEF C_3 EQU 0
+     8	DEF C#3 EQU 1
+     9	DEF D_3 EQU 2
+    10	DEF D#3 EQU 3
+    11	DEF E_3 EQU 4
+    12	DEF F_3 EQU 5
+    13	DEF F#3 EQU 6
+    14	DEF G_3 EQU 7
+    15	DEF G#3 EQU 8
+    16	DEF A_3 EQU 9
+    17	DEF A#3 EQU 10
+    18	DEF B_3 EQU 11
+    19	DEF C_4 EQU 12
+    20	DEF C#4 EQU 13
+    21	DEF D_4 EQU 14
+    22	DEF D#4 EQU 15
+    23	DEF E_4 EQU 16
+    24	DEF F_4 EQU 17
+    25	DEF F#4 EQU 18
+    26	DEF G_4 EQU 19
+    27	DEF G#4 EQU 20
+    28	DEF A_4 EQU 21
+    29	DEF A#4 EQU 22
+    30	DEF B_4 EQU 23
+    31	DEF C_5 EQU 24
+    32	DEF C#5 EQU 25
+    33	DEF D_5 EQU 26
+    34	DEF D#5 EQU 27
+    35	DEF E_5 EQU 28
+    36	DEF F_5 EQU 29
+    37	DEF F#5 EQU 30
+    38	DEF G_5 EQU 31
+    39	DEF G#5 EQU 32
+    40	DEF A_5 EQU 33
+    41	DEF A#5 EQU 34
+    42	DEF B_5 EQU 35
+    43	DEF C_6 EQU 36
+    44	DEF C#6 EQU 37
+    45	DEF D_6 EQU 38
+    46	DEF D#6 EQU 39
+    47	DEF E_6 EQU 40
+    48	DEF F_6 EQU 41
+    49	DEF F#6 EQU 42
+    50	DEF G_6 EQU 43
+    51	DEF G#6 EQU 44
+    52	DEF A_6 EQU 45
+    53	DEF A#6 EQU 46
+    54	DEF B_6 EQU 47
+    55	DEF C_7 EQU 48
+    56	DEF C#7 EQU 49
+    57	DEF D_7 EQU 50
+    58	DEF D#7 EQU 51
+    59	DEF E_7 EQU 52
+    60	DEF F_7 EQU 53
+    61	DEF F#7 EQU 54
+    62	DEF G_7 EQU 55
+    63	DEF G#7 EQU 56
+    64	DEF A_7 EQU 57
+    65	DEF A#7 EQU 58
+    66	DEF B_7 EQU 59
+    67	DEF C_8 EQU 60
+    68	DEF C#8 EQU 61
+    69	DEF D_8 EQU 62
+    70	DEF D#8 EQU 63
+    71	DEF E_8 EQU 64
+    72	DEF F_8 EQU 65
+    73	DEF F#8 EQU 66
+    74	DEF G_8 EQU 67
+    75	DEF G#8 EQU 68
+    76	DEF A_8 EQU 69
+    77	DEF A#8 EQU 70
+    78	DEF B_8 EQU 71
+    79	DEF LAST_NOTE EQU 72
+    80	DEF ___ EQU 90 ; the default "no note" value
+    81	DEF NO_NOTE EQU ___
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/sounds/hUGEDriver.h
+----------------------------------------------------------
+     1	#ifndef HUGEDRIVER_H_INCLUDE
+     2	#define HUGEDRIVER_H_INCLUDE
+     3	
+     4	#include <gbdk/platform.h>
+     5	
+     6	#define DN(A, B, C) (unsigned char)(A | ((B & 0x10) << 3)),(unsigned char)(((B << 4) & 0xFF) | (C >> 8)),(unsigned char)(C & 0xFF)
+     7	
+     8	#define C_3 0
+     9	#define Cs3 1
+    10	#define D_3 2
+    11	#define Ds3 3
+    12	#define E_3 4
+    13	#define F_3 5
+    14	#define Fs3 6
+    15	#define G_3 7
+    16	#define Gs3 8
+    17	#define A_3 9
+    18	#define As3 10
+    19	#define B_3 11
+    20	#define C_4 12
+    21	#define Cs4 13
+    22	#define D_4 14
+    23	#define Ds4 15
+    24	#define E_4 16
+    25	#define F_4 17
+    26	#define Fs4 18
+    27	#define G_4 19
+    28	#define Gs4 20
+    29	#define A_4 21
+    30	#define As4 22
+    31	#define B_4 23
+    32	#define C_5 24
+    33	#define Cs5 25
+    34	#define D_5 26
+    35	#define Ds5 27
+    36	#define E_5 28
+    37	#define F_5 29
+    38	#define Fs5 30
+    39	#define G_5 31
+    40	#define Gs5 32
+    41	#define A_5 33
+    42	#define As5 34
+    43	#define B_5 35
+    44	#define C_6 36
+    45	#define Cs6 37
+    46	#define D_6 38
+    47	#define Ds6 39
+    48	#define E_6 40
+    49	#define F_6 41
+    50	#define Fs6 42
+    51	#define G_6 43
+    52	#define Gs6 44
+    53	#define A_6 45
+    54	#define As6 46
+    55	#define B_6 47
+    56	#define C_7 48
+    57	#define Cs7 49
+    58	#define D_7 50
+    59	#define Ds7 51
+    60	#define E_7 52
+    61	#define F_7 53
+    62	#define Fs7 54
+    63	#define G_7 55
+    64	#define Gs7 56
+    65	#define A_7 57
+    66	#define As7 58
+    67	#define B_7 59
+    68	#define C_8 60
+    69	#define Cs8 61
+    70	#define D_8 62
+    71	#define Ds8 63
+    72	#define E_8 64
+    73	#define F_8 65
+    74	#define Fs8 66
+    75	#define G_8 67
+    76	#define Gs8 68
+    77	#define A_8 69
+    78	#define As8 70
+    79	#define B_8 71
+    80	#define LAST_NOTE 72
+    81	#define ___ 90
+    82	
+    83	// tick is a tick number; the high byte of param is channel and the low byte of param is routine id
+    84	typedef void (*hUGERoutine_t)(unsigned char tick, unsigned int param);
+    85	
+    86	typedef struct hUGEDutyInstr_t {
+    87	  const unsigned char sweep;
+    88	  const unsigned char len_duty;
+    89	  const unsigned char envelope;
+    90	  const unsigned char * subpattern;
+    91	  const unsigned char highmask;
+    92	} hUGEDutyInstr_t;
+    93	
+    94	typedef struct hUGEWaveInstr_t {
+    95	  const unsigned char length;
+    96	  const unsigned char volume;
+    97	  const unsigned char waveform;
+    98	  const unsigned char * subpattern;
+    99	  const unsigned char highmask;
+   100	} hUGEWaveInstr_t;
+   101	
+   102	typedef struct hUGENoiseInstr_t {
+   103	  const unsigned char envelope;
+   104	  const unsigned char * subpattern;
+   105	  const unsigned char highmask;
+   106	  const unsigned char unused1;
+   107	  const unsigned char unused2;
+   108	} hUGENoiseInstr_t;
+   109	
+   110	typedef struct hUGESong_t {
+   111	  unsigned char tempo;
+   112	  const unsigned char * order_cnt;
+   113	  const unsigned char ** order1, ** order2, ** order3, ** order4;
+   114	  const hUGEDutyInstr_t * duty_instruments;
+   115	  const hUGEWaveInstr_t * wave_instruments;
+   116	  const hUGENoiseInstr_t * noise_instruments;
+   117	  const hUGERoutine_t ** routines;
+   118	  const unsigned char * waves;
+   119	} hUGESong_t;
+   120	
+   121	// initialize the driver with song data
+   122	void hUGE_init(const hUGESong_t * song);
+   123	
+   124	// driver routine
+   125	void hUGE_dosound(void);
+   126	
+   127	enum hUGE_channel_t {HT_CH1 = 0, HT_CH2, HT_CH3, HT_CH4};
+   128	enum hUGE_mute_t    {HT_CH_PLAY = 0, HT_CH_MUTE};
+   129	
+   130	void hUGE_mute_channel(enum hUGE_channel_t ch, enum hUGE_mute_t mute);
+   131	
+   132	void hUGE_set_position(unsigned char pattern);
+   133	
+   134	extern volatile unsigned char hUGE_current_wave;
+   135	
+   136	extern volatile unsigned char hUGE_mute_mask;
+   137	
+   138	inline void hUGE_reset_wave(void) {
+   139		hUGE_current_wave = 100;
+   140	}
+   141	
+   142	#endif
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/sounds/hUGE_note_table.inc
+----------------------------------------------------------
+     1	;; hUGETracker note table.
+     2	;; Written by SuperDisk 2019
+     3	
+     4	;; Gameboy sound frequences are represented as 11 byte periods.
+     5	;; this note table was generated from http://www.devrs.com/gb/files/sndtab.html
+     6	
+     7	dw 44
+     8	dw 156
+     9	dw 262
+    10	dw 363
+    11	dw 457
+    12	dw 547
+    13	dw 631
+    14	dw 710
+    15	dw 786
+    16	dw 854
+    17	dw 923
+    18	dw 986
+    19	dw 1046
+    20	dw 1102
+    21	dw 1155
+    22	dw 1205
+    23	dw 1253
+    24	dw 1297
+    25	dw 1339
+    26	dw 1379
+    27	dw 1417
+    28	dw 1452
+    29	dw 1486
+    30	dw 1517
+    31	dw 1546
+    32	dw 1575
+    33	dw 1602
+    34	dw 1627
+    35	dw 1650
+    36	dw 1673
+    37	dw 1694
+    38	dw 1714
+    39	dw 1732
+    40	dw 1750
+    41	dw 1767
+    42	dw 1783
+    43	dw 1798
+    44	dw 1812
+    45	dw 1825
+    46	dw 1837
+    47	dw 1849
+    48	dw 1860
+    49	dw 1871
+    50	dw 1881
+    51	dw 1890
+    52	dw 1899
+    53	dw 1907
+    54	dw 1915
+    55	dw 1923
+    56	dw 1930
+    57	dw 1936
+    58	dw 1943
+    59	dw 1949
+    60	dw 1954
+    61	dw 1959
+    62	dw 1964
+    63	dw 1969
+    64	dw 1974
+    65	dw 1978
+    66	dw 1982
+    67	dw 1985
+    68	dw 1988
+    69	dw 1992
+    70	dw 1995
+    71	dw 1998
+    72	dw 2001
+    73	dw 2004
+    74	dw 2006
+    75	dw 2009
+    76	dw 2011
+    77	dw 2013
+    78	dw 2015
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/sounds/sound_sys.h
+----------------------------------------------------------
+     1	#ifndef SONGS_H
+     2	#define SONGS_H
+     3	#include <stdint.h>
+     4	#include "hUGEDriver.h"
+     5	
+     6	typedef enum { T_HUGE, T_SFX } s_type;
+     7	typedef struct { uint8_t ch, r1, r2, r3, r4, r5, dur; } SFX_d;
+     8	typedef struct { s_type type; const void *data; } Sound;
+     9	
+    10	extern uint32_t sound_tick;
+    11	
+    12	void sound_init(void);
+    13	void sound_play(const Sound *idx);
+    14	void sound_loop(const Sound *idx);
+    15	void sound_stop(const Sound *idx);
+    16	void sound_stop_all(void);
+    17	uint8_t sound_isplaying(const Sound *idx);
+    18	uint16_t sound_pos(const Sound *idx);
+    19	void audio_update(void);
+    20	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/sounds/sound_sys.c
+----------------------------------------------------------
+     1	#include <gb/gb.h>
+     2	#include <stddef.h>
+     3	#include "sound_sys.h"
+     4	
+     5	uint32_t sound_tick = 0;
+     6	static const Sound *c_bgm = NULL;
+     7	static const Sound *c_sfx = NULL;
+     8	static uint8_t s_t = 0;
+     9	
+    10	void sound_init(void) {NR52_REG = 0x80; NR51_REG = 0xFF;NR50_REG = 0x77;}
+    11	void sound_play(const Sound *idx){ if(idx->type==T_HUGE){ c_bgm=idx; hUGE_init((const hUGESong_t *)idx->data); sound_tick=0; } else { c_sfx=idx; const SFX_d *d=(const SFX_d *)idx->data; s_t=d->dur; if(d->ch==1){ NR10_REG=d->r1; NR11_REG=d->r2; NR12_REG=d->r3; NR13_REG=d->r4; NR14_REG=d->r5; } else if(d->ch==2){ NR21_REG=d->r2; NR22_REG=d->r3; NR23_REG=d->r4; NR24_REG=d->r5; } else if(d->ch==4){ NR41_REG=d->r2; NR42_REG=d->r3; NR43_REG=d->r4; NR44_REG=d->r5; } } }
+    12	void sound_loop(const Sound *idx){ sound_play(idx); }
+    13	void sound_stop(const Sound *idx){ if(idx==c_bgm){ c_bgm=NULL; sound_tick=0; NR12_REG=NR22_REG=NR32_REG=NR42_REG=0; } else if(idx==c_sfx){ c_sfx=NULL; s_t=0; } }
+    14	void sound_stop_all(void){ c_bgm=NULL; c_sfx=NULL; s_t=0; sound_tick=0; NR12_REG=NR22_REG=NR32_REG=NR42_REG=0; }
+    15	uint8_t sound_isplaying(const Sound *idx){ return (idx==c_bgm || (idx==c_sfx && s_t>0)); }
+    16	uint16_t sound_pos(const Sound *idx){ if(idx->type==T_HUGE && idx==c_bgm) return (uint16_t)sound_tick; if(idx->type==T_SFX && idx==c_sfx) return s_t; return 0; }
+    17	void audio_update(void){ if(s_t>0) s_t--; if(c_bgm!=NULL){ hUGE_dosound(); sound_tick++; } }
+    18	
+    19	
+
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/joystick/joystick_sys.h
+----------------------------------------------------------
+     1	#ifndef JOYSTICK_SYS_H
+     2	#define JOYSTICK_SYS_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <stdint.h>
+     6	
+     7	// Botones nativos de GBDK (Máscaras de bits):
+     8	// J_START  : Botón Start
+     9	// J_SELECT : Botón Select
+    10	// J_A      : Botón A
+    11	// J_B      : Botón B
+    12	// J_UP     : Cruceta Arriba
+    13	// J_DOWN   : Cruceta Abajo
+    14	// J_LEFT   : Cruceta Izquierda
+    15	// J_RIGHT  : Cruceta Derecha
+    16	
+    17	extern uint8_t _joy_current, _joy_previous;
+    18	
+    19	void joystick_update(void);
+    20	uint8_t joystick_check_button(uint8_t btn);
+    21	uint8_t joystick_pressed_button(uint8_t btn);
+    22	uint8_t joystick_released_button(uint8_t btn);
+    23	int8_t joystick_xpos(void);
+    24	int8_t joystick_ypos(void);
+    25	
+    26	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/joystick/joystick_sys.c
+----------------------------------------------------------
+     1	#include "joystick_sys.h"
+     2	
+     3	uint8_t _joy_current = 0, _joy_previous = 0;
+     4	
+     5	void joystick_update(void) {_joy_previous = _joy_current;_joy_current = joypad();}
+     6	uint8_t joystick_check_button(uint8_t btn) { return (_joy_current & btn); }
+     7	uint8_t joystick_pressed_button(uint8_t btn) { return ((_joy_current & btn) && !(_joy_previous & btn)); }
+     8	uint8_t joystick_released_button(uint8_t btn) { return (!(_joy_current & btn) && (_joy_previous & btn)); }
+     9	int8_t joystick_xpos(void) {if (_joy_current & J_LEFT) return -1;if (_joy_current & J_RIGHT) return 1;return 0;}
+    10	int8_t joystick_ypos(void) {if (_joy_current & J_UP) return -1;if (_joy_current & J_DOWN) return 1;return 0;}
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/debug/debug_sys.h
+----------------------------------------------------------
+     1	#ifndef DEBUG_SYS_H
+     2	#define DEBUG_SYS_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <stdint.h>
+     6	
+     7	// Comenta esta línea para desactivar el debug y ganar rendimiento en el juego final
+     8	#define MODO_DEBUG
+     9	
+    10	#ifdef MODO_DEBUG
+    11	    void debug_init(void);
+    12	    void debug_begin(void);
+    13	    void debug_watch(int16_t value);
+    14	#else
+    15	    #define debug_init()
+    16	    #define debug_begin()
+    17	    #define debug_watch(v)
+    18	#endif
+    19	
+    20	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./src/engine/debug/debug_sys.c
+----------------------------------------------------------
+     1	#include "debug_sys.h"
+     2	#include "../../game/sprites/fuenteNumerica/fuenteNumerica.h"
+     3	
+     4	#ifdef MODO_DEBUG
+     5	
+     6	// --- CONFIGURACIÓN DINÁMICA ---
+     7	#define WIN_X_BASE 7       // Borde izquierdo
+     8	#define WIN_Y_BOTTOM 144   // Altura total de la pantalla (oculta)
+     9	#define TILE_NUM_START 200 
+    10	#define TILE_BLANCO 210
+    11	
+    12	static uint8_t current_row;
+    13	static uint8_t win_y_pos;
+    14	
+    15	void debug_init(void) {
+    16	    // Cargamos los tiles una sola vez
+    17	    set_bkg_data(TILE_NUM_START, 12, fuenteNumerica);
+    18	    
+    19	    // Inicialmente la Window está fuera de la pantalla (en el fondo)
+    20	    win_y_pos = WIN_Y_BOTTOM;
+    21	    move_win(WIN_X_BASE, win_y_pos);
+    22	    SHOW_WIN;
+    23	}
+    24	
+    25	void debug_begin(void) {
+    26	    // Al empezar el frame, reseteamos la fila y la posición Y
+    27	    current_row = 0;
+    28	    win_y_pos = WIN_Y_BOTTOM;
+    29	    move_win(WIN_X_BASE, win_y_pos);
+    30	}
+    31	
+    32	void debug_watch(int16_t value) {
+    33	    uint8_t buf[8]; 
+    34	    uint8_t tmp[5]; 
+    35	    int8_t p = 0;
+    36	    uint8_t i = 0;
+    37	    
+    38	    int16_t v = (value < 0) ? -value : value;
+    39	
+    40	    // Conversión de número a tiles
+    41	    if (v == 0) {
+    42	        tmp[p++] = TILE_NUM_START; 
+    43	    } else {
+    44	        while (v > 0 && p < 5) {
+    45	            tmp[p++] = (v % 10) + TILE_NUM_START;
+    46	            v /= 10;
+    47	        }
+    48	    }
+    49	
+    50	    // Signo negativo (tile 211)
+    51	    if (value < 0) buf[i++] = 211;
+    52	    
+    53	    while (p > 0) buf[i++] = tmp[--p];
+    54	    
+    55	    // Limpieza con tile blanco
+    56	    buf[i++] = TILE_BLANCO;
+    57	
+    58	    // --- EL TRUCO DEL ASCENSOR ---
+    59	    // 1. Dibujamos en la Window en la fila actual
+    60	    set_win_tiles(0, current_row++, i, 1, buf);
+    61	
+    62	    // 2. Subimos la posición física de la Window 8 píxeles
+    63	    if (win_y_pos > 8) {
+    64	        win_y_pos -= 8;
+    65	        move_win(WIN_X_BASE, win_y_pos);
+    66	    }
+    67	}
+    68	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./project_report.txt
+----------------------------------------------------------
+     1	=== ESTRUCTURA DEL PROYECTO ===
+     2	.
+     3	 |-- make.sh
+     4	 |-- rom
+     5	 | |-- game.sav
+     6	 | |-- game.gb
+     7	 | |-- game.map
+     8	 | |-- game.noi
+     9	 |-- resumenDirectorio.txt
+    10	 |-- src
+    11	 | |-- game
+    12	 | | |-- entity
+    13	 | | | |-- game_objects.h
+    14	 | | | |-- game_objects.c
+    15	 | | |-- main.c
+    16	 | | |-- sound
+    17	 | | | |-- sample_song.c
+    18	 | | | |-- _sound_data.c
+    19	 | | | |-- _sound_data.h
+    20	 | | |-- assets
+    21	 | | | |-- tilesFondo.c
+    22	 | | | |-- tilesFondo.gbr
+    23	 | | | |-- tilesFondo.h
+    24	 | |-- engine
+    25	 | | |-- entity
+    26	 | | | |-- entity_manager.h
+    27	 | | | |-- entity_manager.c
+    28	 | | |-- sound
+    29	 | | | |-- hUGE.inc
+    30	 | | | |-- sound_system.h
+    31	 | | | |-- hUGEDriver.h
+    32	 | | | |-- hUGE_note_table.inc
+    33	 | | | |-- hUGEDriver.o
+    34	 | | | |-- sound_system.c
+    35	 | | |-- video
+    36	 | | | |-- video_system.c
+    37	 | | | |-- video_system.h
+    38	 |-- build
+    39	 | |-- errores.log
+    40	 |-- project_report.txt
+    41	 |-- project_report.sh
+    42	 |-- resumenDirectorio.sh
+    43	
+    44	=== ANÁLISIS DE ARCHIVOS C/H ===
+    45	--------------------------------
+    46	Archivo: game_objects.h
+    47	Ruta: ./src/game/entity/game_objects.h
+    48	#include "../../engine/entity/entity_manager.h"
+    49	--------------------------------
+    50	Archivo: game_objects.c
+    51	Ruta: ./src/game/entity/game_objects.c
+    52	#include "../../engine/entity/entity_manager.h"
+    53	#include "./game_objects.h"
+    54	--------------------------------
+    55	Archivo: main.c
+    56	Ruta: ./src/game/main.c
+    57	#include <gb/gb.h>
+    58	#include "../engine/sound/sound_system.h"
+    59	#include "../engine/video/video_system.h"
+    60	#include "../engine/entity/entity_manager.h"
+    61	#include "./sound/_sound_data.h"
+    62	#include "./entity/game_objects.h" 
+    63	#include "./assets/tilesFondo.h"
+    64	--------------------------------
+    65	Archivo: sample_song.c
+    66	Ruta: ./src/game/sound/sample_song.c
+    67	#include "../../engine/sound/hUGEDriver.h"
+    68	#include <stddef.h>
+    69	--------------------------------
+    70	Archivo: _sound_data.c
+    71	Ruta: ./src/game/sound/_sound_data.c
+    72	#include "../../engine/sound/sound_system.h"
+    73	#include "_sound_data.h"
+    74	--------------------------------
+    75	Archivo: _sound_data.h
+    76	Ruta: ./src/game/sound/_sound_data.h
+    77	#include "../../engine/sound/sound_system.h"
+    78	--------------------------------
+    79	Archivo: tilesFondo.c
+    80	Ruta: ./src/game/assets/tilesFondo.c
+    81	--------------------------------
+    82	Archivo: tilesFondo.h
+    83	Ruta: ./src/game/assets/tilesFondo.h
+    84	--------------------------------
+    85	Archivo: entity_manager.h
+    86	Ruta: ./src/engine/entity/entity_manager.h
+    87	#include <gb/gb.h>
+    88	#include <stdint.h>
+    89	--------------------------------
+    90	Archivo: entity_manager.c
+    91	Ruta: ./src/engine/entity/entity_manager.c
+    92	#include "./entity_manager.h"
+    93	--------------------------------
+    94	Archivo: sound_system.h
+    95	Ruta: ./src/engine/sound/sound_system.h
+    96	#include <stdint.h>
+    97	#include "hUGEDriver.h"
+    98	--------------------------------
+    99	Archivo: hUGEDriver.h
+   100	Ruta: ./src/engine/sound/hUGEDriver.h
+   101	#include <gbdk/platform.h>
+   102	--------------------------------
+   103	Archivo: sound_system.c
+   104	Ruta: ./src/engine/sound/sound_system.c
+   105	#include <gb/gb.h>
+   106	#include <stddef.h>
+   107	#include "sound_system.h"
+   108	--------------------------------
+   109	Archivo: video_system.c
+   110	Ruta: ./src/engine/video/video_system.c
+   111	#include "video_system.h"
+   112	--------------------------------
+   113	Archivo: video_system.h
+   114	Ruta: ./src/engine/video/video_system.h
+   115	#include <gb/gb.h>
+   116	#include <stdint.h>
+
+
+----------------------------------------------------------
+ARCHIVO: ./project_report.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	OUTPUT="project_report.txt"
+     4	
+     5	echo "Iniciando análisis del directorio actual..."
+     6	echo "------------------------------------------"
+     7	
+     8	# Limpiar archivo previo
+     9	> "$OUTPUT"
+    10	
+    11	# 1. Generar Árbol de Recursos
+    12	echo "[1/2] Escaneando estructura de carpetas y archivos..."
+    13	echo "=== ESTRUCTURA DEL PROYECTO ===" >> "$OUTPUT"
+    14	
+    15	# Listar nombres sin rutas absolutas, ignorando archivos ocultos
+    16	find . -maxdepth 10 -not -path '*/.*' | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-- \1/" >> "$OUTPUT"
+    17	echo " -> Estructura guardada."
+    18	
+    19	# 2. Analizar archivos .c y .h
+    20	echo "[2/2] Analizando archivos .c y .h para extraer #includes..."
+    21	echo -e "\n=== ANÁLISIS DE ARCHIVOS C/H ===" >> "$OUTPUT"
+    22	
+    23	# Buscar archivos .c y .h
+    24	find . -type f \( -name "*.c" -o -name "*.h" \) -not -path '*/.*' | while read -r FILE; do
+    25	    echo " -> Procesando: $FILE"
+    26	    
+    27	    echo "--------------------------------" >> "$OUTPUT"
+    28	    echo "Archivo: $(basename "$FILE")" >> "$OUTPUT"
+    29	    echo "Ruta: $FILE" >> "$OUTPUT"
+    30	    
+    31	    # Extraer líneas con #include sin espacios iniciales
+    32	    grep "#include" "$FILE" | sed 's/^[ \t]*//' >> "$OUTPUT"
+    33	done
+    34	
+    35	echo "------------------------------------------"
+    36	echo "Análisis completado con éxito."
+    37	echo "Resultados guardados en: $OUTPUT"
+    38	echo ""
+    39	read -p "Presiona Enter para cerrar..."
+
+----------------------------------------------------------
+ARCHIVO: ./resumenDirectorio.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	# [AI INSTRUCTION / PROTECTED CODE]
+     4	# Este script es un ENCAPSULADOR DE CONTEXTO LOCAL ESTRICTO.
+     5	# Prohibido mostrar rutas absolutas del sistema (/home/user/...).
+     6	# Solo opera sobre el directorio relativo actual.
+     7	
+     8	OUTPUT_FILE="resumenDirectorio.txt"
+     9	
+    10	# Obtenemos solo el nombre de la carpeta actual (sin la ruta completa)
+    11	NOMBRE_CARPETA_LOCAL=$(basename "$PWD")
+    12	
+    13	clear
+    14	echo "=========================================================="
+    15	echo "      ENCAPSULADOR: RESUMEN DE DIRECTORIO LOCAL          "
+    16	echo "=========================================================="
+    17	echo " Carpeta actual: ./$NOMBRE_CARPETA_LOCAL"
+    18	
+    19	# 1. PREPARACIÓN
+    20	rm -f "$OUTPUT_FILE"
+    21	echo "RESUMEN TÉCNICO DEL DIRECTORIO: ./$NOMBRE_CARPETA_LOCAL" > "$OUTPUT_FILE"
+    22	echo "Ámbito: Solo archivos contenidos en esta ubicación." >> "$OUTPUT_FILE"
+    23	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    24	
+    25	# 2. ÁRBOL LOCAL RELATIVO
+    26	echo "[>] Generando mapa de archivos..."
+    27	echo -e "\nESTRUCTURA RELATIVA:" >> "$OUTPUT_FILE"
+    28	# Usamos find . para mantener rutas relativas ./ y evitar rutas absolutas
+    29	find . -maxdepth 4 -not -path '*/.*' -not -path "./build/*" -not -path "./rom/*" | sed -e 's/[^-][^\/]*\// |/g' -e 's/|/  /g' >> "$OUTPUT_FILE"
+    30	
+    31	echo "=========================================================="
+    32	echo "          PROCESANDO CONTENIDO RELATIVO                   "
+    33	echo "=========================================================="
+    34	
+    35	total_archivos=0
+    36	
+    37	# 3. VOLCADO RECURSIVO (Solo extensiones permitidas)
+    38	# Excluimos explícitamente el archivo de salida para evitar recursividad
+    39	find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.sh" -o -name "*.txt" -o -name "*.inc" -o -name "*.asm" \) \
+    40	-not -path "./build/*" -not -path "./rom/*" -not -name "$OUTPUT_FILE" | while read -r archivo; do
+    41	
+    42	    # Informar al usuario (solo ruta relativa)
+    43	    echo -n "[LECTURA]: $archivo ... "
+    44	    
+    45	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    46	    echo "ARCHIVO: $archivo" >> "$OUTPUT_FILE"
+    47	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    48	    
+    49	    # Volcar contenido
+    50	    cat -n "$archivo" >> "$OUTPUT_FILE"
+    51	    echo -e "\n" >> "$OUTPUT_FILE"
+    52	    
+    53	    ((total_archivos++))
+    54	    echo -e "\033[0;32mOK\033[0m"
+    55	
+    56	done
+    57	
+    58	# 4. CIERRE
+    59	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    60	echo "FIN DEL RESUMEN" >> "$OUTPUT_FILE"
+    61	
+    62	echo ""
+    63	echo "=========================================================="
+    64	echo "          PROCESO FINALIZADO                             "
+    65	echo "=========================================================="
+    66	echo " [+] Archivos encapsulados: $total_archivos"
+    67	echo " [+] Destino: ./$OUTPUT_FILE"
+    68	echo "=========================================================="
+    69	read -p "Presiona ENTER para finalizar..."
+
+
+----------------------------------------------------------
+FIN DEL RESUMEN

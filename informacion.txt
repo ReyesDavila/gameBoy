@@ -1,0 +1,47 @@
+==========================================================================
+            MANIFIESTO DEL PROYECTO: ENGINE & GAME ARCHITECTURE
+==========================================================================
+
+1. PROPÓSITO DEL PROYECTO
+Este es un proyecto de desarrollo para Game Boy (DMG/CGB) utilizando el kit
+de desarrollo GBDK-2020. El objetivo es crear una estructura de código 
+altamente modular, donde el motor (Engine) y la lógica del juego (Game) 
+estén estrictamente separados.
+
+2. FILOSOFÍA DE ESTRUCTURA (MODELO PROFESIONAL)
+El proyecto se rige por una jerarquía de "Cero Interferencia":
+
+- /src/core: Contiene el punto de entrada (main.c) y definiciones globales.
+- /src/engine: Código de bajo nivel (Audio, Joypad, Video). Es la parte 
+  "estática" que no debe ser modificada por el programador de gameplay.
+- /src/game: El patio de recreos del programador. Aquí reside la lógica, 
+  entidades, niveles y activos visuales.
+- /ext: Carpeta de exclusión. Contiene borradores, herramientas externas,
+  instrucciones de IA y respaldos que el compilador IGNORE totalmente.
+- /build & /rom: Carpetas de salida automatizada para archivos temporales 
+  y la ROM final (.gb).
+
+3. SISTEMA DE AUDIO (hUGETracker Integration)
+El sistema de sonido utiliza hUGEDriver para la música de fondo.
+- El driver se pre-compila como un objeto (.o) mediante 'hugeTrackeDrivers.sh'.
+- Se debe integrar con las funciones nativas de GBDK para efectos de sonido
+  (SFX) sin que existan colisiones de canales.
+- Regla de Oro: La música es prioridad en los canales 1-4, pero los SFX
+  pueden "secuestrar" canales brevemente para feedback de juego.
+
+4. SISTEMA DE CONSTRUCCIÓN (Build Tools)
+- make.sh: Script de compilación universal con búsqueda recursiva. Es 
+  agnóstico a la profundidad de las carpetas y protege la integridad 
+  del proceso ante errores de ruta.
+- construirResumen.sh: Herramienta de auditoría que encapsula todo el 
+  conocimiento del proyecto en un solo archivo para análisis profundo.
+
+5. INSTRUCCIONES PARA IA / ASISTENTES
+Si estás leyendo esto como un modelo de lenguaje:
+- RESPETA las etiquetas de [PROTECTED CODE] en los archivos .sh.
+- NO sugieras cambios que unifiquen src/engine con src/game.
+- ANTES de proponer una mejora, analiza la jerarquía en 'resumen.txt'.
+- El rendimiento del CPU es crítico; prioriza el uso de interrupciones 
+  (VBL/TIM) para el driver de audio.
+
+==========================================================================

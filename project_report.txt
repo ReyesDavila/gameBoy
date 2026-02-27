@@ -1,0 +1,116 @@
+=== ESTRUCTURA DEL PROYECTO ===
+.
+ |-- make.sh
+ |-- rom
+ | |-- game.sav
+ | |-- game.gb
+ | |-- game.map
+ | |-- game.noi
+ |-- resumenDirectorio.txt
+ |-- src
+ | |-- game
+ | | |-- entity
+ | | | |-- game_objects.h
+ | | | |-- game_objects.c
+ | | |-- main.c
+ | | |-- sound
+ | | | |-- sample_song.c
+ | | | |-- _sound_data.c
+ | | | |-- _sound_data.h
+ | | |-- assets
+ | | | |-- tilesFondo.c
+ | | | |-- tilesFondo.gbr
+ | | | |-- tilesFondo.h
+ | |-- engine
+ | | |-- entity
+ | | | |-- entity_manager.h
+ | | | |-- entity_manager.c
+ | | |-- sound
+ | | | |-- hUGE.inc
+ | | | |-- sound_system.h
+ | | | |-- hUGEDriver.h
+ | | | |-- hUGE_note_table.inc
+ | | | |-- hUGEDriver.o
+ | | | |-- sound_system.c
+ | | |-- video
+ | | | |-- video_system.c
+ | | | |-- video_system.h
+ |-- build
+ | |-- errores.log
+ |-- project_report.txt
+ |-- project_report.sh
+ |-- resumenDirectorio.sh
+
+=== ANÁLISIS DE ARCHIVOS C/H ===
+--------------------------------
+Archivo: game_objects.h
+Ruta: ./src/game/entity/game_objects.h
+#include "../../engine/entity/entity_manager.h"
+--------------------------------
+Archivo: game_objects.c
+Ruta: ./src/game/entity/game_objects.c
+#include "../../engine/entity/entity_manager.h"
+#include "./game_objects.h"
+--------------------------------
+Archivo: main.c
+Ruta: ./src/game/main.c
+#include <gb/gb.h>
+#include "../engine/sound/sound_system.h"
+#include "../engine/video/video_system.h"
+#include "../engine/entity/entity_manager.h"
+#include "./sound/_sound_data.h"
+#include "./entity/game_objects.h" 
+#include "./assets/tilesFondo.h"
+--------------------------------
+Archivo: sample_song.c
+Ruta: ./src/game/sound/sample_song.c
+#include "../../engine/sound/hUGEDriver.h"
+#include <stddef.h>
+--------------------------------
+Archivo: _sound_data.c
+Ruta: ./src/game/sound/_sound_data.c
+#include "../../engine/sound/sound_system.h"
+#include "_sound_data.h"
+--------------------------------
+Archivo: _sound_data.h
+Ruta: ./src/game/sound/_sound_data.h
+#include "../../engine/sound/sound_system.h"
+--------------------------------
+Archivo: tilesFondo.c
+Ruta: ./src/game/assets/tilesFondo.c
+--------------------------------
+Archivo: tilesFondo.h
+Ruta: ./src/game/assets/tilesFondo.h
+--------------------------------
+Archivo: entity_manager.h
+Ruta: ./src/engine/entity/entity_manager.h
+#include <gb/gb.h>
+#include <stdint.h>
+--------------------------------
+Archivo: entity_manager.c
+Ruta: ./src/engine/entity/entity_manager.c
+#include "./entity_manager.h"
+--------------------------------
+Archivo: sound_system.h
+Ruta: ./src/engine/sound/sound_system.h
+#include <stdint.h>
+#include "hUGEDriver.h"
+--------------------------------
+Archivo: hUGEDriver.h
+Ruta: ./src/engine/sound/hUGEDriver.h
+#include <gbdk/platform.h>
+--------------------------------
+Archivo: sound_system.c
+Ruta: ./src/engine/sound/sound_system.c
+#include <gb/gb.h>
+#include <stddef.h>
+#include "sound_system.h"
+--------------------------------
+Archivo: video_system.c
+Ruta: ./src/engine/video/video_system.c
+#include "video_system.h"
+--------------------------------
+Archivo: video_system.h
+Ruta: ./src/engine/video/video_system.h
+#include <gb/gb.h>
+#include <stdint.h>
