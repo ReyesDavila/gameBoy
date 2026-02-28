@@ -57,8 +57,8 @@ while true; do
     rm -f "$ROM_FILE"
 
     # lcc transforma tu código C en un archivo que la Game Boy entiende.
-    $LCC -Wa-l -Wl-m -Wl-j $INC_DIRS -o "$ROM_FILE" $SOURCES > build/errores.log 2>&1
-
+    $LCC -Wl-y -Wl-w -Wl-m -Wl-j $INC_DIRS -o "$ROM_FILE" $SOURCES > build/errores.log 2>&1
+    
     if [ $? -eq 0 ]; then
         # Si todo sale bien, movemos los archivos temporales a 'build' para limpiar la carpeta
         # El flag -f y el || true evitan que el script se detenga si no hay archivos que mover

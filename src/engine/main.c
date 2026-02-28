@@ -26,7 +26,7 @@ void main(void) {
         game_draw();
 
         // 4. RENDER DE ENTIDADES
-        entity_render_all();
+        //entity_render_all();
 
         
 

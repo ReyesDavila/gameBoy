@@ -1,9 +1,10 @@
+./src/game/objects/_object0/_object0_settings.c:
+./src/game/objects/_object0/object0_init.c:
+./src/game/objects/_object0/object0_draw.c:
+./src/game/objects/_object0/object0_step.c:
 ./src/game/objects/pelota/pelota_init.c:
 ./src/game/objects/pelota/pelota_step.c:
 ./src/game/objects/game_objects.c:
-./src/game/objects/_object/object_draw.c:
-./src/game/objects/_object/object_init.c:
-./src/game/objects/_object/object_step.c:
 ./src/game/game_step.c:
 ./src/game/game_init.c:
 ./src/game/rooms/room01/room01_step.c:
@@ -14,11 +15,11 @@
 ./src/game/sprites/tilesFondo.c:
 ./src/game/sprites/fuenteNumerica/fuenteNumerica.c:
 ./src/engine/objects/entity_mgr.c:
+./src/engine/scripts/scripts_mgr.c:
 ./src/engine/main.c:
 ./src/engine/math/math_util.c:
-./src/engine/math/math_util.c:9: warning 112: function 'rand' implicit declaration
-./src/engine/math/math_util.c:6: warning 126: unreachable code
-./src/engine/math/math_util.c:9: warning 126: unreachable code
+./src/engine/math/math_util.c:4: warning 112: function 'rand' implicit declaration
+./src/engine/math/math_util.c:4: warning 84: 'auto' variable 'rand' may be used before initialization
 ./src/engine/video/video_sys.c:
 ./src/engine/sounds/sound_sys.c:
 ./src/engine/joystick/joystick_sys.c:

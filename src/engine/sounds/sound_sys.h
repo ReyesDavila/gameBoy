@@ -7,7 +7,7 @@ typedef enum { T_HUGE, T_SFX } s_type;
 typedef struct { uint8_t ch, r1, r2, r3, r4, r5, dur; } SFX_d;
 typedef struct { s_type type; const void *data; } Sound;
 
-extern uint32_t sound_tick;
+extern uint16_t sound_tick;
 
 void sound_init(void);
 void sound_play(const Sound *idx);

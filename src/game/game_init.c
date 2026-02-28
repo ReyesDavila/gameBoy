@@ -1,12 +1,17 @@
 #include "../engine/game_bridge.h"
 
 void game_init(void) {
-    entity_init(mi_pool_personalizado, MI_CANTIDAD_ENTIDADES, sizeof(Entity));
+    // En tu game_init.c
+    entity_manager_init(); // Limpia la lista al empezar
+
+    room01_init();
+    
     #ifdef MODO_DEBUG
         debug_init();
      #endif
 
-    object_init();
-    pelota_init();
-    room01_init();
+    // Creas un obj0
+    obj0 = entity_create(80, 72, Object0);
+    //entity_create(80, 72, Object0);
+    
 }

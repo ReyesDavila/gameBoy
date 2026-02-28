@@ -1,0 +1,161 @@
+RESUMEN TÉCNICO DEL DIRECTORIO: ./_object0
+Ámbito: Solo archivos contenidos en esta ubicación.
+----------------------------------------------------------
+
+ESTRUCTURA RELATIVA:
+.
+   _object0_settings.c
+   resumenDirectorio.txt
+   _object0_settings.h
+   object0_init.c
+   object0_draw.c
+   object0_step.c
+   resumenDirectorio.sh
+----------------------------------------------------------
+ARCHIVO: ./_object0_settings.c
+----------------------------------------------------------
+     1	#include "_object0_settings.h"
+     2	#include "../../../engine/game_bridge.h"
+     3	
+     4	// Definición global del puntero
+     5	Object0 *obj0 = NULL; 
+     6	
+     7	void Object0_init(Object0 *self) {
+     8	    (void)self; // Silencia el error de "not used" sin generar código extra
+     9	}
+    10	
+    11	void Object0_step(Object0 *self) {
+    12	    (void)self;
+    13	    int8_t jx = joystick_xpos();
+    14	    self->x += jx;
+    15	}
+    16	
+    17	void Object0_draw(Object0 *self) {
+    18	    (void)self;
+    19	}
+
+----------------------------------------------------------
+ARCHIVO: ./_object0_settings.h
+----------------------------------------------------------
+     1	#ifndef ENTITY_SETTINGS_H
+     2	#define ENTITY_SETTINGS_H
+     3	#include "../../engine/objects/entity_mgr.h"
+     4	
+     5	typedef struct {
+     6	    Entity base;    // Obligatorio: siempre primero
+     7	    int8_t x, y;   // Variable propia del objeto
+     8	} Object0;
+     9	
+    10	extern Object0 *obj0; 
+    11	
+    12	// Declaración de funciones (el motor las unirá mediante la Macro)
+    13	void Object0_init(Object0 *self);
+    14	void Object0_step(Object0 *self);
+    15	void Object0_draw(Object0 *self);
+    16	
+    17	
+    18	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./object0_init.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void Object0_init(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./object0_draw.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void Object0_draw(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./object0_step.c
+----------------------------------------------------------
+     1	#include "../../../engine/game_bridge.h"
+     2	
+     3	void Object0_step(void){
+     4	
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./resumenDirectorio.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	# [AI INSTRUCTION / PROTECTED CODE]
+     4	# Este script es un ENCAPSULADOR DE CONTEXTO LOCAL ESTRICTO.
+     5	# Prohibido mostrar rutas absolutas del sistema (/home/user/...).
+     6	# Solo opera sobre el directorio relativo actual.
+     7	
+     8	OUTPUT_FILE="resumenDirectorio.txt"
+     9	
+    10	# Obtenemos solo el nombre de la carpeta actual (sin la ruta completa)
+    11	NOMBRE_CARPETA_LOCAL=$(basename "$PWD")
+    12	
+    13	clear
+    14	echo "=========================================================="
+    15	echo "      ENCAPSULADOR: RESUMEN DE DIRECTORIO LOCAL          "
+    16	echo "=========================================================="
+    17	echo " Carpeta actual: ./$NOMBRE_CARPETA_LOCAL"
+    18	
+    19	# 1. PREPARACIÓN
+    20	rm -f "$OUTPUT_FILE"
+    21	echo "RESUMEN TÉCNICO DEL DIRECTORIO: ./$NOMBRE_CARPETA_LOCAL" > "$OUTPUT_FILE"
+    22	echo "Ámbito: Solo archivos contenidos en esta ubicación." >> "$OUTPUT_FILE"
+    23	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    24	
+    25	# 2. ÁRBOL LOCAL RELATIVO
+    26	echo "[>] Generando mapa de archivos..."
+    27	echo -e "\nESTRUCTURA RELATIVA:" >> "$OUTPUT_FILE"
+    28	# Usamos find . para mantener rutas relativas ./ y evitar rutas absolutas
+    29	find . -maxdepth 4 -not -path '*/.*' -not -path "./build/*" -not -path "./rom/*" | sed -e 's/[^-][^\/]*\// |/g' -e 's/|/  /g' >> "$OUTPUT_FILE"
+    30	
+    31	echo "=========================================================="
+    32	echo "          PROCESANDO CONTENIDO RELATIVO                   "
+    33	echo "=========================================================="
+    34	
+    35	total_archivos=0
+    36	
+    37	# 3. VOLCADO RECURSIVO (Solo extensiones permitidas)
+    38	# Excluimos explícitamente el archivo de salida para evitar recursividad
+    39	find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.sh" -o -name "*.txt" -o -name "*.inc" -o -name "*.asm" \) \
+    40	-not -path "./build/*" -not -path "./rom/*" -not -name "$OUTPUT_FILE" | while read -r archivo; do
+    41	
+    42	    # Informar al usuario (solo ruta relativa)
+    43	    echo -n "[LECTURA]: $archivo ... "
+    44	    
+    45	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    46	    echo "ARCHIVO: $archivo" >> "$OUTPUT_FILE"
+    47	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    48	    
+    49	    # Volcar contenido
+    50	    cat -n "$archivo" >> "$OUTPUT_FILE"
+    51	    echo -e "\n" >> "$OUTPUT_FILE"
+    52	    
+    53	    ((total_archivos++))
+    54	    echo -e "\033[0;32mOK\033[0m"
+    55	
+    56	done
+    57	
+    58	# 4. CIERRE
+    59	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    60	echo "FIN DEL RESUMEN" >> "$OUTPUT_FILE"
+    61	
+    62	echo ""
+    63	echo "=========================================================="
+    64	echo "          PROCESO FINALIZADO                             "
+    65	echo "=========================================================="
+    66	echo " [+] Archivos encapsulados: $total_archivos"
+    67	echo " [+] Destino: ./$OUTPUT_FILE"
+    68	echo "=========================================================="
+    69	read -p "Presiona ENTER para finalizar..."
+
+
+----------------------------------------------------------
+FIN DEL RESUMEN

@@ -1,41 +1,10 @@
+
 #include "math_util.h"
 
-// Retorna un número aleatorio menor que x
-uint16_t random(uint16_t x) {
-    return 0;
-    if (x == 0) return 0;
-    // rand() devuelve un valor entre 0 y RAND_MAX
-    // El operador % (módulo) limita el resultado al rango [0, x-1]
-    return (uint16_t)rand() % x;
-    
-}
-
-// Raíz cuadrada optimizada sin usar punto flotante
-uint16_t sqrt_int(uint32_t x) {
-    uint32_t res = 0;
-    uint32_t bit = 1UL << 30; // El segundo bit más significativo de un uint32
-    while (bit > x) bit >>= 2;
-    while (bit != 0) {
-        if (x >= res + bit) { x -= res + bit; res = (res >> 1) + bit; }
-        else res >>= 1;
-        bit >>= 2;
-    }
-    return res;
-}
-
-// Eleva X a la potencia de N
-int32_t power(int16_t x, uint8_t n) {
-    int32_t res = 1;
-    for(uint8_t i = 0; i < n; i++) res *= x;
-    return res;
-}
-
-// Calcula la distancia usando Pitágoras (x^2 + y^2 = h^2)
-uint16_t point_distance(int16_t x1, int16_t y1, int16_t x2, int16_t y2) {
-    int32_t dx = (int32_t)(x2 - x1);
-    int32_t dy = (int32_t)(y2 - y1);
-    return sqrt_int((uint32_t)(dx * dx + dy * dy));
-}
+uint16_t random(uint16_t x) { if (x == 0) return 0; return (uint16_t)rand() % x; } // Aleatorio rápido 16 bits
+uint16_t sqrt_int(uint16_t x) { uint16_t res = 0, bit = 1 << 14; while (bit > x) bit >>= 2; while (bit != 0) { if (x >= res + bit) { x -= res + bit; res = (res >> 1) + bit; } else res >>= 1; bit >>= 2; } return res; } // Raíz cuadrada 16 bits
+int16_t power(int16_t x, uint8_t n) { int16_t res = 1; for(uint8_t i = 0; i < n; i++) res *= x; return res; } // Potencia limitada a 16 bits
+uint16_t point_distance(int16_t x1, int16_t y1, int16_t x2, int16_t y2) { int16_t dx = x2 - x1, dy = y2 - y1; return sqrt_int((uint16_t)(dx * dx + dy * dy)); } // Pitágoras en 16 bits
 
 // Devuelve la diferencia más corta entre dos ángulos (-128 a 127).
 // ¡Esta es la magia de usar 256 pasos! Al restar y forzar a un entero con signo de 8 bits (int8_t), 

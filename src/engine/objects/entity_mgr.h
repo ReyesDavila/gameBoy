@@ -1,15 +1,30 @@
-#ifndef ENTITY_MANAGER_H
-#define ENTITY_MANAGER_H
-
+#ifndef ENTITY_MGR_H
+#define ENTITY_MGR_H
 #include <gb/gb.h>
-#include <stdint.h>
+#include <stdbool.h>
 
-// El motor no sabe qué hay dentro, solo que existe
-typedef struct Entity Entity; 
+typedef struct Entity Entity;
+struct Entity {
+    uint8_t active;
+    uint8_t solid;        // 1 = Sólido, 0 = Traspasable
+    int16_t x, y;
+    uint8_t width, height;// Caja de colisión
+    void (*init)(Entity *self);
+    void (*step)(Entity *self);
+    void (*draw)(Entity *self);
+};
 
-// El motor ahora pide al usuario la memoria y el tamaño
-void entity_init(Entity* storage, uint8_t max_count, uint16_t struct_size);
-Entity* entity_create(int16_t x, int16_t y, uint8_t tile_id);
-void entity_render_all(void);
+extern Entity* global_entities[];
+extern uint8_t global_entity_count;
+
+void entity_manager_init(void);
+void entity_manager_step(void);
+void entity_manager_draw(void);
+
+// Funciones internas del motor
+Entity* _entity_create_pool(int16_t x, int16_t y, Entity* pool, uint8_t max_count, size_t struct_size, void (*i)(Entity*), void (*s)(Entity*), void (*d)(Entity*));
+
+// MACROS ESTILO GAMEMAKER (Requieren que la variable 'self' exista en el contexto)
+#define entity_create(px, py, type) (type*)_entity_create_pool(px, py, (Entity*)type##_list, MAX_##type, sizeof(type), (void(*)(Entity*))type##_init, (void(*)(Entity*))type##_step, (void(*)(Entity*))type##_draw)
 
 #endif

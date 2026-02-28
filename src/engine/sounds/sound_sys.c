@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "sound_sys.h"
 
-uint32_t sound_tick = 0;
+uint16_t sound_tick = 0;
 static const Sound *c_bgm = NULL;
 static const Sound *c_sfx = NULL;
 static uint8_t s_t = 0;

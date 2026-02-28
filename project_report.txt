@@ -1,40 +1,79 @@
 === ESTRUCTURA DEL PROYECTO ===
 .
  |-- make.sh
+ |-- informacion.txt
  |-- rom
  | |-- game.sav
  | |-- game.gb
  | |-- game.map
  | |-- game.noi
- |-- resumenDirectorio.txt
+ |-- gitAuto.sh
  |-- src
  | |-- game
- | | |-- entity
+ | | |-- objects
+ | | | |-- _object0
+ | | | | |-- _object0_settings.c
+ | | | | |-- resumenDirectorio.txt
+ | | | | |-- _object0_settings.h
+ | | | | |-- object0_init.c
+ | | | | |-- object0_draw.c
+ | | | | |-- object0_step.c
+ | | | | |-- resumenDirectorio.sh
+ | | | |-- pelota
+ | | | | |-- pelota_init.c
+ | | | | |-- pelota_step.c
  | | | |-- game_objects.h
  | | | |-- game_objects.c
- | | |-- main.c
- | | |-- sound
+ | | |-- scripts
+ | | |-- game_step.c
+ | | |-- game_init.c
+ | | |-- rooms
+ | | | |-- rooms_all.h
+ | | | |-- room01
+ | | | | |-- room01_step.c
+ | | | | |-- room01_init.c
+ | | | |-- room02
+ | | |-- game_draw.c
+ | | |-- sounds
  | | | |-- sample_song.c
  | | | |-- _sound_data.c
  | | | |-- _sound_data.h
- | | |-- assets
+ | | |-- sprites
  | | | |-- tilesFondo.c
+ | | | |-- fuenteNumerica
+ | | | | |-- fuenteNumerica.gbr
+ | | | | |-- fuenteNumerica.c
+ | | | | |-- fuenteNumerica.h
  | | | |-- tilesFondo.gbr
  | | | |-- tilesFondo.h
  | |-- engine
- | | |-- entity
- | | | |-- entity_manager.h
- | | | |-- entity_manager.c
- | | |-- sound
+ | | |-- objects
+ | | | |-- entity_mgr.h
+ | | | |-- entity_mgr.c
+ | | |-- scripts
+ | | | |-- scripts_mgr.h
+ | | | |-- scripts_mgr.c
+ | | |-- main.c
+ | | |-- math
+ | | | |-- math_util.h
+ | | | |-- math_util.c
+ | | |-- game_bridge.h
+ | | |-- video
+ | | | |-- video_sys.c
+ | | | |-- video_sys.h
+ | | |-- sounds
  | | | |-- hUGE.inc
- | | | |-- sound_system.h
  | | | |-- hUGEDriver.h
  | | | |-- hUGE_note_table.inc
  | | | |-- hUGEDriver.o
- | | | |-- sound_system.c
- | | |-- video
- | | | |-- video_system.c
- | | | |-- video_system.h
+ | | | |-- sound_sys.h
+ | | | |-- sound_sys.c
+ | | |-- joystick
+ | | | |-- joystick_sys.h
+ | | | |-- joystick_sys.c
+ | | |-- debug
+ | | | |-- debug_sys.h
+ | | | |-- debug_sys.c
  |-- build
  | |-- errores.log
  |-- project_report.txt
@@ -43,74 +82,184 @@
 
 === ANÁLISIS DE ARCHIVOS C/H ===
 --------------------------------
+Archivo: _object0_settings.c
+Ruta: ./src/game/objects/_object0/_object0_settings.c
+#include "_object0_settings.h"
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: _object0_settings.h
+Ruta: ./src/game/objects/_object0/_object0_settings.h
+#include "../../engine/objects/entity_mgr.h"
+--------------------------------
+Archivo: object0_init.c
+Ruta: ./src/game/objects/_object0/object0_init.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: object0_draw.c
+Ruta: ./src/game/objects/_object0/object0_draw.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: object0_step.c
+Ruta: ./src/game/objects/_object0/object0_step.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: pelota_init.c
+Ruta: ./src/game/objects/pelota/pelota_init.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: pelota_step.c
+Ruta: ./src/game/objects/pelota/pelota_step.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
 Archivo: game_objects.h
-Ruta: ./src/game/entity/game_objects.h
-#include "../../engine/entity/entity_manager.h"
+Ruta: ./src/game/objects/game_objects.h
+#include "../../engine/objects/entity_mgr.h"
+#include "_object0/_object0_settings.h" 
+// #include "enemigo/enemigo_settings.h"
 --------------------------------
 Archivo: game_objects.c
-Ruta: ./src/game/entity/game_objects.c
-#include "../../engine/entity/entity_manager.h"
-#include "./game_objects.h"
+Ruta: ./src/game/objects/game_objects.c
+#include "game_objects.h"
 --------------------------------
-Archivo: main.c
-Ruta: ./src/game/main.c
-#include <gb/gb.h>
-#include "../engine/sound/sound_system.h"
-#include "../engine/video/video_system.h"
-#include "../engine/entity/entity_manager.h"
-#include "./sound/_sound_data.h"
-#include "./entity/game_objects.h" 
-#include "./assets/tilesFondo.h"
+Archivo: game_step.c
+Ruta: ./src/game/game_step.c
+#include "../engine/game_bridge.h"
+--------------------------------
+Archivo: game_init.c
+Ruta: ./src/game/game_init.c
+#include "../engine/game_bridge.h"
+--------------------------------
+Archivo: rooms_all.h
+Ruta: ./src/game/rooms/rooms_all.h
+--------------------------------
+Archivo: room01_step.c
+Ruta: ./src/game/rooms/room01/room01_step.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: room01_init.c
+Ruta: ./src/game/rooms/room01/room01_init.c
+#include "../../../engine/game_bridge.h"
+--------------------------------
+Archivo: game_draw.c
+Ruta: ./src/game/game_draw.c
+#include "../engine/game_bridge.h"
 --------------------------------
 Archivo: sample_song.c
-Ruta: ./src/game/sound/sample_song.c
-#include "../../engine/sound/hUGEDriver.h"
+Ruta: ./src/game/sounds/sample_song.c
+#include "../../engine/sounds/hUGEDriver.h"
 #include <stddef.h>
 --------------------------------
 Archivo: _sound_data.c
-Ruta: ./src/game/sound/_sound_data.c
-#include "../../engine/sound/sound_system.h"
+Ruta: ./src/game/sounds/_sound_data.c
+#include "../../engine/sounds/sound_sys.h"
 #include "_sound_data.h"
 --------------------------------
 Archivo: _sound_data.h
-Ruta: ./src/game/sound/_sound_data.h
-#include "../../engine/sound/sound_system.h"
+Ruta: ./src/game/sounds/_sound_data.h
+#include "../../engine/sounds/sound_sys.h"
 --------------------------------
 Archivo: tilesFondo.c
-Ruta: ./src/game/assets/tilesFondo.c
+Ruta: ./src/game/sprites/tilesFondo.c
+--------------------------------
+Archivo: fuenteNumerica.c
+Ruta: ./src/game/sprites/fuenteNumerica/fuenteNumerica.c
+--------------------------------
+Archivo: fuenteNumerica.h
+Ruta: ./src/game/sprites/fuenteNumerica/fuenteNumerica.h
 --------------------------------
 Archivo: tilesFondo.h
-Ruta: ./src/game/assets/tilesFondo.h
+Ruta: ./src/game/sprites/tilesFondo.h
 --------------------------------
-Archivo: entity_manager.h
-Ruta: ./src/engine/entity/entity_manager.h
+Archivo: entity_mgr.h
+Ruta: ./src/engine/objects/entity_mgr.h
+#include <gb/gb.h>
+#include <stdbool.h>
+--------------------------------
+Archivo: entity_mgr.c
+Ruta: ./src/engine/objects/entity_mgr.c
+#include "entity_mgr.h"
+#include "../../game/objects/game_objects.h"
+#include <string.h>
+--------------------------------
+Archivo: scripts_mgr.h
+Ruta: ./src/engine/scripts/scripts_mgr.h
+#include <gb/gb.h>
+#include <stdbool.h>
+--------------------------------
+Archivo: scripts_mgr.c
+Ruta: ./src/engine/scripts/scripts_mgr.c
+#include "scripts_mgr.h"
+#include "../../game/objects/game_objects.h"
+#include <string.h>
+--------------------------------
+Archivo: main.c
+Ruta: ./src/engine/main.c
+#include "game_bridge.h"
+--------------------------------
+Archivo: math_util.h
+Ruta: ./src/engine/math/math_util.h
 #include <gb/gb.h>
 #include <stdint.h>
 --------------------------------
-Archivo: entity_manager.c
-Ruta: ./src/engine/entity/entity_manager.c
-#include "./entity_manager.h"
+Archivo: math_util.c
+Ruta: ./src/engine/math/math_util.c
+#include "math_util.h"
 --------------------------------
-Archivo: sound_system.h
-Ruta: ./src/engine/sound/sound_system.h
+Archivo: game_bridge.h
+Ruta: ./src/engine/game_bridge.h
+#include <gb/gb.h>
+#include <rand.h>    // <--- AÑADE ESTO para las funciones de azar
+#include "video/video_sys.h"
+#include "math/math_util.h"
+#include "sounds/sound_sys.h"
+#include "objects/entity_mgr.h"
+#include "scripts/scripts_mgr.h"
+#include "joystick/joystick_sys.h"
+#include "debug/debug_sys.h"
+#include "../game/objects/game_objects.h"
+#include "../game/sounds/_sound_data.h"
+#include "../game/rooms/rooms_all.h"
+#include "../game/sprites/tilesFondo.h"
+--------------------------------
+Archivo: video_sys.c
+Ruta: ./src/engine/video/video_sys.c
+#include "video_sys.h"
+--------------------------------
+Archivo: video_sys.h
+Ruta: ./src/engine/video/video_sys.h
+#include <gb/gb.h>
+#include <stdint.h>
+--------------------------------
+Archivo: hUGEDriver.h
+Ruta: ./src/engine/sounds/hUGEDriver.h
+#include <gbdk/platform.h>
+--------------------------------
+Archivo: sound_sys.h
+Ruta: ./src/engine/sounds/sound_sys.h
 #include <stdint.h>
 #include "hUGEDriver.h"
 --------------------------------
-Archivo: hUGEDriver.h
-Ruta: ./src/engine/sound/hUGEDriver.h
-#include <gbdk/platform.h>
---------------------------------
-Archivo: sound_system.c
-Ruta: ./src/engine/sound/sound_system.c
+Archivo: sound_sys.c
+Ruta: ./src/engine/sounds/sound_sys.c
 #include <gb/gb.h>
 #include <stddef.h>
-#include "sound_system.h"
+#include "sound_sys.h"
 --------------------------------
-Archivo: video_system.c
-Ruta: ./src/engine/video/video_system.c
-#include "video_system.h"
---------------------------------
-Archivo: video_system.h
-Ruta: ./src/engine/video/video_system.h
+Archivo: joystick_sys.h
+Ruta: ./src/engine/joystick/joystick_sys.h
 #include <gb/gb.h>
 #include <stdint.h>
+--------------------------------
+Archivo: joystick_sys.c
+Ruta: ./src/engine/joystick/joystick_sys.c
+#include "joystick_sys.h"
+--------------------------------
+Archivo: debug_sys.h
+Ruta: ./src/engine/debug/debug_sys.h
+#include <gb/gb.h>
+#include <stdint.h>
+--------------------------------
+Archivo: debug_sys.c
+Ruta: ./src/engine/debug/debug_sys.c
+#include "debug_sys.h"
+#include "../../game/sprites/fuenteNumerica/fuenteNumerica.h"
