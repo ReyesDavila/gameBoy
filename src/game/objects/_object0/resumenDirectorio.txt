@@ -14,25 +14,12 @@ ESTRUCTURA RELATIVA:
 ----------------------------------------------------------
 ARCHIVO: ./_object0_settings.c
 ----------------------------------------------------------
-     1	#include "_object0_settings.h"
-     2	#include "../../../engine/game_bridge.h"
+     1	#include "../../../engine/game_bridge.h"
+     2	#include "_object0_settings.h"
      3	
-     4	// Definición global del puntero
-     5	Object0 *obj0 = NULL; 
-     6	
-     7	void Object0_init(Object0 *self) {
-     8	    (void)self; // Silencia el error de "not used" sin generar código extra
-     9	}
-    10	
-    11	void Object0_step(Object0 *self) {
-    12	    (void)self;
-    13	    int8_t jx = joystick_xpos();
-    14	    self->x += jx;
-    15	}
-    16	
-    17	void Object0_draw(Object0 *self) {
-    18	    (void)self;
-    19	}
+     4	Object0 *obj0 = NULL;
+     5	Object0 Object0_list[MAX_Object0];
+
 
 ----------------------------------------------------------
 ARCHIVO: ./_object0_settings.h
@@ -43,35 +30,55 @@ ARCHIVO: ./_object0_settings.h
      4	
      5	typedef struct {
      6	    Entity base;    // Obligatorio: siempre primero
-     7	    int8_t x, y;   // Variable propia del objeto
-     8	} Object0;
-     9	
-    10	extern Object0 *obj0; 
-    11	
-    12	// Declaración de funciones (el motor las unirá mediante la Macro)
-    13	void Object0_init(Object0 *self);
-    14	void Object0_step(Object0 *self);
-    15	void Object0_draw(Object0 *self);
+     7	    int16_t x2, y2;   // Variable propia del objeto
+     8	    int16_t vx, vy;
+     9	    int16_t vx_max, vy_max;
+    10	    int8_t dx, dy, ax, ay, fx, fy;
+    11	} Object0;
+    12	
+    13	  
+    14	extern Object0 *obj0; 
+    15	#define MAX_Object0 10
     16	
-    17	
-    18	#endif
+    17	extern Object0 Object0_list[MAX_Object0];
+    18	
+    19	// Declaración de funciones (el motor las unirá mediante la Macro)
+    20	void Object0_init(Object0 *self);
+    21	void Object0_step(Object0 *self);
+    22	void Object0_draw(Object0 *self);
+    23	
+    24	
+    25	#endif
 
 ----------------------------------------------------------
 ARCHIVO: ./object0_init.c
 ----------------------------------------------------------
      1	#include "../../../engine/game_bridge.h"
      2	
-     3	void Object0_init(void){
-     4	
-     5	}
+     3	void Object0_init(Object0 *self){
+     4	    (void)self;
+     5	
+     6	        self->base.x = 80;
+     7	        self->base.y = 72;
+     8	        self->vx = 0;
+     9	        self->vy = 0;
+    10	        self->vx_max = 256;
+    11	        self->vy_max = 256;
+    12	        self->dx=0;
+    13	        self->dy=0;
+    14	        self->ax=6;
+    15	        self->ay=6;
+    16	        self->fx=2;
+    17	        self->fy=2;
+    18	}
 
 ----------------------------------------------------------
 ARCHIVO: ./object0_draw.c
 ----------------------------------------------------------
      1	#include "../../../engine/game_bridge.h"
      2	
-     3	void Object0_draw(void){
-     4	
+     3	void Object0_draw(Object0 *self){
+     4	    (void)self;
      5	}
 
 ----------------------------------------------------------
@@ -79,9 +86,50 @@ ARCHIVO: ./object0_step.c
 ----------------------------------------------------------
      1	#include "../../../engine/game_bridge.h"
      2	
-     3	void Object0_step(void){
-     4	
-     5	}
+     3	void Object0_step(Object0 *self) {
+     4	    (void)self;
+     5	
+     6	    // --- MOVIMIENTO X ---
+     7	    int8_t jx = joystick_xpos();
+     8	    if(jx) {
+     9	        if (jx == -1) self->dx = -1; else self->dx = 1;
+    10	        if (self->dx == 1) self->vx += self->ax; else self->vx -= self->ax;
+    11	    } else {
+    12	        if (self->vx > 0) self->vx -= self->fx;
+    13	        else if (self->vx < 0) self->vx++;
+    14	        if (abs(self->vx) < 5) self->vx = 0;
+    15	    }
+    16	    if (self->vx > self->vx_max) self->vx = self->vx_max;
+    17	    else if (self->vx < -self->vx_max) self->vx = -self->vx_max;
+    18	    self->x2 += self->vx;
+    19	    self->base.x = (self->x2 >> 8);
+    20	
+    21	    // --- MOVIMIENTO Y ---
+    22	    int8_t jy = joystick_ypos();
+    23	    if(jy) {
+    24	        if (jy == -1) self->dy = -1; else self->dy = 1;
+    25	        if (self->dy == 1) self->vy += self->ay; else self->vy -= self->ay;
+    26	    } else {
+    27	        if (self->vy > 0) self->vy -= self->fy;
+    28	        else if (self->vy < 0) self->vy++;
+    29	        if (abs(self->vy) < 5) self->vy = 0;
+    30	    }
+    31	    if (self->vy > self->vy_max) self->vy = self->vy_max;
+    32	    else if (self->vy < -self->vy_max) self->vy = -self->vy_max;
+    33	    self->y2 += self->vy;
+    34	    self->base.y = (self->y2 >> 8);
+    35	
+    36	
+    37	    draw_tile(self->base.x, self->base.y, 2);
+    38	
+    39	    #ifdef MODO_DEBUG
+    40	        debug_begin();
+    41	        debug_watch(self->base.x);
+    42	        debug_watch(self->base.y);
+    43	    #endif
+    44	
+    45	}
+
 
 ----------------------------------------------------------
 ARCHIVO: ./resumenDirectorio.sh

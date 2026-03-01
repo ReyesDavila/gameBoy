@@ -70,23 +70,23 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000030  l__HEADER7                      
      00000060  l__HEADER4                      
      000000AB  l__HEADER11                     
-     0000011D  l__INITIALIZED                  
-     0000011D  l__INITIALIZER                  
-     00000169  l__DATA                         
+     0000011F  l__INITIALIZED                  
+     0000011F  l__INITIALIZER                  
      00000195  l__HOME                         
      00000200  s__CODE                         
+     00000209  l__DATA                         
      00002000  _rROMB0                            
      00003000  _rROMB1                            
-     00003B6B  l__CODE                         
-     00003D6B  s__HOME                         
-     00003F00  s__BASE                         
-     00003F00  s__CODE_0                       
-     00003F00  s__INITIALIZER                  
-     00003F00  s__LIT                          
      00004000  _rMBC7_SRAM_ENABLE_2               
      00004000  _rRAMB                             
-     0000401D  s__GSINIT                       
-     00004029  s__GSFINAL                      
+     0000408D  l__CODE                         
+     0000428D  s__HOME                         
+     00004422  s__BASE                         
+     00004422  s__CODE_0                       
+     00004422  s__INITIALIZER                  
+     00004422  s__LIT                          
+     00004541  s__GSINIT                       
+     0000454D  s__GSFINAL                      
      00008000  __VRAM                             
      00008000  __VRAM8000                         
      00008800  __VRAM8800                         
@@ -103,10 +103,10 @@ Area                                    Addr        Size        Decimal Bytes (A
      0000C000  __RAM                              
      0000C000  _shadow_OAM                     
      0000C0A0  s__DATA                         
-     0000C209  s__BSS                          
-     0000C209  s__INITIALIZED                  
-     0000C326  s__HEAP                         
-     0000C326  s__HEAP_END                     
+     0000C2A9  s__BSS                          
+     0000C2A9  s__INITIALIZED                  
+     0000C3C8  s__HEAP                         
+     0000C3C8  s__HEAP_END                     
      0000D000  __RAMBANK                          
      0000E000  .STACK                          
      0000FE00  __OAMRAM                           
@@ -197,111 +197,116 @@ Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_CODE                               00000200    00003B6B =       15211. bytes (REL,CON)
+_CODE                               00000200    0000408D =       16525. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
      00000200  _Object0_init                      object0_init
-     00000207  _Object0_draw                      object0_draw
-     00000208  _Object0_step                      object0_step
-     00000233  _pelota_init                       pelota_init
-     00000234  _pelota_step                       pelota_step
-     00000235  _game_step                         game_step
-     00000238  _game_init                         game_init
-     00000275  _room01_step                       room01_step
-     00000276  _room01_init                       room01_init
-     00000296  _game_draw                         game_draw
-     00002958  _sample_song                       sample_song
-     000029B3  _snd_sample_song                   _sound_data
-     000029B6  _snd_coin                          _sound_data
-     000029B9  _snd_shoot                         _sound_data
-     000029BC  _snd_explode                       _sound_data
-     000029BF  _snd_jump                          _sound_data
-     000029C2  _snd_error                         _sound_data
-     000029C5  _snd_start                         _sound_data
-     000029C8  _snd_star                          _sound_data
-     000029CB  _snd_powerup                       _sound_data
-     000029CE  _snd_door                          _sound_data
-     000029D1  _snd_portal                        _sound_data
-     000029D4  _entity_manager_init               entity_mgr
-     000029EA  __entity_create_pool               entity_mgr
-     00002AE7  _entity_manager_step               entity_mgr
-     00002B3A  _entity_manager_draw               entity_mgr
-     00002CC4  __place_free                       scripts_mgr
-     00002D0E  __place_empty                      scripts_mgr
-     00002D51  __place_meeting                    scripts_mgr
-     00002DAA  _main                              main
-     00002DDB  _random                            math_util
-     00002DEF  _sqrt_int                          math_util
-     00002E70  _power                             math_util
-     00002E98  _point_distance                    math_util
-     00002EE9  _angle_difference                  math_util
-     00002EEB  _point_direction                   math_util
-     00002FF0  _sin_tbl                           math_util
-     000030F0  _video_init                        video_sys
-     0000310B  _video_load_tiles                  video_sys
-     00003123  _hUGE_init                         hUGEDriver_obj
-     00003125  hUGE_init                          hUGEDriver_obj
-     0000317B  _hUGE_mute_channel                 hUGEDriver_obj
-     0000317D  hUGE_mute_channel                  hUGEDriver_obj
-     000033CB  _hUGE_set_position                 hUGEDriver_obj
-     000033CD  hUGE_set_position                  hUGEDriver_obj
-     00003592  _hUGE_dosound                      hUGEDriver_obj
-     00003592  hUGE_dosound                       hUGEDriver_obj
-     000038BE  _sound_init                        sound_sys
-     000038CB  _sound_play                        sound_sys
-     0000399E  _sound_loop                        sound_sys
+     000002A7  _Object0_draw                      object0_draw
+     000002A8  _Object0_step                      object0_step
+     0000066D  _pelota_init                       pelota_init
+     0000066E  _pelota_step                       pelota_step
+     0000066F  _game_step                         game_step
+     00000675  _game_init                         game_init
+     000006C9  _room01_step                       room01_step
+     000006CA  _room01_init                       room01_init
+     000006EA  _game_draw                         game_draw
+     00002DAC  _sample_song                       sample_song
+     00002E07  _snd_sample_song                   _sound_data
+     00002E0A  _snd_coin                          _sound_data
+     00002E0D  _snd_shoot                         _sound_data
+     00002E10  _snd_explode                       _sound_data
+     00002E13  _snd_jump                          _sound_data
+     00002E16  _snd_error                         _sound_data
+     00002E19  _snd_start                         _sound_data
+     00002E1C  _snd_star                          _sound_data
+     00002E1F  _snd_powerup                       _sound_data
+     00002E22  _snd_door                          _sound_data
+     00002E25  _snd_portal                        _sound_data
+     00002E28  _entity_manager_init               entity_mgr
+     00002E3E  __entity_create_pool               entity_mgr
+     00002F3B  _entity_manager_step               entity_mgr
+     00002F8E  _entity_manager_draw               entity_mgr
+     00003118  __place_free                       scripts_mgr
+     00003162  __place_empty                      scripts_mgr
+     000031A5  __place_meeting                    scripts_mgr
+     000031FE  _main                              main
+     0000322A  _random                            math_util
+     0000323E  _sqrt_int                          math_util
+     000032BF  _power                             math_util
+     000032E7  _point_distance                    math_util
+     00003338  _angle_difference                  math_util
+     0000333A  _point_direction                   math_util
+     0000343F  _sin_tbl                           math_util
+     0000353F  _video_init                        video_sys
+     0000355A  _video_load_tiles                  video_sys
+     00003572  _hUGE_init                         hUGEDriver_obj
+     00003574  hUGE_init                          hUGEDriver_obj
+     000035CA  _hUGE_mute_channel                 hUGEDriver_obj
+     000035CC  hUGE_mute_channel                  hUGEDriver_obj
+     0000381A  _hUGE_set_position                 hUGEDriver_obj
+     0000381C  hUGE_set_position                  hUGEDriver_obj
+     000039E1  _hUGE_dosound                      hUGEDriver_obj
+     000039E1  hUGE_dosound                       hUGEDriver_obj
+     00003D0D  _sound_init                        sound_sys
+     00003D1A  _sound_play                        sound_sys
+     00003DED  _sound_loop                        sound_sys
 ASxxxx Linker V03.00/V05.40 + sdld,  page 6.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_CODE                               00000200    00003B6B =       15211. bytes (REL,CON)
+_CODE                               00000200    0000408D =       16525. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     000039A1  _sound_stop                        sound_sys
-     000039DB  _sound_stop_all                    sound_sys
-     000039FD  _sound_isplaying                   sound_sys
-     00003A20  _sound_pos                         sound_sys
-     00003A56  _audio_update                      sound_sys
-     00003A6F  _joystick_update                   joystick_sys
-     00003A7C  _joystick_check_button             joystick_sys
-     00003A81  _joystick_pressed_button           joystick_sys
-     00003A93  _joystick_released_button          joystick_sys
-     00003AA5  _joystick_xpos                     joystick_sys
-     00003AB7  _joystick_ypos                     joystick_sys
-     00003AC8  _debug_init                        debug_sys
-     00003AE9  _debug_begin                       debug_sys
-     00003AFB  _debug_watch                       debug_sys
-     00003BFE  __mulsuchar                        mul
-     00003C01  __muluschar                        mul
-     00003C0A  __mulschar                         mul
-     00003C12  __mulint                           mul
-     00003C31  __muluchar                         mul
-     00003C43  _set_vram_byte                     
-     00003C4C  _set_win_tile_xy                   
-     00003C55  _set_bkg_tile_xy                   
-     00003C84  __divsuchar                        divmod
-     00003C8A  __modsuchar                        divmod
-     00003C93  __divuschar                        divmod
-     00003C9C  __moduschar                        divmod
-     00003CA8  __divschar                         divmod
-     00003CAD  __modschar                         divmod
-     00003CB4  __divsint                          divmod
-     00003CBD  __modsint                          divmod
-     00003CC9  __divuchar                         divmod
-     00003CCE  __moduchar                         divmod
-     00003CD5  __divuint                          divmod
-     00003CDE  __moduint                          divmod
-     00003CEA  .div8                              divmod
-     00003CEA  .mod8                              divmod
-     00003CF2  .div16                             divmod
-     00003CF2  .mod16                             divmod
-     00003D28  .divu8                             divmod
-     00003D28  .modu8                             divmod
-     00003D2B  .divu16                            divmod
-     00003D2B  .modu16                            divmod
+     00003DF0  _sound_stop                        sound_sys
+     00003E2A  _sound_stop_all                    sound_sys
+     00003E4C  _sound_isplaying                   sound_sys
+     00003E6F  _sound_pos                         sound_sys
+     00003EA5  _audio_update                      sound_sys
+     00003EBE  _joystick_update                   joystick_sys
+     00003ECB  _joystick_check_button             joystick_sys
+     00003ED0  _joystick_pressed_button           joystick_sys
+     00003EE2  _joystick_released_button          joystick_sys
+     00003EF4  _joystick_xpos                     joystick_sys
+     00003F06  _joystick_ypos                     joystick_sys
+     00003F17  _debug_init                        debug_sys
+     00003F38  _debug_begin                       debug_sys
+     00003F4A  _debug_watch                       debug_sys
+     0000404D  _sprites_reset                     sprites_mgr
+     00004068  _draw_tile                         sprites_mgr
+     000040AD  _draw_tile_win                     sprites_mgr
+     000040B8  _vram_reset                        sprites_mgr
+     00004106  _screen_clear                      sprites_mgr
+     00004120  __mulsuchar                        mul
+     00004123  __muluschar                        mul
+     0000412C  __mulschar                         mul
+     00004134  __mulint                           mul
+     00004153  __muluchar                         mul
+     00004165  _set_vram_byte                     
+     0000416E  _set_win_tile_xy                   
+     00004177  _set_bkg_tile_xy                   
+     000041A6  __divsuchar                        divmod
+     000041AC  __modsuchar                        divmod
+     000041B5  __divuschar                        divmod
+     000041BE  __moduschar                        divmod
+     000041CA  __divschar                         divmod
+     000041CF  __modschar                         divmod
+     000041D6  __divsint                          divmod
+     000041DF  __modsint                          divmod
+     000041EB  __divuchar                         divmod
+     000041F0  __moduchar                         divmod
+     000041F7  __divuint                          divmod
+     00004200  __moduint                          divmod
+     0000420C  .div8                              divmod
+     0000420C  .mod8                              divmod
+     00004214  .div16                             divmod
+     00004214  .mod16                             divmod
+     0000424A  .divu8                             divmod
+     0000424A  .modu8                             divmod
+     0000424D  .divu16                            divmod
+     0000424D  .modu16                            divmod
 
 ASxxxx Linker V03.00/V05.40 + sdld,  page 7.
 Hexadecimal  [32-Bits]
@@ -496,40 +501,40 @@ Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_HOME                               00003D6B    00000195 =         405. bytes (REL,CON)
+_HOME                               0000428D    00000195 =         405. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     00003D6B  .memset_simple                     Runtime
-     00003D74  .memcpy_simple                     Runtime
-     00003D91  .display_off                       Runtime
-     00003D91  _display_off                       Runtime
-     00003DA9  _rand                              
-     00003DA9  _randw                             
-     00003DD4  _initrand                          
-     00003DD6  .initrand                          
-     00003DDF  .padup                             
-     00003DDF  _waitpadup                         
-     00003DEF  .jpad                              
-     00003DEF  _joypad                            
-     00003E17  _waitpad                           
-     00003E18  .wait_pad                          
-     00003E1F  _set_win_tiles                     
-     00003E33  _set_tile_data                     
-     00003E38  _set_bkg_data                      
-     00003E38  _set_win_data                      
-     00003E40  _set_sprite_data                   
-     00003E70  ___sdcc_call_hl                    call_hl
-     00003E71  _memset                            memset
-     00003EA4  .set_xy_wtt                        SetTileMap
-     00003EAD  .set_xy_btt                        SetTileMap
-     00003EBC  .set_xy_tt                         SetTileMap
+     0000428D  .memset_simple                     Runtime
+     00004296  .memcpy_simple                     Runtime
+     000042B3  .display_off                       Runtime
+     000042B3  _display_off                       Runtime
+     000042CB  _rand                              
+     000042CB  _randw                             
+     000042F6  _initrand                          
+     000042F8  .initrand                          
+     00004301  .padup                             
+     00004301  _waitpadup                         
+     00004311  .jpad                              
+     00004311  _joypad                            
+     00004339  _waitpad                           
+     0000433A  .wait_pad                          
+     00004341  _set_win_tiles                     
+     00004355  _set_tile_data                     
+     0000435A  _set_bkg_data                      
+     0000435A  _set_win_data                      
+     00004362  _set_sprite_data                   
+     00004392  ___sdcc_call_hl                    call_hl
+     00004393  _memset                            memset
+     000043C6  .set_xy_wtt                        SetTileMap
+     000043CF  .set_xy_btt                        SetTileMap
+     000043DE  .set_xy_tt                         SetTileMap
 ASxxxx Linker V03.00/V05.40 + sdld,  page 26.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_INITIALIZER                        00003F00    0000011D =         285. bytes (REL,CON)
+_INITIALIZER                        00004422    0000011F =         287. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
@@ -538,18 +543,18 @@ Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_GSINIT                             0000401D    0000000C =          12. bytes (REL,CON)
+_GSINIT                             00004541    0000000C =          12. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     0000401D  gsinit                             Runtime
+     00004541  gsinit                             Runtime
 
 ASxxxx Linker V03.00/V05.40 + sdld,  page 28.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_GSFINAL                            00004029    00000001 =           1. bytes (REL,CON)
+_GSFINAL                            0000454D    00000001 =           1. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
@@ -558,7 +563,7 @@ Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_DATA                               0000C0A0    00000169 =         361. bytes (REL,CON)
+_DATA                               0000C0A0    00000209 =         521. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
@@ -569,28 +574,30 @@ _DATA                               0000C0A0    00000169 =         361. bytes (R
      0000C0A3  _sys_time                          Runtime
      0000C0A5  .int_0x40                          Runtime
      0000C0B1  _Object0_list                      _object0_settings
-     0000C151  _global_entities                   entity_mgr
-     0000C1BD  _hUGE_current_wave                 hUGEDriver_obj
-     0000C1BD  hUGE_current_wave                  hUGEDriver_obj
-     0000C1BE  _hUGE_mute_mask                    hUGEDriver_obj
-     0000C207  ___rand_seed                       
+     0000C1F1  _global_entities                   entity_mgr
+     0000C25D  _hUGE_current_wave                 hUGEDriver_obj
+     0000C25D  hUGE_current_wave                  hUGEDriver_obj
+     0000C25E  _hUGE_mute_mask                    hUGEDriver_obj
+     0000C2A7  ___rand_seed                       
 ASxxxx Linker V03.00/V05.40 + sdld,  page 30.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_INITIALIZED                        0000C209    0000011D =         285. bytes (REL,CON)
+_INITIALIZED                        0000C2A9    0000011F =         287. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     0000C209  _obj0                              _object0_settings
-     0000C20B  _tilesFondo                        tilesFondo
-     0000C25B  _global_entity_count               entity_mgr
-     0000C25C  _sound_tick                        sound_sys
-     0000C263  __joy_current                      joystick_sys
-     0000C264  __joy_previous                     joystick_sys
-     0000C265  _fuenteNumerica                    debug_sys
-     0000C325  __map_tile_offset                  SetTileMap
+     0000C2A9  _obj0                              _object0_settings
+     0000C2AB  _tilesFondo                        tilesFondo
+     0000C2FB  _global_entity_count               entity_mgr
+     0000C2FC  _sound_tick                        sound_sys
+     0000C303  __joy_current                      joystick_sys
+     0000C304  __joy_previous                     joystick_sys
+     0000C305  _fuenteNumerica                    debug_sys
+     0000C3C5  _sprite_cursor                     sprites_mgr
+     0000C3C6  _vram_libre                        sprites_mgr
+     0000C3C7  __map_tile_offset                  SetTileMap
 
 ASxxxx Linker V03.00/V05.40 + sdld,  page 31.
 Hexadecimal  [32-Bits]
@@ -612,31 +619,32 @@ Files Linked                              [ module(s) ]
 
 /home/dixon/Documentos/gb/gbdk-linux64/gbdk/lib/gb/crt0.o
                                           [ Runtime ]
-/tmp/lcc74320.o                           [ _object0_settings ]
-/tmp/lcc74321.o                           [ object0_init ]
-/tmp/lcc74322.o                           [ object0_draw ]
-/tmp/lcc74323.o                           [ object0_step ]
-/tmp/lcc74324.o                           [ pelota_init ]
-/tmp/lcc74325.o                           [ pelota_step ]
-/tmp/lcc74326.o                           [ game_objects ]
-/tmp/lcc74327.o                           [ game_step ]
-/tmp/lcc74328.o                           [ game_init ]
-/tmp/lcc74329.o                           [ room01_step ]
-/tmp/lcc743210.o                          [ room01_init ]
-/tmp/lcc743211.o                          [ game_draw ]
-/tmp/lcc743212.o                          [ sample_song ]
-/tmp/lcc743213.o                          [ _sound_data ]
-/tmp/lcc743214.o                          [ tilesFondo ]
-/tmp/lcc743215.o                          [ fuenteNumerica ]
-/tmp/lcc743216.o                          [ entity_mgr ]
-/tmp/lcc743217.o                          [ scripts_mgr ]
-/tmp/lcc743218.o                          [ main ]
-/tmp/lcc743219.o                          [ math_util ]
-/tmp/lcc743220.o                          [ video_sys ]
+/tmp/lcc224220.o                          [ _object0_settings ]
+/tmp/lcc224221.o                          [ object0_init ]
+/tmp/lcc224222.o                          [ object0_draw ]
+/tmp/lcc224223.o                          [ object0_step ]
+/tmp/lcc224224.o                          [ pelota_init ]
+/tmp/lcc224225.o                          [ pelota_step ]
+/tmp/lcc224226.o                          [ game_objects ]
+/tmp/lcc224227.o                          [ game_step ]
+/tmp/lcc224228.o                          [ game_init ]
+/tmp/lcc224229.o                          [ room01_step ]
+/tmp/lcc2242210.o                         [ room01_init ]
+/tmp/lcc2242211.o                         [ game_draw ]
+/tmp/lcc2242212.o                         [ sample_song ]
+/tmp/lcc2242213.o                         [ _sound_data ]
+/tmp/lcc2242214.o                         [ tilesFondo ]
+/tmp/lcc2242215.o                         [ fuenteNumerica ]
+/tmp/lcc2242216.o                         [ entity_mgr ]
+/tmp/lcc2242217.o                         [ scripts_mgr ]
+/tmp/lcc2242218.o                         [ main ]
+/tmp/lcc2242219.o                         [ math_util ]
+/tmp/lcc2242220.o                         [ video_sys ]
 ./src/engine/sounds/hUGEDriver.o          [ hUGEDriver_obj ]
-/tmp/lcc743221.o                          [ sound_sys ]
-/tmp/lcc743222.o                          [ joystick_sys ]
-/tmp/lcc743223.o                          [ debug_sys ]
+/tmp/lcc2242221.o                         [ sound_sys ]
+/tmp/lcc2242222.o                         [ joystick_sys ]
+/tmp/lcc2242223.o                         [ debug_sys ]
+/tmp/lcc2242224.o                         [ sprites_mgr ]
 
 
 Libraries Linked                          [ object file ]

@@ -4,9 +4,13 @@
 
 typedef struct {
     Entity base;    // Obligatorio: siempre primero
-    int8_t x, y;   // Variable propia del objeto
+    int16_t x2, y2;   // Variable propia del objeto
+    int16_t vx, vy;
+    int16_t vx_max, vy_max;
+    int8_t dx, dy, ax, ay, fx, fy;
 } Object0;
 
+  
 extern Object0 *obj0; 
 #define MAX_Object0 10
 

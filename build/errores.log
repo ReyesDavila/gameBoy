@@ -1,15 +1,26 @@
 ./src/game/objects/_object0/_object0_settings.c:
+./src/game/objects/_object0/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/_object0/object0_init.c:
+./src/game/objects/_object0/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/_object0/object0_draw.c:
+./src/game/objects/_object0/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/_object0/object0_step.c:
+./src/game/objects/_object0/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/pelota/pelota_init.c:
+./src/game/objects/pelota/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/pelota/pelota_step.c:
+./src/game/objects/pelota/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/objects/game_objects.c:
 ./src/game/game_step.c:
+./src/game/../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/game_init.c:
+./src/game/../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/rooms/room01/room01_step.c:
+./src/game/rooms/room01/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/rooms/room01/room01_init.c:
+./src/game/rooms/room01/../../../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/game_draw.c:
+./src/game/../engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/game/sounds/sample_song.c:
 ./src/game/sounds/_sound_data.c:
 ./src/game/sprites/tilesFondo.c:
@@ -17,6 +28,7 @@
 ./src/engine/objects/entity_mgr.c:
 ./src/engine/scripts/scripts_mgr.c:
 ./src/engine/main.c:
+./src/engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
 ./src/engine/math/math_util.c:
 ./src/engine/math/math_util.c:4: warning 112: function 'rand' implicit declaration
 ./src/engine/math/math_util.c:4: warning 84: 'auto' variable 'rand' may be used before initialization
@@ -24,3 +36,6 @@
 ./src/engine/sounds/sound_sys.c:
 ./src/engine/joystick/joystick_sys.c:
 ./src/engine/debug/debug_sys.c:
+./src/engine/sprites/sprites_mgr.c:
+./src/engine/sprites/sprites_mgr.h:15: warning 283: function declarator with no prototype
+./src/engine/sprites/sprites_mgr.c:7: warning 283: function declarator with no prototype

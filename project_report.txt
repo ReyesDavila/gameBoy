@@ -4,9 +4,11 @@
  |-- informacion.txt
  |-- rom
  | |-- game.sav
+ | |-- game.cdb
  | |-- game.gb
  | |-- game.map
  | |-- game.noi
+ |-- resumenDirectorio.txt
  |-- gitAuto.sh
  |-- src
  | |-- game
@@ -84,8 +86,8 @@
 --------------------------------
 Archivo: _object0_settings.c
 Ruta: ./src/game/objects/_object0/_object0_settings.c
-#include "_object0_settings.h"
 #include "../../../engine/game_bridge.h"
+#include "_object0_settings.h"
 --------------------------------
 Archivo: _object0_settings.h
 Ruta: ./src/game/objects/_object0/_object0_settings.h
@@ -114,8 +116,7 @@ Ruta: ./src/game/objects/pelota/pelota_step.c
 Archivo: game_objects.h
 Ruta: ./src/game/objects/game_objects.h
 #include "../../engine/objects/entity_mgr.h"
-#include "_object0/_object0_settings.h" 
-// #include "enemigo/enemigo_settings.h"
+#include "_object0/_object0_settings.h"
 --------------------------------
 Archivo: game_objects.c
 Ruta: ./src/game/objects/game_objects.c
@@ -185,12 +186,12 @@ Archivo: scripts_mgr.h
 Ruta: ./src/engine/scripts/scripts_mgr.h
 #include <gb/gb.h>
 #include <stdbool.h>
+#include "../objects/entity_mgr.h"
 --------------------------------
 Archivo: scripts_mgr.c
 Ruta: ./src/engine/scripts/scripts_mgr.c
 #include "scripts_mgr.h"
-#include "../../game/objects/game_objects.h"
-#include <string.h>
+#include <stddef.h>
 --------------------------------
 Archivo: main.c
 Ruta: ./src/engine/main.c
@@ -200,6 +201,7 @@ Archivo: math_util.h
 Ruta: ./src/engine/math/math_util.h
 #include <gb/gb.h>
 #include <stdint.h>
+#include <stdbool.h>
 --------------------------------
 Archivo: math_util.c
 Ruta: ./src/engine/math/math_util.c
@@ -209,6 +211,7 @@ Archivo: game_bridge.h
 Ruta: ./src/engine/game_bridge.h
 #include <gb/gb.h>
 #include <rand.h>    // <--- AÑADE ESTO para las funciones de azar
+#include <stdbool.h>
 #include "video/video_sys.h"
 #include "math/math_util.h"
 #include "sounds/sound_sys.h"

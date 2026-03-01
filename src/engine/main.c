@@ -3,7 +3,7 @@
 void main(void) {
     video_init();
     sound_init();
-    video_load_tiles(tilesFondo, 5);
+    //video_load_tiles(tilesFondo, 5);
 
     
     // Esperar a que el usuario pulse Start para generar una semilla aleatoria real
@@ -14,7 +14,8 @@ void main(void) {
     game_init();
 
     while(1) {
-        
+        sprites_reset(); // 1. Limpiar proyectores del frame anterior
+
         // 1. ACTUALIZAR INPUT (Crucial: Primero de la fila)
         // Esto guarda el estado del frame anterior y lee el nuevo.
         joystick_update();
@@ -24,11 +25,6 @@ void main(void) {
 
         // 3. DIBUJO MANUAL
         game_draw();
-
-        // 4. RENDER DE ENTIDADES
-        //entity_render_all();
-
-        
 
         // 5. AUDIO Y ESPERA DE V-BLANK
         audio_update();    

@@ -5,6 +5,7 @@
 #include <rand.h>    // <--- AÑADE ESTO para las funciones de azar
 #include <stdbool.h>
 
+
 // --- INCLUDES DEL MOTOR (Engine) ---
 #include "video/video_sys.h"
 #include "math/math_util.h"
@@ -12,6 +13,7 @@
 #include "objects/entity_mgr.h"
 #include "scripts/scripts_mgr.h"
 #include "joystick/joystick_sys.h"
+#include "sprites/sprites_mgr.h"
 #include "debug/debug_sys.h"
 
 // --- INCLUDES DEL JUEGO (Game) ---
@@ -19,6 +21,7 @@
 #include "../game/sounds/_sound_data.h"
 #include "../game/rooms/rooms_all.h"
 #include "../game/sprites/tilesFondo.h"
+
 
 
 /* * Estas son DECLARACIONES (Notifican que la función existe)
