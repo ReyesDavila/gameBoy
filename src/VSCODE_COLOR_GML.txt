@@ -1,0 +1,35 @@
+===========================================================
+INSTRUCTIVO: RESALTADO DE COLOR PARA SINTAXIS GML EN C
+===========================================================
+
+1. EXTENSIÓN NECESARIA
+   Instala "Highlight" de Fabio Spampinato en el Marketplace.
+
+2. CÓMO ABRIR LA CONFIGURACIÓN
+   - Presiona Ctrl + Shift + P
+   - Escribe: "Open User Settings (JSON)" y pulsa Enter.
+
+3. DÓNDE PEGAR EL CÓDIGO
+   Ve al final del archivo. Debes añadir una COMA (,) después 
+   de la penúltima llave de cierre (}) para separar la 
+   configuración anterior de la nueva.
+
+4. CÓDIGO A PEGAR:
+
+,
+"highlight.regexes": {
+  "(?<!\\w)(x|y|solid|active|width|height)(?!\\w)": {
+    "filterFileRegex": ".*src/game/.*",
+    "decorations": [
+      {
+        "color": "#569CD6",
+        "fontWeight": "bold"
+      }
+    ]
+  }
+}
+
+5. RESULTADO
+   Ahora 'x', 'y', 'solid', 'active', 'width' y 'height' 
+   resaltarán en azul negrita dentro de la carpeta /src/game/.
+===========================================================

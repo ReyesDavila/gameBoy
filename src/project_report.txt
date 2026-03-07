@@ -1,0 +1,188 @@
+=== ESTRUCTURA DEL PROYECTO ===
+.
+ |-- resumenDirectorio.txt
+ |-- game
+ | |-- Scene
+ | | |-- game_scenes.h
+ | | |-- Scene01
+ | | | |-- scene01_init.c
+ | | | |-- _scene01_settings.h
+ | |-- game_step.c
+ | |-- game_api.h
+ | |-- game_init.c
+ | |-- Video
+ | |-- Renderer
+ | | |-- game_renders.h
+ | | |-- Render01
+ | | | |-- render01_map.c
+ | | | |-- render01_map_entitys.c
+ | | | |-- render01_map.gbm
+ | | | |-- render01_map_entitys.h
+ | | | |-- render01_map.h
+ | | | |-- render01_tile.gbr
+ | | | |-- render01_map_entitys.gbm
+ | | | |-- render01_tile.h
+ | | | |-- render01_tile.c
+ | |-- Entity
+ | | |-- Enemy
+ | | | |-- enemy_init.c
+ | | | |-- enemy_step.c
+ | | |-- game_entitys.c
+ | | |-- Entity02
+ | | | |-- entity02_init.c
+ | | | |-- entity02_step.c
+ | | |-- game_entitys.h
+ | | |-- Entity01
+ | | | |-- entity01_init.c
+ | | | |-- entity01_step.c
+ |-- project_report.txt
+ |-- engine
+ | |-- Scene
+ | | |-- engine_scenes.h
+ | |-- engine_api.h
+ | |-- main.c
+ | |-- Scripts
+ | |-- Video
+ | | |-- engine_video.h
+ | | |-- engine_video.c
+ | |-- Renderer
+ | | |-- renderer_mgr.h
+ | | |-- renderer_mgr.c
+ | |-- Entity
+ | | |-- engine_entity.h
+ | | |-- engine_entity.c
+ |-- project_report.sh
+ |-- resumenDirectorio.sh
+
+=== ANÁLISIS DE ARCHIVOS C/H ===
+--------------------------------
+Archivo: game_scenes.h
+Ruta: ./game/Scene/game_scenes.h
+#include <stdint.h>
+#include "../game_api.h"
+#include "Scene01/_scene01_settings.h"
+--------------------------------
+Archivo: scene01_init.c
+Ruta: ./game/Scene/Scene01/scene01_init.c
+#include "../game_scenes.h"
+--------------------------------
+Archivo: _scene01_settings.h
+Ruta: ./game/Scene/Scene01/_scene01_settings.h
+#include "../game_scenes.h"
+--------------------------------
+Archivo: game_step.c
+Ruta: ./game/game_step.c
+#include "game_api.h"
+--------------------------------
+Archivo: game_api.h
+Ruta: ./game/game_api.h
+#include "../engine/engine_api.h"
+#include "Entity/game_entitys.h"
+#include "Scene/game_scenes.h"
+#include "Renderer/game_renders.h"
+--------------------------------
+Archivo: game_init.c
+Ruta: ./game/game_init.c
+#include "game_api.h"
+--------------------------------
+Archivo: game_renders.h
+Ruta: ./game/Renderer/game_renders.h
+#include "Render01/render01_tile.h"
+#include "Render01/render01_map.h"
+#include "Render01/render01_map_entitys.h"
+--------------------------------
+Archivo: render01_map.c
+Ruta: ./game/Renderer/Render01/render01_map.c
+--------------------------------
+Archivo: render01_map_entitys.c
+Ruta: ./game/Renderer/Render01/render01_map_entitys.c
+--------------------------------
+Archivo: render01_map_entitys.h
+Ruta: ./game/Renderer/Render01/render01_map_entitys.h
+--------------------------------
+Archivo: render01_map.h
+Ruta: ./game/Renderer/Render01/render01_map.h
+--------------------------------
+Archivo: render01_tile.h
+Ruta: ./game/Renderer/Render01/render01_tile.h
+--------------------------------
+Archivo: render01_tile.c
+Ruta: ./game/Renderer/Render01/render01_tile.c
+--------------------------------
+Archivo: enemy_init.c
+Ruta: ./game/Entity/Enemy/enemy_init.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: enemy_step.c
+Ruta: ./game/Entity/Enemy/enemy_step.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: game_entitys.c
+Ruta: ./game/Entity/game_entitys.c
+#include "game_entitys.h"
+--------------------------------
+Archivo: entity02_init.c
+Ruta: ./game/Entity/Entity02/entity02_init.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: entity02_step.c
+Ruta: ./game/Entity/Entity02/entity02_step.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: game_entitys.h
+Ruta: ./game/Entity/game_entitys.h
+#include "../game_api.h"
+--------------------------------
+Archivo: entity01_init.c
+Ruta: ./game/Entity/Entity01/entity01_init.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: entity01_step.c
+Ruta: ./game/Entity/Entity01/entity01_step.c
+#include "../game_entitys.h"
+--------------------------------
+Archivo: engine_scenes.h
+Ruta: ./engine/Scene/engine_scenes.h
+--------------------------------
+Archivo: engine_api.h
+Ruta: ./engine/engine_api.h
+#include <gb/gb.h>
+#include "../../engine/engine_api.h"
+#include "Entity/engine_entity.h"
+#include "Renderer/renderer_mgr.h"
+#include "Scene/engine_scenes.h"
+#include "Video/engine_video.h"
+--------------------------------
+Archivo: main.c
+Ruta: ./engine/main.c
+#include "engine_api.h"
+#include "../game/game_api.h"
+--------------------------------
+Archivo: engine_video.h
+Ruta: ./engine/Video/engine_video.h
+#include <gb/gb.h>
+#include <stdint.h>
+--------------------------------
+Archivo: engine_video.c
+Ruta: ./engine/Video/engine_video.c
+#include <gb/gb.h>
+#include "engine_video.h"
+--------------------------------
+Archivo: renderer_mgr.h
+Ruta: ./engine/Renderer/renderer_mgr.h
+#include "../engine_api.h"
+--------------------------------
+Archivo: renderer_mgr.c
+Ruta: ./engine/Renderer/renderer_mgr.c
+#include "../engine_api.h"
+--------------------------------
+Archivo: engine_entity.h
+Ruta: ./engine/Entity/engine_entity.h
+#include <gb/gb.h>
+#include <stdbool.h>
+--------------------------------
+Archivo: engine_entity.c
+Ruta: ./engine/Entity/engine_entity.c
+#include "engine_entity.h"
+#include "../../game/Entity/game_entitys.h"
+#include <string.h>

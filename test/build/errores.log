@@ -1,0 +1,3 @@
+./funciones.c:
+./test_logic.c:
+./test_logic.c:5: warning 283: function declarator with no prototype

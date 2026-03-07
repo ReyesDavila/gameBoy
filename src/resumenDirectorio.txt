@@ -1,0 +1,1001 @@
+RESUMEN TÉCNICO DEL DIRECTORIO: ./src
+Ámbito: Solo archivos contenidos en esta ubicación.
+----------------------------------------------------------
+
+ESTRUCTURA RELATIVA:
+.
+   resumenDirectorio.txt
+   game
+      Scene
+         game_scenes.h
+         Scene01
+            scene01_init.c
+            _scene01_settings.h
+      game_step.c
+      game_api.h
+      game_init.c
+      Video
+      Renderer
+         game_renders.h
+         Render01
+            render01_map.c
+            render01_map_entitys.c
+            render01_map.gbm
+            render01_map_entitys.h
+            render01_map.h
+            render01_tile.gbr
+            render01_map_entitys.gbm
+            render01_tile.h
+            render01_tile.c
+      Entity
+         Enemy
+            enemy_init.c
+            enemy_step.c
+         game_entitys.c
+         Entity02
+            entity02_init.c
+            entity02_step.c
+         game_entitys.h
+         Entity01
+            entity01_init.c
+            entity01_step.c
+   project_report.txt
+   engine
+      Scene
+         engine_scenes.h
+      engine_api.h
+      main.c
+      Scripts
+      Video
+         engine_video.h
+         engine_video.c
+      Renderer
+         renderer_mgr.h
+         renderer_mgr.c
+      Entity
+         engine_entity.h
+         engine_entity.c
+   project_report.sh
+   resumenDirectorio.sh
+----------------------------------------------------------
+ARCHIVO: ./game/Scene/game_scenes.h
+----------------------------------------------------------
+     1	#ifndef GAME_SCENES_H
+     2	#define GAME_SCENES_H
+     3	
+     4	#include <stdint.h>
+     5	#include "../game_api.h"
+     6	#include "Scene01/_scene01_settings.h"
+     7	
+     8	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./game/Scene/Scene01/scene01_init.c
+----------------------------------------------------------
+     1	#include "../game_scenes.h"
+     2	
+     3	void scene01_init(void){
+     4	    entity_manager_init(); 
+     5	    video_clear_bkg();
+     6	
+     7	    set_bkg_data(0, 6, render01_tile);
+     8	    set_sprite_data(0, 6, render01_tile);
+     9	    set_bkg_tile_xy(10, 9, 2);
+    10	    set_bkg_tiles(0,0,20,18,render01_map);
+    11	
+    12	    scene_load_instances(render01_map_entitys, 20, 18, SPAWN_RELATIONS_SCENE01);
+    13	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Scene/Scene01/_scene01_settings.h
+----------------------------------------------------------
+     1	#ifndef _SCENE01_SETTINGS_H
+     2	#define _SCENE01_SETTINGS_H
+     3	
+     4	#include "../game_scenes.h"
+     5	
+     6	// Definimos los IDs de los tiles que representan objetos
+     7	#define TILE_PLAYER    3
+     8	#define TILE_ENEMY     4
+     9	#define TILE_ENEMY2    5
+    10	
+    11	//#define TILE_AUTO      30
+    12	
+    13	// Esta macro permite al usuario mapear el ID con el TYPE de la estructura
+    14	// Es minimalista: si el tile coincide, ejecuta el entity_create
+    15	#define SPAWN_RELATIONS_SCENE01(tile, x, y) \
+    16	    if (tile == TILE_PLAYER) entity_create(x, y, Entity01); \
+    17	    if (tile == TILE_ENEMY) entity_create(x, y, Entity02); \
+    18	    if (tile == TILE_ENEMY2) entity_create(x, y, Enemy); \
+    19	
+    20	void scene01_init(void);
+    21	
+    22	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./game/game_step.c
+----------------------------------------------------------
+     1	#include "game_api.h"
+     2	
+     3	void game_step(void){
+     4	    entity_manager_step();
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/game_api.h
+----------------------------------------------------------
+     1	#ifndef GAME_API_H
+     2	#define GAME_API_H
+     3	
+     4	#include "../engine/engine_api.h"
+     5	#include "Entity/game_entitys.h"
+     6	#include "Scene/game_scenes.h"
+     7	#include "Renderer/game_renders.h"
+     8	
+     9	void game_init(void);
+    10	void game_step(void);
+    11	
+    12	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./game/game_init.c
+----------------------------------------------------------
+     1	#include "game_api.h"
+     2	
+     3	void game_init(void){
+     4	    scene01_init();
+     5	    
+     6	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/game_renders.h
+----------------------------------------------------------
+     1	#ifndef GAME_RENDERS_H
+     2	#define GAME_RENDERS_H
+     3	
+     4	    #include "Render01/render01_tile.h"
+     5	    #include "Render01/render01_map.h"
+     6	    #include "Render01/render01_map_entitys.h"
+     7	
+     8	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_map.c
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_MAP.C
+     4	
+     5	 Map Source File.
+     6	
+     7	 Info:
+     8	   Section       : 
+     9	   Bank          : 0
+    10	   Map size      : 20 x 18
+    11	   Tile set      : Z:\home\dixon\Documentos\gb\gbdk-linux64\gbdk\examples\gb\ejemplos\colisiones\Assets\sprites.gbr
+    12	   Plane count   : 1 plane (8 bits)
+    13	   Plane order   : Tiles are continues
+    14	   Tile offset   : 0
+    15	   Split data    : No
+    16	
+    17	 This file was generated by GBMB v1.8
+    18	
+    19	*/
+    20	
+    21	#define render01_mapWidth 20
+    22	#define render01_mapHeight 18
+    23	#define render01_mapBank 0
+    24	
+    25	unsigned char render01_map[] =
+    26	{
+    27	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    28	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    29	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    30	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    31	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    32	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    33	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    34	  0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x02,0x02,0x02,
+    35	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    36	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    37	  0x00,0x02,0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,
+    38	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    39	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    40	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    41	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    42	  0x00,0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x02,0x02,
+    43	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    44	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    45	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    46	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    47	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    48	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    49	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x02,0x02,
+    50	  0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    51	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    52	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    53	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    54	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    55	  0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x00,
+    56	  0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+    57	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    58	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    59	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00,
+    60	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    61	  0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+    62	  0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02
+    63	};
+    64	
+    65	/* End of RENDER01_MAP.C */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_map_entitys.c
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_MAP_ENTITYS.C
+     4	
+     5	 Map Source File.
+     6	
+     7	 Info:
+     8	   Section       : 
+     9	   Bank          : 0
+    10	   Map size      : 20 x 18
+    11	   Tile set      : Z:\home\dixon\Documentos\gb\gbdk-linux64\gbdk\examples\gb\ejemplos\ejemplo02\src\game\Renderer\Render01\render01_tile.gbr
+    12	   Plane count   : 1 plane (8 bits)
+    13	   Plane order   : Tiles are continues
+    14	   Tile offset   : 0
+    15	   Split data    : No
+    16	
+    17	 This file was generated by GBMB v1.8
+    18	
+    19	*/
+    20	
+    21	#define render01_map_entitysWidth 20
+    22	#define render01_map_entitysHeight 18
+    23	#define render01_map_entitysBank 0
+    24	
+    25	unsigned char render01_map_entitys[] =
+    26	{
+    27	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    28	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    29	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    30	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    31	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    32	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    33	  0x00,0x00,0x00,0x00,0x03,0x00,0x00,0x00,0x00,0x00,
+    34	  0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x02,0x02,0x02,
+    35	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x05,
+    36	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    37	  0x00,0x02,0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,
+    38	  0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    39	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    40	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    41	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    42	  0x00,0x00,0x04,0x00,0x02,0x02,0x02,0x02,0x02,0x02,
+    43	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x00,
+    44	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    45	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    46	  0x00,0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    47	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    48	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    49	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x02,0x02,
+    50	  0x02,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    51	  0x00,0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x00,0x00,
+    52	  0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x00,0x00,0x00,
+    53	  0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    54	  0x00,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x00,
+    55	  0x02,0x02,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x00,
+    56	  0x00,0x00,0x00,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+    57	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    58	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    59	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x02,0x00,
+    60	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    61	  0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+    62	  0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02
+    63	};
+    64	
+    65	/* End of RENDER01_MAP_ENTITYS.C */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_map_entitys.h
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_MAP_ENTITYS.H
+     4	
+     5	 Map Include File.
+     6	
+     7	 Info:
+     8	   Section       : 
+     9	   Bank          : 0
+    10	   Map size      : 20 x 18
+    11	   Tile set      : Z:\home\dixon\Documentos\gb\gbdk-linux64\gbdk\examples\gb\ejemplos\ejemplo02\src\game\Renderer\Render01\render01_tile.gbr
+    12	   Plane count   : 1 plane (8 bits)
+    13	   Plane order   : Tiles are continues
+    14	   Tile offset   : 0
+    15	   Split data    : No
+    16	
+    17	 This file was generated by GBMB v1.8
+    18	
+    19	*/
+    20	
+    21	#define render01_map_entitysWidth 20
+    22	#define render01_map_entitysHeight 18
+    23	#define render01_map_entitysBank 0
+    24	
+    25	extern unsigned char render01_map_entitys[];
+    26	
+    27	/* End of RENDER01_MAP_ENTITYS.H */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_map.h
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_MAP.H
+     4	
+     5	 Map Include File.
+     6	
+     7	 Info:
+     8	   Section       : 
+     9	   Bank          : 0
+    10	   Map size      : 20 x 18
+    11	   Tile set      : Z:\home\dixon\Documentos\gb\gbdk-linux64\gbdk\examples\gb\ejemplos\colisiones\Assets\sprites.gbr
+    12	   Plane count   : 1 plane (8 bits)
+    13	   Plane order   : Tiles are continues
+    14	   Tile offset   : 0
+    15	   Split data    : No
+    16	
+    17	 This file was generated by GBMB v1.8
+    18	
+    19	*/
+    20	
+    21	#define render01_mapWidth 20
+    22	#define render01_mapHeight 18
+    23	#define render01_mapBank 0
+    24	
+    25	extern unsigned char render01_map[];
+    26	
+    27	/* End of RENDER01_MAP.H */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_tile.h
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_TILE.H
+     4	
+     5	 Include File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 5
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	
+    26	/* Bank of tiles. */
+    27	#define render01_tileBank 0
+    28	/* Start of tile array. */
+    29	extern unsigned char render01_tile[];
+    30	
+    31	/* End of RENDER01_TILE.H */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Renderer/Render01/render01_tile.c
+----------------------------------------------------------
+     1	/*
+     2	
+     3	 RENDER01_TILE.C
+     4	
+     5	 Tile Source File.
+     6	
+     7	 Info:
+     8	  Form                 : All tiles as one unit.
+     9	  Format               : Gameboy 4 color.
+    10	  Compression          : None.
+    11	  Counter              : None.
+    12	  Tile size            : 8 x 8
+    13	  Tiles                : 0 to 5
+    14	
+    15	  Palette colors       : None.
+    16	  SGB Palette          : None.
+    17	  CGB Palette          : None.
+    18	
+    19	  Convert to metatiles : No.
+    20	
+    21	 This file was generated by GBTD v2.2
+    22	
+    23	*/
+    24	
+    25	/* Start of tile array. */
+    26	unsigned char render01_tile[] =
+    27	{
+    28	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    29	  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    30	  0x00,0xFF,0x7C,0x83,0x7A,0x85,0x76,0x89,
+    31	  0x6E,0x91,0x5E,0xA1,0x3E,0xC1,0x00,0xFF,
+    32	  0xFF,0xFF,0x81,0xFF,0x81,0xFF,0x81,0xFF,
+    33	  0x81,0xFF,0x81,0xFF,0x81,0xFF,0xFF,0xFF,
+    34	  0x3C,0x3C,0x7A,0x46,0xD5,0xAB,0xF3,0x8D,
+    35	  0xC9,0xB7,0xA1,0xDF,0x52,0x6E,0x3C,0x3C,
+    36	  0x00,0x00,0x18,0x18,0x3C,0x24,0x7E,0x42,
+    37	  0x7E,0x42,0x7E,0x42,0x3C,0x24,0x18,0x18,
+    38	  0x00,0x7E,0x00,0xFF,0x66,0xFF,0x24,0xDB,
+    39	  0x00,0xFF,0x7E,0xFF,0x24,0xFF,0x00,0x7E
+    40	};
+    41	
+    42	/* End of RENDER01_TILE.C */
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Enemy/enemy_init.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	void Enemy_init(Enemy *self){
+     4	    (void)self;
+     5	
+     6	}
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Enemy/enemy_step.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	int8_t framex = 0;
+     4	
+     5	void Enemy_step(Enemy *self){
+     6	    (void)self;
+     7	
+     8	    framex++;
+     9	    if(framex==20)
+    10	    {
+    11	        self->base.y+=1;
+    12	        framex=0;
+    13	    }
+    14	    draw_tile_spr(self->base.x, self->base.y,5);
+    15	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/game_entitys.c
+----------------------------------------------------------
+     1	#include "game_entitys.h"
+     2	
+     3	Entity01 Entity01_list[MAX_Entity01];
+     4	Entity02 Entity02_list[MAX_Entity02];
+     5	Enemy Enemy_list[MAX_Enemy];
+
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Entity02/entity02_init.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	void Entity02_init(Entity02 *self){
+     4	    (void)self;
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Entity02/entity02_step.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	void Entity02_step(Entity02 *self){
+     4	    (void)self;
+     5	
+     6	    self->base.x+=1;
+     7	    
+     8	    draw_tile_spr(self->base.x, self->base.y,4);
+     9	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/game_entitys.h
+----------------------------------------------------------
+     1	#ifndef GAME_ENTITY_H
+     2	#define GAME_ENTITY_H
+     3	
+     4	#include "../game_api.h"
+     5	
+     6	// El programador define el límite aquí
+     7	#define MAX_ENTITIES 40
+     8	
+     9	DECLARE_ENTITY(Entity01, 5, 
+    10	    uint8_t hp;         // Variable 1
+    11	    int8_t patrol_dir;  // Variable 2
+    12	    uint16_t score_val; // Variable 3 (ocupa 2 bytes)
+    13	);
+    14	
+    15	DECLARE_ENTITY(Entity02, 5, 
+    16	    uint8_t hp;         // Variable 1
+    17	    int8_t patrol_dir;  // Variable 2
+    18	    uint16_t score_val; // Variable 3 (ocupa 2 bytes)
+    19	);
+    20	
+    21	DECLARE_ENTITY(Enemy, 5, 
+    22	    uint8_t hp;         // Variable 1
+    23	    int8_t patrol_dir;  // Variable 2
+    24	    uint16_t score_val; // Variable 3 (ocupa 2 bytes)
+    25	);
+    26	
+    27	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Entity01/entity01_init.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	void Entity01_init(Entity01 *self){
+     4	    (void)self;
+     5	}
+
+----------------------------------------------------------
+ARCHIVO: ./game/Entity/Entity01/entity01_step.c
+----------------------------------------------------------
+     1	#include "../game_entitys.h"
+     2	
+     3	void Entity01_step(Entity01 *self){
+     4	    (void)self;
+     5	
+     6	    self->base.y+=1;
+     7	    
+     8	    draw_tile_spr(self->base.x, self->base.y,3);
+     9	}
+
+----------------------------------------------------------
+ARCHIVO: ./project_report.txt
+----------------------------------------------------------
+     1	=== ESTRUCTURA DEL PROYECTO ===
+     2	.
+     3	 |-- game
+     4	 | |-- game_step.c
+     5	 | |-- game_api.h
+     6	 | |-- game_init.c
+     7	 | |-- Renderer
+     8	 | |-- Entity
+     9	 | | |-- game_entity.h
+    10	 |-- project_report.txt
+    11	 |-- engine
+    12	 | |-- engine_api.h
+    13	 | |-- main.c
+    14	 | |-- Video
+    15	 | | |-- engine_video.h
+    16	 | | |-- engine_video.c
+    17	 | |-- Entity
+    18	 | | |-- engine_entity.h
+    19	 | | |-- engine_entity.c
+    20	 |-- project_report.sh
+    21	
+    22	=== ANÁLISIS DE ARCHIVOS C/H ===
+    23	--------------------------------
+    24	Archivo: game_step.c
+    25	Ruta: ./game/game_step.c
+    26	#include "game_api.h"
+    27	--------------------------------
+    28	Archivo: game_api.h
+    29	Ruta: ./game/game_api.h
+    30	#include "Entity/game_entity.h"
+    31	--------------------------------
+    32	Archivo: game_init.c
+    33	Ruta: ./game/game_init.c
+    34	#include "game_api.h"
+    35	--------------------------------
+    36	Archivo: game_entity.h
+    37	Ruta: ./game/Entity/game_entity.h
+    38	--------------------------------
+    39	Archivo: engine_api.h
+    40	Ruta: ./engine/engine_api.h
+    41	#include <gb/gb.h>
+    42	#include "Entity/engine_entity.h"
+    43	#include "Video/engine_video.h"
+    44	--------------------------------
+    45	Archivo: main.c
+    46	Ruta: ./engine/main.c
+    47	#include "engine_api.h"
+    48	#include "../game/game_api.h"
+    49	--------------------------------
+    50	Archivo: engine_video.h
+    51	Ruta: ./engine/Video/engine_video.h
+    52	#include <gb/gb.h>
+    53	#include <stdint.h>
+    54	--------------------------------
+    55	Archivo: engine_video.c
+    56	Ruta: ./engine/Video/engine_video.c
+    57	#include <gb/gb.h>
+    58	#include "engine_video.h"
+    59	--------------------------------
+    60	Archivo: engine_entity.h
+    61	Ruta: ./engine/Entity/engine_entity.h
+    62	#include <stdint.h>
+    63	#include "../../game/Entity/game_entity.h"
+    64	--------------------------------
+    65	Archivo: engine_entity.c
+    66	Ruta: ./engine/Entity/engine_entity.c
+    67	#include "engine_entity.h"
+
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Scene/engine_scenes.h
+----------------------------------------------------------
+     1	
+     2	/**
+     3	 * Función minimalista para escanear mapas de instancias.
+     4	 * @param map: El array del mapa (ej. scene01_instances)
+     5	 * @param w: Ancho del mapa
+     6	 * @param h: Alto del mapa
+     7	 */
+     8	 
+     9	#define scene_load_instances(map, w, h, relation_macro) { \
+    10	    uint16_t i = 0; \
+    11	    for (uint8_t py = 0; py < h; py++) { \
+    12	        for (uint8_t px = 0; px < w; px++) { \
+    13	            uint8_t t = map[i++]; \
+    14	            if (t != 0) { \
+    15	                /* Convertimos tile a coordenadas de píxel (x8) */ \
+    16	                relation_macro(t, px << 3, py << 3); \
+    17	            } \
+    18	        } \
+    19	    } \
+    20	}
+
+
+----------------------------------------------------------
+ARCHIVO: ./engine/engine_api.h
+----------------------------------------------------------
+     1	#ifndef ENGINE_API_H
+     2	#define ENGINE_API_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include "../../engine/engine_api.h"
+     6	
+     7	#include "Entity/engine_entity.h"
+     8	#include "Renderer/renderer_mgr.h"
+     9	#include "Scene/engine_scenes.h"
+    10	#include "Video/engine_video.h"
+    11	
+    12	
+    13	
+    14	
+    15	
+    16	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./engine/main.c
+----------------------------------------------------------
+     1	#include "engine_api.h"
+     2	#include "../game/game_api.h"
+     3	
+     4	void main(void){
+     5	    renderer_init();
+     6	    game_init();
+     7	
+     8	    while(1)
+     9	    {
+    10	        sprites_reset();
+    11	        game_step();
+    12	        wait_vbl_done();
+    13	    }
+    14	}
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Video/engine_video.h
+----------------------------------------------------------
+     1	#ifndef ENGINE_VIDEO_H
+     2	#define ENGINE_VIDEO_H
+     3	
+     4	#include <gb/gb.h>
+     5	#include <stdint.h>
+     6	
+     7	/**
+     8	 * --- FUNCIONES NATIVAS DE GBDK (RESUMEN) ---
+     9	 * * 1. GESTIÓN DE VRAM (Cargar dibujos):
+    10	 * set_bkg_data(ID, cant, data)    -> Carga tiles en la memoria de fondo.
+    11	 * set_sprite_data(ID, cant, data) -> Carga tiles en la memoria de sprites.
+    12	 * * 2. BACKGROUND & WINDOW (Dibujar el mapa):
+    13	 * set_bkg_tiles(x, y, w, h, map)  -> Dibuja una matriz de tiles en el fondo.
+    14	 * set_bkg_tile_xy(x, y, tile_index);-> dibuja un tile background
+    15	 * set_win_tiles(x, y, w, h, map)  -> Dibuja una matriz en la capa de ventana.
+    16	 * move_win(x, y)                  -> Posiciona la capa Window (útil para HUD).
+    17	 * * 3. SPRITES (Dibujar objetos móviles):
+    18	 * set_sprite_tile(nb, tile_id)    -> Asigna un dibujo (tile) a un sprite de hardware.
+    19	 * move_sprite(nb, x, y)           -> Posiciona el sprite en pantalla.
+    20	 * * 4. METASPRITES (GBDK nativo):
+    21	 * move_metasprite(data, tile, nb, x, y) 
+    22	 * -> Es una función de GBDK que toma una estructura de datos (Metasprite) 
+    23	 * y mueve automáticamente varios sprites de hardware para que parezcan uno solo.
+    24	 */
+    25	
+    26	// Definiciones para tu motor
+    27	void renderer_init(void);
+    28	void video_clear_bkg(void);
+    29	
+    30	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Video/engine_video.c
+----------------------------------------------------------
+     1	#include <gb/gb.h>
+     2	#include "engine_video.h"
+     3	
+     4	
+     5	void renderer_init(void) {
+     6	    DISPLAY_OFF;
+     7	    SPRITES_8x8;
+     8	    SHOW_BKG;
+     9	    SHOW_SPRITES;
+    10	    DISPLAY_ON;
+    11	}
+    12	
+    13	void video_clear_bkg(void) {
+    14	    // Llena el mapa de 32x32 con el tile 0 (que debe ser transparente o vacío)
+    15	    fill_bkg_rect(0, 0, 32, 32, 0);
+    16	}
+
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Renderer/renderer_mgr.h
+----------------------------------------------------------
+     1	#ifndef RENDERER_MGR_H
+     2	#define RENDERER_MGR_H
+     3	
+     4	#include "../engine_api.h"
+     5	
+     6	void sprites_reset(void);
+     7	void draw_tile_spr(uint8_t x, uint8_t y, uint8_t tile_index);
+     8	
+     9	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Renderer/renderer_mgr.c
+----------------------------------------------------------
+     1	#include "../engine_api.h"
+     2	
+     3	uint8_t sprite_cursor = 0;
+     4	uint8_t vram_libre = 0; // <--- AÑADE ESTA LÍNEA AQUÍ
+     5	
+     6	void sprites_reset(void) {
+     7	    // Escondemos los 40 proyectores moviéndolos fuera de pantalla
+     8	    for(uint8_t i = 0; i < 40; i++) {
+     9	        move_sprite(i, 0, 200); 
+    10	    }
+    11	    // Reiniciamos el cursor para el nuevo frame
+    12	    sprite_cursor = 0;
+    13	}
+    14	
+    15	void draw_tile_spr(uint8_t x, uint8_t y, uint8_t tile_index) {
+    16	    if (sprite_cursor < 40) {
+    17	        // Asignamos el dibujo al proyector actual
+    18	        set_sprite_tile(sprite_cursor, tile_index);
+    19	        // Lo posicionamos (sumamos offset de hardware: X+8, Y+16)
+    20	        move_sprite(sprite_cursor, x + 8, y + 16);
+    21	        // Avanzamos al siguiente proyector
+    22	        sprite_cursor++;
+    23	    }
+    24	}
+
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Entity/engine_entity.h
+----------------------------------------------------------
+     1	#ifndef ENGINE_ENTITY_H
+     2	#define ENGINE_ENTITY_H
+     3	#include <gb/gb.h>
+     4	#include <stdbool.h>
+     5	
+     6	typedef struct Entity Entity;
+     7	struct Entity {
+     8	    uint8_t active;
+     9	    uint8_t x, y;
+    10	    uint8_t width, height;// Caja de colisión
+    11	    void (*init)(Entity *self);
+    12	    void (*step)(Entity *self);
+    13	};
+    14	
+    15	extern Entity* global_entities[];
+    16	extern uint8_t global_entity_count;
+    17	
+    18	void entity_manager_init(void);
+    19	void entity_manager_step(void);
+    20	
+    21	// Funciones internas del motor
+    22	Entity* _entity_create_pool(uint8_t x, uint8_t y, Entity* pool, uint8_t max_count, size_t struct_size, void (*i)(Entity*), void (*s)(Entity*));
+    23	
+    24	// MACROS ESTILO GAMEMAKER (Requieren que la variable 'self' exista en el contexto)
+    25	#define entity_create(px, py, type) (type*)_entity_create_pool(px, py, (Entity*)type##_list, MAX_##type, sizeof(type), (void(*)(Entity*))type##_init, (void(*)(Entity*))type##_step)
+    26	
+    27	
+    28	//PARA DECLARAR ENTIDADES
+    29	#define DECLARE_ENTITY(NAME, MAX_INSTANCES, EXTRA_FIELDS) \
+    30	    enum { MAX_##NAME = MAX_INSTANCES }; \
+    31	    typedef struct { \
+    32	        Entity base; \
+    33	        EXTRA_FIELDS \
+    34	    } NAME; \
+    35	    extern NAME NAME##_list[MAX_##NAME]; \
+    36	    void NAME##_init(NAME *self); \
+    37	    void NAME##_step(NAME *self)
+    38	
+    39	
+    40	#endif
+
+----------------------------------------------------------
+ARCHIVO: ./engine/Entity/engine_entity.c
+----------------------------------------------------------
+     1	#include "engine_entity.h"
+     2	#include "../../game/Entity/game_entitys.h"
+     3	#include <string.h>
+     4	
+     5	Entity* global_entities[MAX_ENTITIES];
+     6	uint8_t global_entity_count = 0;
+     7	
+     8	void entity_manager_init(void) {
+     9	    global_entity_count = 0;
+    10	    memset(global_entities, 0, sizeof(global_entities));
+    11	}
+    12	
+    13	Entity* _entity_create_pool(uint8_t x, uint8_t y, Entity* pool, uint8_t max_count, size_t struct_size, void (*i)(Entity*), void (*s)(Entity*)) {
+    14	    uint8_t* ptr = (uint8_t*)pool;
+    15	    for(uint8_t idx = 0; idx < max_count; idx++) {
+    16	        Entity *e = (Entity*)(ptr + (idx * struct_size));
+    17	        if(!e->active) {
+    18	            e->active = 1;
+    19	            e->x = x; e->y = y;
+    20	            e->width = 16; e->height = 16; // Valores por defecto
+    21	            e->init = i; e->step = s;
+    22	            
+    23	            if(global_entity_count < MAX_ENTITIES) {
+    24	                global_entities[global_entity_count++] = e;
+    25	            }
+    26	            if(e->init) e->init(e);
+    27	            return e;
+    28	        }
+    29	    }
+    30	    return NULL;
+    31	}
+    32	
+    33	
+    34	void entity_manager_step(void) {
+    35	    for(uint8_t i = 0; i < global_entity_count; i++) 
+    36	        if(global_entities[i]->active && global_entities[i]->step) global_entities[i]->step(global_entities[i]);
+    37	}
+    38	
+
+
+----------------------------------------------------------
+ARCHIVO: ./project_report.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	OUTPUT="project_report.txt"
+     4	
+     5	echo "Iniciando análisis del directorio actual..."
+     6	echo "------------------------------------------"
+     7	
+     8	# Limpiar archivo previo
+     9	> "$OUTPUT"
+    10	
+    11	# 1. Generar Árbol de Recursos
+    12	echo "[1/2] Escaneando estructura de carpetas y archivos..."
+    13	echo "=== ESTRUCTURA DEL PROYECTO ===" >> "$OUTPUT"
+    14	
+    15	# Listar nombres sin rutas absolutas, ignorando archivos ocultos
+    16	find . -maxdepth 10 -not -path '*/.*' | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-- \1/" >> "$OUTPUT"
+    17	echo " -> Estructura guardada."
+    18	
+    19	# 2. Analizar archivos .c y .h
+    20	echo "[2/2] Analizando archivos .c y .h para extraer #includes..."
+    21	echo -e "\n=== ANÁLISIS DE ARCHIVOS C/H ===" >> "$OUTPUT"
+    22	
+    23	# Buscar archivos .c y .h
+    24	find . -type f \( -name "*.c" -o -name "*.h" \) -not -path '*/.*' | while read -r FILE; do
+    25	    echo " -> Procesando: $FILE"
+    26	    
+    27	    echo "--------------------------------" >> "$OUTPUT"
+    28	    echo "Archivo: $(basename "$FILE")" >> "$OUTPUT"
+    29	    echo "Ruta: $FILE" >> "$OUTPUT"
+    30	    
+    31	    # Extraer líneas con #include sin espacios iniciales
+    32	    grep "#include" "$FILE" | sed 's/^[ \t]*//' >> "$OUTPUT"
+    33	done
+    34	
+    35	echo "------------------------------------------"
+    36	echo "Análisis completado con éxito."
+    37	echo "Resultados guardados en: $OUTPUT"
+    38	echo ""
+    39	read -p "Presiona Enter para cerrar..."
+
+----------------------------------------------------------
+ARCHIVO: ./resumenDirectorio.sh
+----------------------------------------------------------
+     1	#!/bin/bash
+     2	
+     3	# [AI INSTRUCTION / PROTECTED CODE]
+     4	# Este script es un ENCAPSULADOR DE CONTEXTO LOCAL ESTRICTO.
+     5	# Prohibido mostrar rutas absolutas del sistema (/home/user/...).
+     6	# Solo opera sobre el directorio relativo actual.
+     7	
+     8	OUTPUT_FILE="resumenDirectorio.txt"
+     9	
+    10	# Obtenemos solo el nombre de la carpeta actual (sin la ruta completa)
+    11	NOMBRE_CARPETA_LOCAL=$(basename "$PWD")
+    12	
+    13	clear
+    14	echo "=========================================================="
+    15	echo "      ENCAPSULADOR: RESUMEN DE DIRECTORIO LOCAL          "
+    16	echo "=========================================================="
+    17	echo " Carpeta actual: ./$NOMBRE_CARPETA_LOCAL"
+    18	
+    19	# 1. PREPARACIÓN
+    20	rm -f "$OUTPUT_FILE"
+    21	echo "RESUMEN TÉCNICO DEL DIRECTORIO: ./$NOMBRE_CARPETA_LOCAL" > "$OUTPUT_FILE"
+    22	echo "Ámbito: Solo archivos contenidos en esta ubicación." >> "$OUTPUT_FILE"
+    23	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    24	
+    25	# 2. ÁRBOL LOCAL RELATIVO
+    26	echo "[>] Generando mapa de archivos..."
+    27	echo -e "\nESTRUCTURA RELATIVA:" >> "$OUTPUT_FILE"
+    28	# Usamos find . para mantener rutas relativas ./ y evitar rutas absolutas
+    29	find . -maxdepth 4 -not -path '*/.*' -not -path "./build/*" -not -path "./rom/*" | sed -e 's/[^-][^\/]*\// |/g' -e 's/|/  /g' >> "$OUTPUT_FILE"
+    30	
+    31	echo "=========================================================="
+    32	echo "          PROCESANDO CONTENIDO RELATIVO                   "
+    33	echo "=========================================================="
+    34	
+    35	total_archivos=0
+    36	
+    37	# 3. VOLCADO RECURSIVO (Solo extensiones permitidas)
+    38	# Excluimos explícitamente el archivo de salida para evitar recursividad
+    39	find . -type f \( -name "*.c" -o -name "*.h" -o -name "*.sh" -o -name "*.txt" -o -name "*.inc" -o -name "*.asm" \) \
+    40	-not -path "./build/*" -not -path "./rom/*" -not -name "$OUTPUT_FILE" | while read -r archivo; do
+    41	
+    42	    # Informar al usuario (solo ruta relativa)
+    43	    echo -n "[LECTURA]: $archivo ... "
+    44	    
+    45	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    46	    echo "ARCHIVO: $archivo" >> "$OUTPUT_FILE"
+    47	    echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    48	    
+    49	    # Volcar contenido
+    50	    cat -n "$archivo" >> "$OUTPUT_FILE"
+    51	    echo -e "\n" >> "$OUTPUT_FILE"
+    52	    
+    53	    ((total_archivos++))
+    54	    echo -e "\033[0;32mOK\033[0m"
+    55	
+    56	done
+    57	
+    58	# 4. CIERRE
+    59	echo "----------------------------------------------------------" >> "$OUTPUT_FILE"
+    60	echo "FIN DEL RESUMEN" >> "$OUTPUT_FILE"
+    61	
+    62	echo ""
+    63	echo "=========================================================="
+    64	echo "          PROCESO FINALIZADO                             "
+    65	echo "=========================================================="
+    66	echo " [+] Archivos encapsulados: $total_archivos"
+    67	echo " [+] Destino: ./$OUTPUT_FILE"
+    68	echo "=========================================================="
+    69	read -p "Presiona ENTER para finalizar..."
+
+
+----------------------------------------------------------
+FIN DEL RESUMEN
