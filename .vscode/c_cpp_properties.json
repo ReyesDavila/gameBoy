@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "GBDK",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/dixon/Documentos/gbdk/include",
+                "/home/dixon/Documentos/gbdk/include/gb"
+            ],
+            "defines": [
+                "__PORT_sm83",
+                "__TARGET_gb"
+            ],
+            "compilerPath": "",
+            "intelliSenseMode": "gcc-x86",
+            "cStandard": "c11"
+        }
+    ],
+    "version": 4
+}
