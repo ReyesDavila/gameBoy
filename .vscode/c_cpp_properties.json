@@ -1,19 +1,11 @@
 {
     "configurations": [
         {
-            "name": "GBDK",
+            "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/home/dixon/Documentos/gbdk/include",
-                "/home/dixon/Documentos/gbdk/include/gb"
+                "${workspaceFolder}/**"
             ],
-            "defines": [
-                "__PORT_sm83",
-                "__TARGET_gb"
-            ],
-            "compilerPath": "",
-            "intelliSenseMode": "gcc-x86",
-            "cStandard": "c11"
+            "defines": []
         }
     ],
     "version": 4

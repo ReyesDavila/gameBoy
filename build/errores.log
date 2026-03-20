@@ -1,0 +1,8 @@
+./src/Engine/game_step.c:
+./src/Engine/game_init.c:
+./src/Engine/Sprites/engine_sprites.c:
+./src/main.c:
+./src/Game/Sprites/game_sprites.c:
+./src/Game/Sprites/codigos/corazon.c:
+./src/Game/Sprites/codigos/_sprites.c:
+./src/Game/Sprites/codigos/man.c:
