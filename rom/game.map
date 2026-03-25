@@ -7,7 +7,11 @@ Area                                    Addr        Size        Decimal Bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     00000000  .__.ABS.                           scene00_init
+     00000000  .__.ABS.                           
+     00000000  ___bank_corazon                    corazon
+     00000000  ___bank_man                        man
+     00000000  _rMBC7_SRAM_ENABLE_1               
+     00000000  _rRAMG                             
      00000000  l__BASE                         
      00000000  l__BSS                          
      00000000  l__CABS                         
@@ -53,10 +57,6 @@ Area                                    Addr        Size        Decimal Bytes (A
      00000003  l__INITIALIZED                  
      00000003  l__INITIALIZER                  
      00000005  l__HEADER1                      
-     00000006  l__HEADER8                      
-     00000007  l__HEADER2                      
-     00000008  l__HEADER3                      
-     0000000C  l__GSINIT                       
 ASxxxx Linker V03.00/V05.40 + sdld,  page 2.
 Hexadecimal  [32-Bits]
 
@@ -66,46 +66,170 @@ Area                                    Addr        Size        Decimal Bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     00000011  l__DATA                         
+     00000006  l__HEADER8                      
+     00000007  l__HEADER2                      
+     00000008  l__HEADER3                      
+     0000000C  l__GSINIT                       
      00000013  l__HRAM                         
-     00000022  l__CODE                         
      00000030  l__HEADER7                      
-     0000003E  l__HOME                         
+     0000003D  l__DATA                         
      00000060  l__HEADER4                      
+     0000007B  l__HOME                         
      000000AB  l__HEADER11                     
      00000200  s__CODE                         
-     00000222  s__HOME                         
-     00000260  s__BASE                         
-     00000260  s__CODE_0                       
-     00000260  s__INITIALIZER                  
-     00000260  s__LIT                          
-     00000263  s__GSINIT                       
-     0000026F  s__GSFINAL                      
+     0000048A  l__CODE                         
+     0000068A  s__HOME                         
+     00000705  s__BASE                         
+     00000705  s__CODE_0                       
+     00000705  s__INITIALIZER                  
+     00000705  s__LIT                          
+     00000708  s__GSINIT                       
+     00000714  s__GSFINAL                      
+     00002000  _rROMB0                            
+     00003000  _rROMB1                            
+     00004000  _rMBC7_SRAM_ENABLE_2               
+     00004000  _rRAMB                             
+     00008000  __VRAM                             
+     00008000  __VRAM8000                         
+     00008800  __VRAM8800                         
+     00009000  __VRAM9000                         
+     00009800  __SCRN0                            
+     00009C00  __SCRN1                            
+     0000A000  __SRAM                             
+     0000A000  _rMBC7_LATCH_1                     
+     0000A010  _rMBC7_LATCH_2                     
+     0000A020  _rMBC7_ACCEL_X_LO                  
+     0000A030  _rMBC7_ACCEL_X_HI                  
+     0000A040  _rMBC7_ACCEL_Y_LO                  
+     0000A050  _rMBC7_ACCEL_Y_HI                  
+     0000C000  __RAM                              
      0000C000  _shadow_OAM                     
      0000C0A0  s__DATA                         
-     0000C0B1  s__BSS                          
-     0000C0B1  s__INITIALIZED                  
-     0000C0B4  s__HEAP                         
-     0000C0B4  s__HEAP_END                     
+     0000C0DD  s__BSS                          
+     0000C0DD  s__INITIALIZED                  
+     0000C0E0  s__HEAP                         
+     0000C0E0  s__HEAP_END                     
+     0000D000  __RAMBANK                          
      0000E000  .STACK                          
-     0000FF80  s__HRAM                         
-
+     0000FE00  __OAMRAM                           
+     0000FF00  _P1_REG                            
+     0000FF00  __IO                               
+     0000FF01  _SB_REG                            
+     0000FF02  _SC_REG                            
+     0000FF04  _DIV_REG                           
 ASxxxx Linker V03.00/V05.40 + sdld,  page 3.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_CODE                               00000200    00000022 =          34. bytes (REL,CON)
+.  .ABS.                            00000000    00000000 =           0. bytes (ABS,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     00000200  _engine_init                       engine_init
-     00000204  _load_scene                        engine_scenes
-     00000218  _engine_step                       engine_step
-     00000219  _main                              main
-     00000221  _scene00_init                      scene00_init
-
+     0000FF05  _TIMA_REG                          
+     0000FF06  _TMA_REG                           
+     0000FF07  _TAC_REG                           
+     0000FF0F  _IF_REG                            
+     0000FF10  _NR10_REG                          
+     0000FF11  _NR11_REG                          
+     0000FF12  _NR12_REG                          
+     0000FF13  _NR13_REG                          
+     0000FF14  _NR14_REG                          
+     0000FF16  _NR21_REG                          
+     0000FF17  _NR22_REG                          
+     0000FF18  _NR23_REG                          
+     0000FF19  _NR24_REG                          
+     0000FF1A  _NR30_REG                          
+     0000FF1B  _NR31_REG                          
+     0000FF1C  _NR32_REG                          
+     0000FF1D  _NR33_REG                          
+     0000FF1E  _NR34_REG                          
+     0000FF20  _NR41_REG                          
+     0000FF21  _NR42_REG                          
+     0000FF22  _NR43_REG                          
+     0000FF23  _NR44_REG                          
+     0000FF24  _NR50_REG                          
+     0000FF25  _NR51_REG                          
+     0000FF26  _NR52_REG                          
+     0000FF30  _AUD3WAVE                          
+     0000FF30  _PCM_SAMPLE                        
+     0000FF30  __AUD3WAVERAM                      
+     0000FF40  _LCDC_REG                          
+     0000FF41  _STAT_REG                          
+     0000FF42  _SCY_REG                           
+     0000FF43  _SCX_REG                           
+     0000FF44  _LY_REG                            
+     0000FF45  _LYC_REG                           
+     0000FF46  _DMA_REG                           
+     0000FF47  _BGP_REG                           
+     0000FF48  _OBP0_REG                          
+     0000FF49  _OBP1_REG                          
+     0000FF4A  _WY_REG                            
+     0000FF4B  _WX_REG                            
+     0000FF4D  _KEY1_REG                          
+     0000FF4F  _VBK_REG                           
+     0000FF51  _HDMA1_REG                         
+     0000FF52  _HDMA2_REG                         
+     0000FF53  _HDMA3_REG                         
+     0000FF54  _HDMA4_REG                         
+     0000FF55  _HDMA5_REG                         
+     0000FF56  _RP_REG                            
+     0000FF68  _BCPS_REG                          
+     0000FF69  _BCPD_REG                          
+     0000FF6A  _OCPS_REG                          
 ASxxxx Linker V03.00/V05.40 + sdld,  page 4.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+.  .ABS.                            00000000    00000000 =           0. bytes (ABS,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+     0000FF6B  _OCPD_REG                          
+     0000FF70  _SVBK_REG                          
+     0000FF76  _PCM12_REG                         
+     0000FF77  _PCM34_REG                         
+     0000FF80  __HRAM                             
+     0000FF80  s__HRAM                         
+     0000FFFF  _IE_REG                            
+ASxxxx Linker V03.00/V05.40 + sdld,  page 5.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_CODE                               00000200    0000048A =        1162. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+     00000200  _game_step                         game_step
+     00000201  _game_init                         game_init
+     00000202  _sprites_prepare_frame             engine_sprites
+     00000207  _draw_sprite                       engine_sprites
+     00000264  _sprites_reset                     engine_sprites
+     00000279  _load_sprite_to_vram               engine_sprites
+     000002BC  _main                              main
+     00000318  ___func_corazon                    corazon
+     00000318  _corazon_palettes                  corazon
+     00000320  _corazon_tiles                     corazon
+     000003C0  _corazon_metasprite0               corazon
+     000003D4  _corazon_metasprite1               corazon
+     000003E8  _corazon_metasprite2               corazon
+     000003FC  _corazon_metasprite3               corazon
+     00000410  _corazon_metasprites               corazon
+     00000418  _lista_metasprites                 _sprites
+     0000041C  _lista_tile_data                   _sprites
+     00000420  _lista_tile_count                  _sprites
+     00000422  ___func_man                        man
+     00000422  _man_palettes                      man
+     0000042A  _man_tiles                         man
+     0000059A  _man_metasprite0                   man
+     000005DA  _man_metasprite1                   man
+     0000061A  _man_metasprites                   man
+     0000061E  _hide_sprites_range                Metasprites
+     0000064D  ___move_metasprite                 Metasprites
+
+ASxxxx Linker V03.00/V05.40 + sdld,  page 6.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -116,7 +240,7 @@ _HEADER0                            00000000    00000001 =           1. bytes (A
       -----  --------------------------------   ------------------------
      00000020  .call_hl                           Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 5.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 7.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -127,7 +251,7 @@ _HEADER1                            00000000    00000005 =           5. bytes (A
       -----  --------------------------------   ------------------------
      00000028  .MemsetSmall                       Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 6.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 8.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -138,7 +262,7 @@ _HEADER2                            00000000    00000007 =           7. bytes (A
       -----  --------------------------------   ------------------------
      00000030  .MemcpySmall                       Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 7.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 9.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -147,7 +271,7 @@ _HEADER3                            00000000    00000008 =           8. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 8.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 10.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -162,7 +286,7 @@ _HEADER4                            00000000    00000060 =          96. bytes (A
      000000AB  _refresh_OAM                       Runtime
      000000CC  _set_interrupts                    Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 9.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 11.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -171,7 +295,7 @@ _HEADER5                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 10.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 12.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -180,7 +304,7 @@ _HEADER6                            00000000    00000002 =           2. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 11.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 13.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -189,7 +313,7 @@ _HEADER7                            00000000    00000030 =          48. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 12.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 14.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -198,7 +322,7 @@ _HEADER8                            00000000    00000006 =           6. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 13.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 15.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -207,7 +331,7 @@ _HEADER9                            00000000    00000003 =           3. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 14.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 16.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -216,7 +340,7 @@ _HEADERa                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 15.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 17.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -225,7 +349,7 @@ _HEADERb                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 16.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 18.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -234,7 +358,7 @@ _HEADERc                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 17.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 19.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -243,7 +367,7 @@ _HEADERd                            00000000    00000002 =           2. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 18.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 20.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -252,7 +376,7 @@ _HEADERe                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 19.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 21.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -261,7 +385,7 @@ _HEADERf                            00000000    00000001 =           1. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 20.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 22.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -270,7 +394,7 @@ _HEADER10                           00000000    00000002 =           2. bytes (A
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-ASxxxx Linker V03.00/V05.40 + sdld,  page 21.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 23.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -293,46 +417,30 @@ _HEADER11                           00000000    000000AB =         171. bytes (A
      000001ED  _add_VBL                           Runtime
      000001F0  .add_int                           Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 22.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-_HOME                               00000222    0000003E =          62. bytes (REL,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
-     00000222  .memset_simple                     Runtime
-     0000022B  .memcpy_simple                     Runtime
-     00000248  .display_off                       Runtime
-     00000248  _display_off                       Runtime
-
-ASxxxx Linker V03.00/V05.40 + sdld,  page 23.
-Hexadecimal  [32-Bits]
-
-Area                                    Addr        Size        Decimal Bytes (Attributes)
---------------------------------        ----        ----        ------- ----- ------------
-_INITIALIZER                        00000260    00000003 =           3. bytes (REL,CON)
-
-      Value  Global                              Global Defined In Module
-      -----  --------------------------------   ------------------------
 ASxxxx Linker V03.00/V05.40 + sdld,  page 24.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_GSINIT                             00000263    0000000C =          12. bytes (REL,CON)
+_HOME                               0000068A    0000007B =         123. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     00000263  gsinit                             Runtime
+     0000068A  .memset_simple                     Runtime
+     00000693  .memcpy_simple                     Runtime
+     000006B0  .display_off                       Runtime
+     000006B0  _display_off                       Runtime
+     000006C8  _set_tile_data                     
+     000006CD  _set_bkg_data                      
+     000006CD  _set_win_data                      
+     000006D5  _set_sprite_data                   
 
 ASxxxx Linker V03.00/V05.40 + sdld,  page 25.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_GSFINAL                            0000026F    00000001 =           1. bytes (REL,CON)
+_INITIALIZER                        00000705    00000003 =           3. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
@@ -341,7 +449,27 @@ Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_DATA                               0000C0A0    00000011 =          17. bytes (REL,CON)
+_GSINIT                             00000708    0000000C =          12. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+     00000708  gsinit                             Runtime
+
+ASxxxx Linker V03.00/V05.40 + sdld,  page 27.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_GSFINAL                            00000714    00000001 =           1. bytes (REL,CON)
+
+      Value  Global                              Global Defined In Module
+      -----  --------------------------------   ------------------------
+ASxxxx Linker V03.00/V05.40 + sdld,  page 28.
+Hexadecimal  [32-Bits]
+
+Area                                    Addr        Size        Decimal Bytes (Attributes)
+--------------------------------        ----        ----        ------- ----- ------------
+_DATA                               0000C0A0    0000003D =          61. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
@@ -351,19 +479,24 @@ _DATA                               0000C0A0    00000011 =          17. bytes (R
      0000C0A3  .sys_time                          Runtime
      0000C0A3  _sys_time                          Runtime
      0000C0A5  .int_0x40                          Runtime
-ASxxxx Linker V03.00/V05.40 + sdld,  page 27.
+     0000C0B1  _lista_vram_offsets                engine_sprites
+     0000C0D9  ___current_metasprite              Metasprites
+     0000C0DB  ___current_base_tile               Metasprites
+     0000C0DC  ___current_base_prop               Metasprites
+
+ASxxxx Linker V03.00/V05.40 + sdld,  page 29.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
 --------------------------------        ----        ----        ------- ----- ------------
-_INITIALIZED                        0000C0B1    00000003 =           3. bytes (REL,CON)
+_INITIALIZED                        0000C0DD    00000003 =           3. bytes (REL,CON)
 
       Value  Global                              Global Defined In Module
       -----  --------------------------------   ------------------------
-     0000C0B1  _scene_list                        game_scenes
-     0000C0B3  _scene_count                       game_scenes
-
-ASxxxx Linker V03.00/V05.40 + sdld,  page 28.
+     0000C0DD  _current_oam                       engine_sprites
+     0000C0DE  _vram_pointer                      engine_sprites
+     0000C0DF  ___render_shadow_OAM               Metasprites
+ASxxxx Linker V03.00/V05.40 + sdld,  page 30.
 Hexadecimal  [32-Bits]
 
 Area                                    Addr        Size        Decimal Bytes (Attributes)
@@ -377,27 +510,41 @@ _HRAM                               0000FF80    00000013 =          19. bytes (R
      0000FF91  __vbl_done                         Runtime
      0000FF92  __shadow_OAM_base                  Runtime
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 29.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 31.
 
 Files Linked                              [ module(s) ]
 
-/home/dixon/Documentos/gameBoy/basico/lib/gb/crt0.o
+/home/dixon/Documentos/gbdk/lib/gb/crt0.o
                                           [ Runtime ]
-/tmp/lcc54130.o                           [ engine_init ]
-/tmp/lcc54131.o                           [ engine_scenes ]
-/tmp/lcc54132.o                           [ engine_step ]
-/tmp/lcc54133.o                           [ main ]
-/tmp/lcc54134.o                           [ game_scenes ]
-/tmp/lcc54135.o                           [ scene00_init ]
+/tmp/lcc140130.o                          [ game_step ]
+/tmp/lcc140131.o                          [ game_init ]
+/tmp/lcc140132.o                          [ engine_sprites ]
+/tmp/lcc140133.o                          [ main ]
+/tmp/lcc140134.o                          [ game_sprites ]
+/tmp/lcc140135.o                          [ corazon ]
+/tmp/lcc140136.o                          [ _sprites ]
+/tmp/lcc140137.o                          [ man ]
 
-ASxxxx Linker V03.00/V05.40 + sdld,  page 30.
+
+Libraries Linked                          [ object file ]
+
+/home/dixon/Documentos/gbdk/lib/gb/gb.lib
+                                          [ metasprites_hide_spr.o ]
+/home/dixon/Documentos/gbdk/lib/gb/gb.lib
+                                          [ set_data.o ]
+/home/dixon/Documentos/gbdk/lib/gb/gb.lib
+                                          [ metasprites.o ]
+/home/dixon/Documentos/gbdk/lib/gb/gb.lib
+                                          [ sfr.o ]
+
+ASxxxx Linker V03.00/V05.40 + sdld,  page 32.
 
 User Base Address Definitions
 
 _DATA=0xC0A0
 _CODE=0x0200
 _HRAM=0xFF80
-ASxxxx Linker V03.00/V05.40 + sdld,  page 31.
+ASxxxx Linker V03.00/V05.40 + sdld,  page 33.
 
 User Global Definitions
 

@@ -1,6 +1,8 @@
-./Engine/engine_init.c:
-./Engine/Scenes/engine_scenes.c:
-./Engine/engine_step.c:
-./main.c:
-./Game/Scenes/game_scenes.c:
-./Game/Scenes/scene00_init.c:
+./src/Engine/game_step.c:
+./src/Engine/game_init.c:
+./src/Engine/Sprites/engine_sprites.c:
+./src/main.c:
+./src/Game/Sprites/game_sprites.c:
+./src/Game/Sprites/codigos/corazon.c:
+./src/Game/Sprites/codigos/_sprites.c:
+./src/Game/Sprites/codigos/man.c:
